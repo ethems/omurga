@@ -4,7 +4,7 @@ var webpack = require('webpack');
 module.exports = {
     entry: [
       'script!jquery/dist/jquery.min.js',
-      'script!materialize-css/dist/js/materialize.min.js',
+      'script!material-design-lite/dist/material.min.js',
       './app',
     ],
     externals:{
@@ -34,7 +34,9 @@ module.exports = {
                 test: /\.jsx?$/,
                 exclude: /(node_modules|bower_components)/
             },
-            {test: /\.(jpg|png|woff(2)?|eot|ttf|svg)(\?[a-z0-9=\.]+)?$/,loader: 'url?limit=100000'}
+            {
+              test: /\.(jpg|png|woff(2)?|eot|ttf|svg)(\?[a-z0-9=\.]+)?$/,loader: 'url?limit=100000'
+            }
         ]
     }
 };
