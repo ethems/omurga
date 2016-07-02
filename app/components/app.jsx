@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 
+import CatalogDialog from './catalog-dialog';
+
 class App extends Component {
 
     render() {
@@ -9,10 +11,13 @@ class App extends Component {
                   <header className="mdl-layout__header mdl-color--light-blue-500">
                     <div role="button" tabindex="0" className="mdl-layout__drawer-button"><i className="material-icons">menu</i></div>
                     <div className="mdl-layout__header-row">
-
+                      <CatalogDialog/>
                     </div>
                   </header>
                   <div className="mdl-layout__drawer mdl-color--white">
+                    <header className="drawer-header">
+
+                    </header>
                   </div>
                     <div className="small-4 medium-6 columns"></div>
                     <div className="small-4 medium-3 columns">

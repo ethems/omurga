@@ -1,0 +1,27 @@
+.catalog-dialog dialog {
+    position: fixed;
+    top: 0px;
+    // transform: translate(0,calc(0% + 64px));
+    -ms-transform: translate(0, 64px);
+    -webkit-transform: translate(0, 64px);
+    -moz-transform: translate(0, 64px);
+    transform: translate(0, 64px);
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    height: auto;
+    width: auto;
+    left: 240px;
+    right: calc(100% - 580px);
+    bottom: calc(0% + 64px);
+}
+.is-small-screen .catalog-dialog dialog {
+    position: fixed;
+    top: 0px;
+    transform: translate(0,  56px);
+    width: auto;
+    height: 40%;
+    left: 0;
+    right: 0;
+    bottom: auto;
+}

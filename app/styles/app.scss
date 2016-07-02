@@ -7,3 +7,13 @@
 // .columns{
 //   min-height: 100px;
 // }
+
+.drawer-header{
+  display: -webkit-flex; /* Safari */
+  display: flex;
+  flex-direction: column;
+  -webkit-flex-direction: row-reverse; /* Safari 6.1+ */
+  justify-content: flex-end;
+  padding: 16px;
+  height: 151px;
+}
