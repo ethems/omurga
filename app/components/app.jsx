@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import CatalogDialog from './catalog-dialog';
+import CatalogDialog from './filters/catalog-dialog';
 
 class App extends Component {
 
