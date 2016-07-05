@@ -6,11 +6,16 @@ class CatalogFilterLayout extends Component {
     render() {
         return (
             <div>
-                <MediaQuery query='(min-device-width: 1224px)'>
+                <MediaQuery query='(min-device-width: 64.063em)'>
                     <div>You are a desktop or laptop</div>
                 </MediaQuery>
-                <MediaQuery query='(max-device-width: 1224px)'>
-                    <div>You are a tablet or mobile phone</div>
+                <MediaQuery query='(max-device-width: 64.063em)'>
+                  <MediaQuery query='(min-device-width: 40em)'>
+                      <div>You are a tablet</div>
+                  </MediaQuery>
+                  <MediaQuery query='(max-device-width: 40em)'>
+                      <div>You are a mobile</div>
+                  </MediaQuery>
                 </MediaQuery>
             </div>
         );

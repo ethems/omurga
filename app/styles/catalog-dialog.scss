@@ -1,36 +1,41 @@
 .catalog-dialog dialog {
     position: fixed;
     top: 20px;
-
-
     -ms-transform: translate(0, 64px);
     -webkit-transform: translate(0, 64px);
     -moz-transform: translate(0, 64px);
     transform: translate(0, 64px);
-
     height: auto;
     width: auto;
     left: 260px;
     right: calc(100% - 580px);
     bottom: calc(0% + 84px);
 
-
-
-
+    .search-button {
+      position: absolute;
+      top: 10%;
+      right: -28px;
+    }
 }
 .is-small-screen .catalog-dialog dialog {
     position: fixed;
     top: 20px;
-
-
     -ms-transform: translate(0, 56px);
     -webkit-transform: translate(0, 56px);
     -moz-transform: translate(0, 56px);
     transform: translate(0, 56px);
-
     width: 90%;
     height: 50%;
+    @media only screen and (max-width: 40em) {
+        height: 80%;
+    }
     left: 0;
     right: 0;
     bottom: auto;
+    .search-button {
+      position: absolute;
+      top:auto;
+      bottom: -28px;
+      right: 28px;
+    }
 }

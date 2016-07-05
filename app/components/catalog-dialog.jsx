@@ -9,32 +9,45 @@ class CatalogDialog extends React.Component {
     }
 
     handleCloseDialog(e) {
-        this.dialog.close();
+        const dialog = this.dialog;
+        const searchButton = this.searchDialogButton;
+        const rect = dialog.getBoundingClientRect();
+
+        if(searchButton == e.target || searchButton ==e.target.parentNode){
+          return;
+        }
+        if (!(rect.top <= e.clientY && e.clientY <= rect.top + rect.height && rect.left <= e.clientX && e.clientX <= rect.left + rect.width)) {
+            this.dialog.close();
+        }
+    }
+
+    handleSearch(e){
+
     }
 
     componentDidMount() {
 
         const dialog = this.dialog;
         const showButton = this.showDialogButton;
-        const closeButton = this.closeDialogButton;
-
-        if (dialog && showButton) {
+        const searchButton = this.searchDialogButton;
+        if (dialog && showButton && searchButton) {
             if (!dialog.showModal) {
                 DialogPolyfill.registerDialog(dialog);
             }
             $(showButton).on('click', this.handleOpenDialog.bind(this));
-            $(closeButton).on('click', this.handleCloseDialog.bind(this));
+            $(dialog).on('click', this.handleCloseDialog.bind(this));
+            $(searchButton).on('click',this.handleSearch.bind(this));
         }
     }
     componentWillUnmount() {
 
         const dialog = this.dialog;
         const showButton = this.showDialogButton;
-        const closeButton = this.closeDialogButton;
-
-        if (dialog && showButton) {
+        const searchButton = this.searchDialogButton;
+        if (dialog && showButton && searchButton) {
             $(showButton).off('click', this.handleOpenDialog.bind(this));
-            $(closeButton).off('click', this.handleCloseDialog.bind(this));
+            $(dialog).off('click', this.handleCloseDialog.bind(this));
+            $(searchButton).off('click',this.handleSearch.bind(this));
         }
     }
     render() {
@@ -46,15 +59,14 @@ class CatalogDialog extends React.Component {
                 <dialog className="mdl-dialog " ref={(ref) => this.dialog = ref}>
                     <div className="mdl-dialog__content">
                         <div className="filters-content">
-                          <CatalogFilterLayout/>
+                            <CatalogFilterLayout/>
                         </div>
                     </div>
-                    <div className="mdl-dialog__actions">
-                        <button type="button" className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent mdl-color--blue-500">
-                            <i className="material-icons">search</i>Ara
-                        </button>
-                        <button type="button" className="mdl-button mdl-js-button mdl-button--raised close" ref={(ref) => this.closeDialogButton = ref}>Kapat</button>
-                    </div>
+
+                    <button className="mdl-button mdl-js-button mdl-button--fab mdl-color--amber-500 search-button" ref={(ref) => this.searchDialogButton = ref} >
+                        <i className="material-icons">search</i>
+                    </button>
+
                 </dialog>
             </div>
         );

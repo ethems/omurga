@@ -28226,22 +28226,34 @@
 	    }, {
 	        key: 'handleCloseDialog',
 	        value: function handleCloseDialog(e) {
-	            this.dialog.close();
+	            var dialog = this.dialog;
+	            var searchButton = this.searchDialogButton;
+	            var rect = dialog.getBoundingClientRect();
+
+	            if (searchButton == e.target || searchButton == e.target.parentNode) {
+	                return;
+	            }
+	            if (!(rect.top <= e.clientY && e.clientY <= rect.top + rect.height && rect.left <= e.clientX && e.clientX <= rect.left + rect.width)) {
+	                this.dialog.close();
+	            }
 	        }
+	    }, {
+	        key: 'handleSearch',
+	        value: function handleSearch(e) {}
 	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
 
 	            var dialog = this.dialog;
 	            var showButton = this.showDialogButton;
-	            var closeButton = this.closeDialogButton;
-
-	            if (dialog && showButton) {
+	            var searchButton = this.searchDialogButton;
+	            if (dialog && showButton && searchButton) {
 	                if (!dialog.showModal) {
 	                    _dialogPolyfill2.default.registerDialog(dialog);
 	                }
 	                $(showButton).on('click', this.handleOpenDialog.bind(this));
-	                $(closeButton).on('click', this.handleCloseDialog.bind(this));
+	                $(dialog).on('click', this.handleCloseDialog.bind(this));
+	                $(searchButton).on('click', this.handleSearch.bind(this));
 	            }
 	        }
 	    }, {
@@ -28250,11 +28262,11 @@
 
 	            var dialog = this.dialog;
 	            var showButton = this.showDialogButton;
-	            var closeButton = this.closeDialogButton;
-
-	            if (dialog && showButton) {
+	            var searchButton = this.searchDialogButton;
+	            if (dialog && showButton && searchButton) {
 	                $(showButton).off('click', this.handleOpenDialog.bind(this));
-	                $(closeButton).off('click', this.handleCloseDialog.bind(this));
+	                $(dialog).off('click', this.handleCloseDialog.bind(this));
+	                $(searchButton).off('click', this.handleSearch.bind(this));
 	            }
 	        }
 	    }, {
@@ -28291,24 +28303,14 @@
 	                        )
 	                    ),
 	                    _react2.default.createElement(
-	                        'div',
-	                        { className: 'mdl-dialog__actions' },
+	                        'button',
+	                        { className: 'mdl-button mdl-js-button mdl-button--fab mdl-color--amber-500 search-button', ref: function ref(_ref2) {
+	                                return _this2.searchDialogButton = _ref2;
+	                            } },
 	                        _react2.default.createElement(
-	                            'button',
-	                            { type: 'button', className: 'mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent mdl-color--blue-500' },
-	                            _react2.default.createElement(
-	                                'i',
-	                                { className: 'material-icons' },
-	                                'search'
-	                            ),
-	                            'Ara'
-	                        ),
-	                        _react2.default.createElement(
-	                            'button',
-	                            { type: 'button', className: 'mdl-button mdl-js-button mdl-button--raised close', ref: function ref(_ref2) {
-	                                    return _this2.closeDialogButton = _ref2;
-	                                } },
-	                            'Kapat'
+	                            'i',
+	                            { className: 'material-icons' },
+	                            'search'
 	                        )
 	                    )
 	                )
@@ -32875,7 +32877,7 @@
 
 
 	// module
-	exports.push([module.id, ".catalog-dialog dialog {\n  position: fixed;\n  top: 20px;\n  -ms-transform: translate(0, 64px);\n  -webkit-transform: translate(0, 64px);\n  -moz-transform: translate(0, 64px);\n  transform: translate(0, 64px);\n  height: auto;\n  width: auto;\n  left: 260px;\n  right: calc(100% - 580px);\n  bottom: calc(0% + 84px); }\n\n.is-small-screen .catalog-dialog dialog {\n  position: fixed;\n  top: 20px;\n  -ms-transform: translate(0, 56px);\n  -webkit-transform: translate(0, 56px);\n  -moz-transform: translate(0, 56px);\n  transform: translate(0, 56px);\n  width: 90%;\n  height: 50%;\n  left: 0;\n  right: 0;\n  bottom: auto; }\n", ""]);
+	exports.push([module.id, ".catalog-dialog dialog {\n  position: fixed;\n  top: 20px;\n  -ms-transform: translate(0, 64px);\n  -webkit-transform: translate(0, 64px);\n  -moz-transform: translate(0, 64px);\n  transform: translate(0, 64px);\n  height: auto;\n  width: auto;\n  left: 260px;\n  right: calc(100% - 580px);\n  bottom: calc(0% + 84px); }\n  .catalog-dialog dialog .search-button {\n    position: absolute;\n    top: 10%;\n    right: -28px; }\n\n.is-small-screen .catalog-dialog dialog {\n  position: fixed;\n  top: 20px;\n  -ms-transform: translate(0, 56px);\n  -webkit-transform: translate(0, 56px);\n  -moz-transform: translate(0, 56px);\n  transform: translate(0, 56px);\n  width: 90%;\n  height: 50%;\n  left: 0;\n  right: 0;\n  bottom: auto; }\n  @media only screen and (max-width: 40em) {\n    .is-small-screen .catalog-dialog dialog {\n      height: 80%; } }\n  .is-small-screen .catalog-dialog dialog .search-button {\n    position: absolute;\n    top: auto;\n    bottom: -28px;\n    right: 28px; }\n", ""]);
 
 	// exports
 
@@ -32927,7 +32929,7 @@
 	                null,
 	                _react2.default.createElement(
 	                    MediaQuery,
-	                    { query: '(min-device-width: 1224px)' },
+	                    { query: '(min-device-width: 64.063em)' },
 	                    _react2.default.createElement(
 	                        'div',
 	                        null,
@@ -32936,11 +32938,24 @@
 	                ),
 	                _react2.default.createElement(
 	                    MediaQuery,
-	                    { query: '(max-device-width: 1224px)' },
+	                    { query: '(max-device-width: 64.063em)' },
 	                    _react2.default.createElement(
-	                        'div',
-	                        null,
-	                        'You are a tablet or mobile phone'
+	                        MediaQuery,
+	                        { query: '(min-device-width: 40em)' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            null,
+	                            'You are a tablet'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        MediaQuery,
+	                        { query: '(max-device-width: 40em)' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            null,
+	                            'You are a mobile'
+	                        )
 	                    )
 	                )
 	            );
