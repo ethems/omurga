@@ -1,0 +1,19 @@
+$primary-color:#009688;
+
+.location-filter-container {
+    .location-filter-text{
+      font-size: 12px;
+      color:$primary-color;
+    }
+    .location-filter {
+        position: relative;
+        .location-filter-icon-container {
+            position: absolute;
+            top: 8px;
+            left: 0;
+            .location-filter-icon{
+              color:$primary-color;
+            }
+        }
+    }
+}

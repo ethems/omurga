@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 
 
 import LocationFilter from './location-filter';
+import ProductFilter  from './product-filter';
 
 class CatalogFilterLayout extends Component {
 
@@ -9,6 +10,7 @@ class CatalogFilterLayout extends Component {
         return (
             <div className="catalog-filters-layout">
                 <LocationFilter/>
+                <ProductFilter/>
             </div>
         );
     }
