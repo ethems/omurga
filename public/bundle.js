@@ -46,7 +46,8 @@
 
 	__webpack_require__(1);
 	__webpack_require__(4);
-	module.exports = __webpack_require__(6);
+	__webpack_require__(6);
+	module.exports = __webpack_require__(8);
 
 
 /***/ },
@@ -93,33 +94,45 @@
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
+	__webpack_require__(2)(__webpack_require__(7))
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	module.exports = "// https://d3js.org Version 4.1.0. Copyright 2016 Mike Bostock.\n(function (global, factory) {\n  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :\n  typeof define === 'function' && define.amd ? define(['exports'], factory) :\n  (factory((global.d3 = global.d3 || {})));\n}(this, function (exports) { 'use strict';\n\n  var version = \"4.1.0\";\n\n  function ascending(a, b) {\n    return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;\n  }\n\n  function bisector(compare) {\n    if (compare.length === 1) compare = ascendingComparator(compare);\n    return {\n      left: function(a, x, lo, hi) {\n        if (lo == null) lo = 0;\n        if (hi == null) hi = a.length;\n        while (lo < hi) {\n          var mid = lo + hi >>> 1;\n          if (compare(a[mid], x) < 0) lo = mid + 1;\n          else hi = mid;\n        }\n        return lo;\n      },\n      right: function(a, x, lo, hi) {\n        if (lo == null) lo = 0;\n        if (hi == null) hi = a.length;\n        while (lo < hi) {\n          var mid = lo + hi >>> 1;\n          if (compare(a[mid], x) > 0) hi = mid;\n          else lo = mid + 1;\n        }\n        return lo;\n      }\n    };\n  }\n\n  function ascendingComparator(f) {\n    return function(d, x) {\n      return ascending(f(d), x);\n    };\n  }\n\n  var ascendingBisect = bisector(ascending);\n  var bisectRight = ascendingBisect.right;\n  var bisectLeft = ascendingBisect.left;\n\n  function descending(a, b) {\n    return b < a ? -1 : b > a ? 1 : b >= a ? 0 : NaN;\n  }\n\n  function number(x) {\n    return x === null ? NaN : +x;\n  }\n\n  function variance(array, f) {\n    var n = array.length,\n        m = 0,\n        a,\n        d,\n        s = 0,\n        i = -1,\n        j = 0;\n\n    if (f == null) {\n      while (++i < n) {\n        if (!isNaN(a = number(array[i]))) {\n          d = a - m;\n          m += d / ++j;\n          s += d * (a - m);\n        }\n      }\n    }\n\n    else {\n      while (++i < n) {\n        if (!isNaN(a = number(f(array[i], i, array)))) {\n          d = a - m;\n          m += d / ++j;\n          s += d * (a - m);\n        }\n      }\n    }\n\n    if (j > 1) return s / (j - 1);\n  }\n\n  function deviation(array, f) {\n    var v = variance(array, f);\n    return v ? Math.sqrt(v) : v;\n  }\n\n  function extent(array, f) {\n    var i = -1,\n        n = array.length,\n        a,\n        b,\n        c;\n\n    if (f == null) {\n      while (++i < n) if ((b = array[i]) != null && b >= b) { a = c = b; break; }\n      while (++i < n) if ((b = array[i]) != null) {\n        if (a > b) a = b;\n        if (c < b) c = b;\n      }\n    }\n\n    else {\n      while (++i < n) if ((b = f(array[i], i, array)) != null && b >= b) { a = c = b; break; }\n      while (++i < n) if ((b = f(array[i], i, array)) != null) {\n        if (a > b) a = b;\n        if (c < b) c = b;\n      }\n    }\n\n    return [a, c];\n  }\n\n  var array = Array.prototype;\n\n  var slice = array.slice;\n  var map = array.map;\n\n  function constant(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  function identity(x) {\n    return x;\n  }\n\n  function range(start, stop, step) {\n    start = +start, stop = +stop, step = (n = arguments.length) < 2 ? (stop = start, start = 0, 1) : n < 3 ? 1 : +step;\n\n    var i = -1,\n        n = Math.max(0, Math.ceil((stop - start) / step)) | 0,\n        range = new Array(n);\n\n    while (++i < n) {\n      range[i] = start + i * step;\n    }\n\n    return range;\n  }\n\n  var e10 = Math.sqrt(50);\n  var e5 = Math.sqrt(10);\n  var e2 = Math.sqrt(2);\n  function ticks(start, stop, count) {\n    var step = tickStep(start, stop, count);\n    return range(\n      Math.ceil(start / step) * step,\n      Math.floor(stop / step) * step + step / 2, // inclusive\n      step\n    );\n  }\n\n  function tickStep(start, stop, count) {\n    var step0 = Math.abs(stop - start) / Math.max(0, count),\n        step1 = Math.pow(10, Math.floor(Math.log(step0) / Math.LN10)),\n        error = step0 / step1;\n    if (error >= e10) step1 *= 10;\n    else if (error >= e5) step1 *= 5;\n    else if (error >= e2) step1 *= 2;\n    return stop < start ? -step1 : step1;\n  }\n\n  function sturges(values) {\n    return Math.ceil(Math.log(values.length) / Math.LN2) + 1;\n  }\n\n  function histogram() {\n    var value = identity,\n        domain = extent,\n        threshold = sturges;\n\n    function histogram(data) {\n      var i,\n          n = data.length,\n          x,\n          values = new Array(n);\n\n      for (i = 0; i < n; ++i) {\n        values[i] = value(data[i], i, data);\n      }\n\n      var xz = domain(values),\n          x0 = xz[0],\n          x1 = xz[1],\n          tz = threshold(values, x0, x1);\n\n      // Convert number of thresholds into uniform thresholds.\n      if (!Array.isArray(tz)) tz = ticks(x0, x1, tz);\n\n      // Remove any thresholds outside the domain.\n      var m = tz.length;\n      while (tz[0] <= x0) tz.shift(), --m;\n      while (tz[m - 1] >= x1) tz.pop(), --m;\n\n      var bins = new Array(m + 1),\n          bin;\n\n      // Initialize bins.\n      for (i = 0; i <= m; ++i) {\n        bin = bins[i] = [];\n        bin.x0 = i > 0 ? tz[i - 1] : x0;\n        bin.x1 = i < m ? tz[i] : x1;\n      }\n\n      // Assign data to bins by value, ignoring any outside the domain.\n      for (i = 0; i < n; ++i) {\n        x = values[i];\n        if (x0 <= x && x <= x1) {\n          bins[bisectRight(tz, x, 0, m)].push(data[i]);\n        }\n      }\n\n      return bins;\n    }\n\n    histogram.value = function(_) {\n      return arguments.length ? (value = typeof _ === \"function\" ? _ : constant(_), histogram) : value;\n    };\n\n    histogram.domain = function(_) {\n      return arguments.length ? (domain = typeof _ === \"function\" ? _ : constant([_[0], _[1]]), histogram) : domain;\n    };\n\n    histogram.thresholds = function(_) {\n      return arguments.length ? (threshold = typeof _ === \"function\" ? _ : Array.isArray(_) ? constant(slice.call(_)) : constant(_), histogram) : threshold;\n    };\n\n    return histogram;\n  }\n\n  function threshold(array, p, f) {\n    if (f == null) f = number;\n    if (!(n = array.length)) return;\n    if ((p = +p) <= 0 || n < 2) return +f(array[0], 0, array);\n    if (p >= 1) return +f(array[n - 1], n - 1, array);\n    var n,\n        h = (n - 1) * p,\n        i = Math.floor(h),\n        a = +f(array[i], i, array),\n        b = +f(array[i + 1], i + 1, array);\n    return a + (b - a) * (h - i);\n  }\n\n  function freedmanDiaconis(values, min, max) {\n    values = map.call(values, number).sort(ascending);\n    return Math.ceil((max - min) / (2 * (threshold(values, 0.75) - threshold(values, 0.25)) * Math.pow(values.length, -1 / 3)));\n  }\n\n  function scott(values, min, max) {\n    return Math.ceil((max - min) / (3.5 * deviation(values) * Math.pow(values.length, -1 / 3)));\n  }\n\n  function max(array, f) {\n    var i = -1,\n        n = array.length,\n        a,\n        b;\n\n    if (f == null) {\n      while (++i < n) if ((b = array[i]) != null && b >= b) { a = b; break; }\n      while (++i < n) if ((b = array[i]) != null && b > a) a = b;\n    }\n\n    else {\n      while (++i < n) if ((b = f(array[i], i, array)) != null && b >= b) { a = b; break; }\n      while (++i < n) if ((b = f(array[i], i, array)) != null && b > a) a = b;\n    }\n\n    return a;\n  }\n\n  function mean(array, f) {\n    var s = 0,\n        n = array.length,\n        a,\n        i = -1,\n        j = n;\n\n    if (f == null) {\n      while (++i < n) if (!isNaN(a = number(array[i]))) s += a; else --j;\n    }\n\n    else {\n      while (++i < n) if (!isNaN(a = number(f(array[i], i, array)))) s += a; else --j;\n    }\n\n    if (j) return s / j;\n  }\n\n  function median(array, f) {\n    var numbers = [],\n        n = array.length,\n        a,\n        i = -1;\n\n    if (f == null) {\n      while (++i < n) if (!isNaN(a = number(array[i]))) numbers.push(a);\n    }\n\n    else {\n      while (++i < n) if (!isNaN(a = number(f(array[i], i, array)))) numbers.push(a);\n    }\n\n    return threshold(numbers.sort(ascending), 0.5);\n  }\n\n  function merge(arrays) {\n    var n = arrays.length,\n        m,\n        i = -1,\n        j = 0,\n        merged,\n        array;\n\n    while (++i < n) j += arrays[i].length;\n    merged = new Array(j);\n\n    while (--n >= 0) {\n      array = arrays[n];\n      m = array.length;\n      while (--m >= 0) {\n        merged[--j] = array[m];\n      }\n    }\n\n    return merged;\n  }\n\n  function min(array, f) {\n    var i = -1,\n        n = array.length,\n        a,\n        b;\n\n    if (f == null) {\n      while (++i < n) if ((b = array[i]) != null && b >= b) { a = b; break; }\n      while (++i < n) if ((b = array[i]) != null && a > b) a = b;\n    }\n\n    else {\n      while (++i < n) if ((b = f(array[i], i, array)) != null && b >= b) { a = b; break; }\n      while (++i < n) if ((b = f(array[i], i, array)) != null && a > b) a = b;\n    }\n\n    return a;\n  }\n\n  function pairs(array) {\n    var i = 0, n = array.length - 1, p = array[0], pairs = new Array(n < 0 ? 0 : n);\n    while (i < n) pairs[i] = [p, p = array[++i]];\n    return pairs;\n  }\n\n  function permute(array, indexes) {\n    var i = indexes.length, permutes = new Array(i);\n    while (i--) permutes[i] = array[indexes[i]];\n    return permutes;\n  }\n\n  function scan(array, compare) {\n    if (!(n = array.length)) return;\n    var i = 0,\n        n,\n        j = 0,\n        xi,\n        xj = array[j];\n\n    if (!compare) compare = ascending;\n\n    while (++i < n) if (compare(xi = array[i], xj) < 0 || compare(xj, xj) !== 0) xj = xi, j = i;\n\n    if (compare(xj, xj) === 0) return j;\n  }\n\n  function shuffle(array, i0, i1) {\n    var m = (i1 == null ? array.length : i1) - (i0 = i0 == null ? 0 : +i0),\n        t,\n        i;\n\n    while (m) {\n      i = Math.random() * m-- | 0;\n      t = array[m + i0];\n      array[m + i0] = array[i + i0];\n      array[i + i0] = t;\n    }\n\n    return array;\n  }\n\n  function sum(array, f) {\n    var s = 0,\n        n = array.length,\n        a,\n        i = -1;\n\n    if (f == null) {\n      while (++i < n) if (a = +array[i]) s += a; // Note: zero and null are equivalent.\n    }\n\n    else {\n      while (++i < n) if (a = +f(array[i], i, array)) s += a;\n    }\n\n    return s;\n  }\n\n  function transpose(matrix) {\n    if (!(n = matrix.length)) return [];\n    for (var i = -1, m = min(matrix, length), transpose = new Array(m); ++i < m;) {\n      for (var j = -1, n, row = transpose[i] = new Array(n); ++j < n;) {\n        row[j] = matrix[j][i];\n      }\n    }\n    return transpose;\n  }\n\n  function length(d) {\n    return d.length;\n  }\n\n  function zip() {\n    return transpose(arguments);\n  }\n\n  var prefix = \"$\";\n\n  function Map() {}\n\n  Map.prototype = map$1.prototype = {\n    constructor: Map,\n    has: function(key) {\n      return (prefix + key) in this;\n    },\n    get: function(key) {\n      return this[prefix + key];\n    },\n    set: function(key, value) {\n      this[prefix + key] = value;\n      return this;\n    },\n    remove: function(key) {\n      var property = prefix + key;\n      return property in this && delete this[property];\n    },\n    clear: function() {\n      for (var property in this) if (property[0] === prefix) delete this[property];\n    },\n    keys: function() {\n      var keys = [];\n      for (var property in this) if (property[0] === prefix) keys.push(property.slice(1));\n      return keys;\n    },\n    values: function() {\n      var values = [];\n      for (var property in this) if (property[0] === prefix) values.push(this[property]);\n      return values;\n    },\n    entries: function() {\n      var entries = [];\n      for (var property in this) if (property[0] === prefix) entries.push({key: property.slice(1), value: this[property]});\n      return entries;\n    },\n    size: function() {\n      var size = 0;\n      for (var property in this) if (property[0] === prefix) ++size;\n      return size;\n    },\n    empty: function() {\n      for (var property in this) if (property[0] === prefix) return false;\n      return true;\n    },\n    each: function(f) {\n      for (var property in this) if (property[0] === prefix) f(this[property], property.slice(1), this);\n    }\n  };\n\n  function map$1(object, f) {\n    var map = new Map;\n\n    // Copy constructor.\n    if (object instanceof Map) object.each(function(value, key) { map.set(key, value); });\n\n    // Index array by numeric index or specified key function.\n    else if (Array.isArray(object)) {\n      var i = -1,\n          n = object.length,\n          o;\n\n      if (f == null) while (++i < n) map.set(i, object[i]);\n      else while (++i < n) map.set(f(o = object[i], i, object), o);\n    }\n\n    // Convert object to map.\n    else if (object) for (var key in object) map.set(key, object[key]);\n\n    return map;\n  }\n\n  function nest() {\n    var keys = [],\n        sortKeys = [],\n        sortValues,\n        rollup,\n        nest;\n\n    function apply(array, depth, createResult, setResult) {\n      if (depth >= keys.length) return rollup != null\n          ? rollup(array) : (sortValues != null\n          ? array.sort(sortValues)\n          : array);\n\n      var i = -1,\n          n = array.length,\n          key = keys[depth++],\n          keyValue,\n          value,\n          valuesByKey = map$1(),\n          values,\n          result = createResult();\n\n      while (++i < n) {\n        if (values = valuesByKey.get(keyValue = key(value = array[i]) + \"\")) {\n          values.push(value);\n        } else {\n          valuesByKey.set(keyValue, [value]);\n        }\n      }\n\n      valuesByKey.each(function(values, key) {\n        setResult(result, key, apply(values, depth, createResult, setResult));\n      });\n\n      return result;\n    }\n\n    function entries(map, depth) {\n      if (++depth > keys.length) return map;\n      var array, sortKey = sortKeys[depth - 1];\n      if (rollup != null && depth >= keys.length) array = map.entries();\n      else array = [], map.each(function(v, k) { array.push({key: k, values: entries(v, depth)}); });\n      return sortKey != null ? array.sort(function(a, b) { return sortKey(a.key, b.key); }) : array;\n    }\n\n    return nest = {\n      object: function(array) { return apply(array, 0, createObject, setObject); },\n      map: function(array) { return apply(array, 0, createMap, setMap); },\n      entries: function(array) { return entries(apply(array, 0, createMap, setMap), 0); },\n      key: function(d) { keys.push(d); return nest; },\n      sortKeys: function(order) { sortKeys[keys.length - 1] = order; return nest; },\n      sortValues: function(order) { sortValues = order; return nest; },\n      rollup: function(f) { rollup = f; return nest; }\n    };\n  }\n\n  function createObject() {\n    return {};\n  }\n\n  function setObject(object, key, value) {\n    object[key] = value;\n  }\n\n  function createMap() {\n    return map$1();\n  }\n\n  function setMap(map, key, value) {\n    map.set(key, value);\n  }\n\n  function Set() {}\n\n  var proto = map$1.prototype;\n\n  Set.prototype = set.prototype = {\n    constructor: Set,\n    has: proto.has,\n    add: function(value) {\n      value += \"\";\n      this[prefix + value] = value;\n      return this;\n    },\n    remove: proto.remove,\n    clear: proto.clear,\n    values: proto.keys,\n    size: proto.size,\n    empty: proto.empty,\n    each: proto.each\n  };\n\n  function set(object, f) {\n    var set = new Set;\n\n    // Copy constructor.\n    if (object instanceof Set) object.each(function(value) { set.add(value); });\n\n    // Otherwise, assume it’s an array.\n    else if (object) {\n      var i = -1, n = object.length;\n      if (f == null) while (++i < n) set.add(object[i]);\n      else while (++i < n) set.add(f(object[i], i, object));\n    }\n\n    return set;\n  }\n\n  function keys(map) {\n    var keys = [];\n    for (var key in map) keys.push(key);\n    return keys;\n  }\n\n  function values(map) {\n    var values = [];\n    for (var key in map) values.push(map[key]);\n    return values;\n  }\n\n  function entries(map) {\n    var entries = [];\n    for (var key in map) entries.push({key: key, value: map[key]});\n    return entries;\n  }\n\n  function uniform(min, max) {\n    min = min == null ? 0 : +min;\n    max = max == null ? 1 : +max;\n    if (arguments.length === 1) max = min, min = 0;\n    else max -= min;\n    return function() {\n      return Math.random() * max + min;\n    };\n  }\n\n  function normal(mu, sigma) {\n    var x, r;\n    mu = mu == null ? 0 : +mu;\n    sigma = sigma == null ? 1 : +sigma;\n    return function() {\n      var y;\n\n      // If available, use the second previously-generated uniform random.\n      if (x != null) y = x, x = null;\n\n      // Otherwise, generate a new x and y.\n      else do {\n        x = Math.random() * 2 - 1;\n        y = Math.random() * 2 - 1;\n        r = x * x + y * y;\n      } while (!r || r > 1);\n\n      return mu + sigma * y * Math.sqrt(-2 * Math.log(r) / r);\n    };\n  }\n\n  function logNormal() {\n    var randomNormal = normal.apply(this, arguments);\n    return function() {\n      return Math.exp(randomNormal());\n    };\n  }\n\n  function irwinHall(n) {\n    return function() {\n      for (var sum = 0, i = 0; i < n; ++i) sum += Math.random();\n      return sum;\n    };\n  }\n\n  function bates(n) {\n    var randomIrwinHall = irwinHall(n);\n    return function() {\n      return randomIrwinHall() / n;\n    };\n  }\n\n  function exponential(lambda) {\n    return function() {\n      return -Math.log(1 - Math.random()) / lambda;\n    };\n  }\n\n  function linear(t) {\n    return +t;\n  }\n\n  function quadIn(t) {\n    return t * t;\n  }\n\n  function quadOut(t) {\n    return t * (2 - t);\n  }\n\n  function quadInOut(t) {\n    return ((t *= 2) <= 1 ? t * t : --t * (2 - t) + 1) / 2;\n  }\n\n  function cubicIn(t) {\n    return t * t * t;\n  }\n\n  function cubicOut(t) {\n    return --t * t * t + 1;\n  }\n\n  function easeCubicInOut(t) {\n    return ((t *= 2) <= 1 ? t * t * t : (t -= 2) * t * t + 2) / 2;\n  }\n\n  var exponent = 3;\n\n  var polyIn = (function custom(e) {\n    e = +e;\n\n    function polyIn(t) {\n      return Math.pow(t, e);\n    }\n\n    polyIn.exponent = custom;\n\n    return polyIn;\n  })(exponent);\n\n  var polyOut = (function custom(e) {\n    e = +e;\n\n    function polyOut(t) {\n      return 1 - Math.pow(1 - t, e);\n    }\n\n    polyOut.exponent = custom;\n\n    return polyOut;\n  })(exponent);\n\n  var polyInOut = (function custom(e) {\n    e = +e;\n\n    function polyInOut(t) {\n      return ((t *= 2) <= 1 ? Math.pow(t, e) : 2 - Math.pow(2 - t, e)) / 2;\n    }\n\n    polyInOut.exponent = custom;\n\n    return polyInOut;\n  })(exponent);\n\n  var pi = Math.PI;\n  var halfPi = pi / 2;\n  function sinIn(t) {\n    return 1 - Math.cos(t * halfPi);\n  }\n\n  function sinOut(t) {\n    return Math.sin(t * halfPi);\n  }\n\n  function sinInOut(t) {\n    return (1 - Math.cos(pi * t)) / 2;\n  }\n\n  function expIn(t) {\n    return Math.pow(2, 10 * t - 10);\n  }\n\n  function expOut(t) {\n    return 1 - Math.pow(2, -10 * t);\n  }\n\n  function expInOut(t) {\n    return ((t *= 2) <= 1 ? Math.pow(2, 10 * t - 10) : 2 - Math.pow(2, 10 - 10 * t)) / 2;\n  }\n\n  function circleIn(t) {\n    return 1 - Math.sqrt(1 - t * t);\n  }\n\n  function circleOut(t) {\n    return Math.sqrt(1 - --t * t);\n  }\n\n  function circleInOut(t) {\n    return ((t *= 2) <= 1 ? 1 - Math.sqrt(1 - t * t) : Math.sqrt(1 - (t -= 2) * t) + 1) / 2;\n  }\n\n  var b1 = 4 / 11;\n  var b2 = 6 / 11;\n  var b3 = 8 / 11;\n  var b4 = 3 / 4;\n  var b5 = 9 / 11;\n  var b6 = 10 / 11;\n  var b7 = 15 / 16;\n  var b8 = 21 / 22;\n  var b9 = 63 / 64;\n  var b0 = 1 / b1 / b1;\n  function bounceIn(t) {\n    return 1 - bounceOut(1 - t);\n  }\n\n  function bounceOut(t) {\n    return (t = +t) < b1 ? b0 * t * t : t < b3 ? b0 * (t -= b2) * t + b4 : t < b6 ? b0 * (t -= b5) * t + b7 : b0 * (t -= b8) * t + b9;\n  }\n\n  function bounceInOut(t) {\n    return ((t *= 2) <= 1 ? 1 - bounceOut(1 - t) : bounceOut(t - 1) + 1) / 2;\n  }\n\n  var overshoot = 1.70158;\n\n  var backIn = (function custom(s) {\n    s = +s;\n\n    function backIn(t) {\n      return t * t * ((s + 1) * t - s);\n    }\n\n    backIn.overshoot = custom;\n\n    return backIn;\n  })(overshoot);\n\n  var backOut = (function custom(s) {\n    s = +s;\n\n    function backOut(t) {\n      return --t * t * ((s + 1) * t + s) + 1;\n    }\n\n    backOut.overshoot = custom;\n\n    return backOut;\n  })(overshoot);\n\n  var backInOut = (function custom(s) {\n    s = +s;\n\n    function backInOut(t) {\n      return ((t *= 2) < 1 ? t * t * ((s + 1) * t - s) : (t -= 2) * t * ((s + 1) * t + s) + 2) / 2;\n    }\n\n    backInOut.overshoot = custom;\n\n    return backInOut;\n  })(overshoot);\n\n  var tau = 2 * Math.PI;\n  var amplitude = 1;\n  var period = 0.3;\n  var elasticIn = (function custom(a, p) {\n    var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);\n\n    function elasticIn(t) {\n      return a * Math.pow(2, 10 * --t) * Math.sin((s - t) / p);\n    }\n\n    elasticIn.amplitude = function(a) { return custom(a, p * tau); };\n    elasticIn.period = function(p) { return custom(a, p); };\n\n    return elasticIn;\n  })(amplitude, period);\n\n  var elasticOut = (function custom(a, p) {\n    var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);\n\n    function elasticOut(t) {\n      return 1 - a * Math.pow(2, -10 * (t = +t)) * Math.sin((t + s) / p);\n    }\n\n    elasticOut.amplitude = function(a) { return custom(a, p * tau); };\n    elasticOut.period = function(p) { return custom(a, p); };\n\n    return elasticOut;\n  })(amplitude, period);\n\n  var elasticInOut = (function custom(a, p) {\n    var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);\n\n    function elasticInOut(t) {\n      return ((t = t * 2 - 1) < 0\n          ? a * Math.pow(2, 10 * t) * Math.sin((s - t) / p)\n          : 2 - a * Math.pow(2, -10 * t) * Math.sin((s + t) / p)) / 2;\n    }\n\n    elasticInOut.amplitude = function(a) { return custom(a, p * tau); };\n    elasticInOut.period = function(p) { return custom(a, p); };\n\n    return elasticInOut;\n  })(amplitude, period);\n\n  function area(polygon) {\n    var i = -1,\n        n = polygon.length,\n        a,\n        b = polygon[n - 1],\n        area = 0;\n\n    while (++i < n) {\n      a = b;\n      b = polygon[i];\n      area += a[1] * b[0] - a[0] * b[1];\n    }\n\n    return area / 2;\n  }\n\n  function centroid(polygon) {\n    var i = -1,\n        n = polygon.length,\n        x = 0,\n        y = 0,\n        a,\n        b = polygon[n - 1],\n        c,\n        k = 0;\n\n    while (++i < n) {\n      a = b;\n      b = polygon[i];\n      k += c = a[0] * b[1] - b[0] * a[1];\n      x += (a[0] + b[0]) * c;\n      y += (a[1] + b[1]) * c;\n    }\n\n    return k *= 3, [x / k, y / k];\n  }\n\n  // Returns the 2D cross product of AB and AC vectors, i.e., the z-component of\n  // the 3D cross product in a quadrant I Cartesian coordinate system (+x is\n  // right, +y is up). Returns a positive value if ABC is counter-clockwise,\n  // negative if clockwise, and zero if the points are collinear.\n  function cross(a, b, c) {\n    return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);\n  }\n\n  function lexicographicOrder(a, b) {\n    return a[0] - b[0] || a[1] - b[1];\n  }\n\n  // Computes the upper convex hull per the monotone chain algorithm.\n  // Assumes points.length >= 3, is sorted by x, unique in y.\n  // Returns an array of indices into points in left-to-right order.\n  function computeUpperHullIndexes(points) {\n    var n = points.length,\n        indexes = [0, 1],\n        size = 2;\n\n    for (var i = 2; i < n; ++i) {\n      while (size > 1 && cross(points[indexes[size - 2]], points[indexes[size - 1]], points[i]) <= 0) --size;\n      indexes[size++] = i;\n    }\n\n    return indexes.slice(0, size); // remove popped points\n  }\n\n  function hull(points) {\n    if ((n = points.length) < 3) return null;\n\n    var i,\n        n,\n        sortedPoints = new Array(n),\n        flippedPoints = new Array(n);\n\n    for (i = 0; i < n; ++i) sortedPoints[i] = [+points[i][0], +points[i][1], i];\n    sortedPoints.sort(lexicographicOrder);\n    for (i = 0; i < n; ++i) flippedPoints[i] = [sortedPoints[i][0], -sortedPoints[i][1]];\n\n    var upperIndexes = computeUpperHullIndexes(sortedPoints),\n        lowerIndexes = computeUpperHullIndexes(flippedPoints);\n\n    // Construct the hull polygon, removing possible duplicate endpoints.\n    var skipLeft = lowerIndexes[0] === upperIndexes[0],\n        skipRight = lowerIndexes[lowerIndexes.length - 1] === upperIndexes[upperIndexes.length - 1],\n        hull = [];\n\n    // Add upper hull in right-to-l order.\n    // Then add lower hull in left-to-right order.\n    for (i = upperIndexes.length - 1; i >= 0; --i) hull.push(points[sortedPoints[upperIndexes[i]][2]]);\n    for (i = +skipLeft; i < lowerIndexes.length - skipRight; ++i) hull.push(points[sortedPoints[lowerIndexes[i]][2]]);\n\n    return hull;\n  }\n\n  function contains(polygon, point) {\n    var n = polygon.length,\n        p = polygon[n - 1],\n        x = point[0], y = point[1],\n        x0 = p[0], y0 = p[1],\n        x1, y1,\n        inside = false;\n\n    for (var i = 0; i < n; ++i) {\n      p = polygon[i], x1 = p[0], y1 = p[1];\n      if (((y1 > y) !== (y0 > y)) && (x < (x0 - x1) * (y - y1) / (y0 - y1) + x1)) inside = !inside;\n      x0 = x1, y0 = y1;\n    }\n\n    return inside;\n  }\n\n  function length$1(polygon) {\n    var i = -1,\n        n = polygon.length,\n        b = polygon[n - 1],\n        xa,\n        ya,\n        xb = b[0],\n        yb = b[1],\n        perimeter = 0;\n\n    while (++i < n) {\n      xa = xb;\n      ya = yb;\n      b = polygon[i];\n      xb = b[0];\n      yb = b[1];\n      xa -= xb;\n      ya -= yb;\n      perimeter += Math.sqrt(xa * xa + ya * ya);\n    }\n\n    return perimeter;\n  }\n\nvar   pi$1 = Math.PI;\nvar   tau$1 = 2 * pi$1;\n  var epsilon = 1e-6;\n  var tauEpsilon = tau$1 - epsilon;\n  function Path() {\n    this._x0 = this._y0 = // start of current subpath\n    this._x1 = this._y1 = null; // end of current subpath\n    this._ = [];\n  }\n\n  function path() {\n    return new Path;\n  }\n\n  Path.prototype = path.prototype = {\n    constructor: Path,\n    moveTo: function(x, y) {\n      this._.push(\"M\", this._x0 = this._x1 = +x, \",\", this._y0 = this._y1 = +y);\n    },\n    closePath: function() {\n      if (this._x1 !== null) {\n        this._x1 = this._x0, this._y1 = this._y0;\n        this._.push(\"Z\");\n      }\n    },\n    lineTo: function(x, y) {\n      this._.push(\"L\", this._x1 = +x, \",\", this._y1 = +y);\n    },\n    quadraticCurveTo: function(x1, y1, x, y) {\n      this._.push(\"Q\", +x1, \",\", +y1, \",\", this._x1 = +x, \",\", this._y1 = +y);\n    },\n    bezierCurveTo: function(x1, y1, x2, y2, x, y) {\n      this._.push(\"C\", +x1, \",\", +y1, \",\", +x2, \",\", +y2, \",\", this._x1 = +x, \",\", this._y1 = +y);\n    },\n    arcTo: function(x1, y1, x2, y2, r) {\n      x1 = +x1, y1 = +y1, x2 = +x2, y2 = +y2, r = +r;\n      var x0 = this._x1,\n          y0 = this._y1,\n          x21 = x2 - x1,\n          y21 = y2 - y1,\n          x01 = x0 - x1,\n          y01 = y0 - y1,\n          l01_2 = x01 * x01 + y01 * y01;\n\n      // Is the radius negative? Error.\n      if (r < 0) throw new Error(\"negative radius: \" + r);\n\n      // Is this path empty? Move to (x1,y1).\n      if (this._x1 === null) {\n        this._.push(\n          \"M\", this._x1 = x1, \",\", this._y1 = y1\n        );\n      }\n\n      // Or, is (x1,y1) coincident with (x0,y0)? Do nothing.\n      else if (!(l01_2 > epsilon));\n\n      // Or, are (x0,y0), (x1,y1) and (x2,y2) collinear?\n      // Equivalently, is (x1,y1) coincident with (x2,y2)?\n      // Or, is the radius zero? Line to (x1,y1).\n      else if (!(Math.abs(y01 * x21 - y21 * x01) > epsilon) || !r) {\n        this._.push(\n          \"L\", this._x1 = x1, \",\", this._y1 = y1\n        );\n      }\n\n      // Otherwise, draw an arc!\n      else {\n        var x20 = x2 - x0,\n            y20 = y2 - y0,\n            l21_2 = x21 * x21 + y21 * y21,\n            l20_2 = x20 * x20 + y20 * y20,\n            l21 = Math.sqrt(l21_2),\n            l01 = Math.sqrt(l01_2),\n            l = r * Math.tan((pi$1 - Math.acos((l21_2 + l01_2 - l20_2) / (2 * l21 * l01))) / 2),\n            t01 = l / l01,\n            t21 = l / l21;\n\n        // If the start tangent is not coincident with (x0,y0), line to.\n        if (Math.abs(t01 - 1) > epsilon) {\n          this._.push(\n            \"L\", x1 + t01 * x01, \",\", y1 + t01 * y01\n          );\n        }\n\n        this._.push(\n          \"A\", r, \",\", r, \",0,0,\", +(y01 * x20 > x01 * y20), \",\", this._x1 = x1 + t21 * x21, \",\", this._y1 = y1 + t21 * y21\n        );\n      }\n    },\n    arc: function(x, y, r, a0, a1, ccw) {\n      x = +x, y = +y, r = +r;\n      var dx = r * Math.cos(a0),\n          dy = r * Math.sin(a0),\n          x0 = x + dx,\n          y0 = y + dy,\n          cw = 1 ^ ccw,\n          da = ccw ? a0 - a1 : a1 - a0;\n\n      // Is the radius negative? Error.\n      if (r < 0) throw new Error(\"negative radius: \" + r);\n\n      // Is this path empty? Move to (x0,y0).\n      if (this._x1 === null) {\n        this._.push(\n          \"M\", x0, \",\", y0\n        );\n      }\n\n      // Or, is (x0,y0) not coincident with the previous point? Line to (x0,y0).\n      else if (Math.abs(this._x1 - x0) > epsilon || Math.abs(this._y1 - y0) > epsilon) {\n        this._.push(\n          \"L\", x0, \",\", y0\n        );\n      }\n\n      // Is this arc empty? We’re done.\n      if (!r) return;\n\n      // Is this a complete circle? Draw two arcs to complete the circle.\n      if (da > tauEpsilon) {\n        this._.push(\n          \"A\", r, \",\", r, \",0,1,\", cw, \",\", x - dx, \",\", y - dy,\n          \"A\", r, \",\", r, \",0,1,\", cw, \",\", this._x1 = x0, \",\", this._y1 = y0\n        );\n      }\n\n      // Otherwise, draw an arc!\n      else {\n        if (da < 0) da = da % tau$1 + tau$1;\n        this._.push(\n          \"A\", r, \",\", r, \",0,\", +(da >= pi$1), \",\", cw, \",\", this._x1 = x + r * Math.cos(a1), \",\", this._y1 = y + r * Math.sin(a1)\n        );\n      }\n    },\n    rect: function(x, y, w, h) {\n      this._.push(\"M\", this._x0 = this._x1 = +x, \",\", this._y0 = this._y1 = +y, \"h\", +w, \"v\", +h, \"h\", -w, \"Z\");\n    },\n    toString: function() {\n      return this._.join(\"\");\n    }\n  };\n\n  function tree_add(d) {\n    var x = +this._x.call(null, d),\n        y = +this._y.call(null, d);\n    return add(this.cover(x, y), x, y, d);\n  }\n\n  function add(tree, x, y, d) {\n    if (isNaN(x) || isNaN(y)) return tree; // ignore invalid points\n\n    var parent,\n        node = tree._root,\n        leaf = {data: d},\n        x0 = tree._x0,\n        y0 = tree._y0,\n        x1 = tree._x1,\n        y1 = tree._y1,\n        xm,\n        ym,\n        xp,\n        yp,\n        right,\n        bottom,\n        i,\n        j;\n\n    // If the tree is empty, initialize the root as a leaf.\n    if (!node) return tree._root = leaf, tree;\n\n    // Find the existing leaf for the new point, or add it.\n    while (node.length) {\n      if (right = x >= (xm = (x0 + x1) / 2)) x0 = xm; else x1 = xm;\n      if (bottom = y >= (ym = (y0 + y1) / 2)) y0 = ym; else y1 = ym;\n      if (parent = node, !(node = node[i = bottom << 1 | right])) return parent[i] = leaf, tree;\n    }\n\n    // Is the new point is exactly coincident with the existing point?\n    xp = +tree._x.call(null, node.data);\n    yp = +tree._y.call(null, node.data);\n    if (x === xp && y === yp) return leaf.next = node, parent ? parent[i] = leaf : tree._root = leaf, tree;\n\n    // Otherwise, split the leaf node until the old and new point are separated.\n    do {\n      parent = parent ? parent[i] = new Array(4) : tree._root = new Array(4);\n      if (right = x >= (xm = (x0 + x1) / 2)) x0 = xm; else x1 = xm;\n      if (bottom = y >= (ym = (y0 + y1) / 2)) y0 = ym; else y1 = ym;\n    } while ((i = bottom << 1 | right) === (j = (yp >= ym) << 1 | (xp >= xm)));\n    return parent[j] = node, parent[i] = leaf, tree;\n  }\n\n  function addAll(data) {\n    var d, i, n = data.length,\n        x,\n        y,\n        xz = new Array(n),\n        yz = new Array(n),\n        x0 = Infinity,\n        y0 = Infinity,\n        x1 = -Infinity,\n        y1 = -Infinity;\n\n    // Compute the points and their extent.\n    for (i = 0; i < n; ++i) {\n      if (isNaN(x = +this._x.call(null, d = data[i])) || isNaN(y = +this._y.call(null, d))) continue;\n      xz[i] = x;\n      yz[i] = y;\n      if (x < x0) x0 = x;\n      if (x > x1) x1 = x;\n      if (y < y0) y0 = y;\n      if (y > y1) y1 = y;\n    }\n\n    // If there were no (valid) points, inherit the existing extent.\n    if (x1 < x0) x0 = this._x0, x1 = this._x1;\n    if (y1 < y0) y0 = this._y0, y1 = this._y1;\n\n    // Expand the tree to cover the new points.\n    this.cover(x0, y0).cover(x1, y1);\n\n    // Add the new points.\n    for (i = 0; i < n; ++i) {\n      add(this, xz[i], yz[i], data[i]);\n    }\n\n    return this;\n  }\n\n  function tree_cover(x, y) {\n    if (isNaN(x = +x) || isNaN(y = +y)) return this; // ignore invalid points\n\n    var x0 = this._x0,\n        y0 = this._y0,\n        x1 = this._x1,\n        y1 = this._y1;\n\n    // If the quadtree has no extent, initialize them.\n    // Integer extent are necessary so that if we later double the extent,\n    // the existing quadrant boundaries don’t change due to floating point error!\n    if (isNaN(x0)) {\n      x1 = (x0 = Math.floor(x)) + 1;\n      y1 = (y0 = Math.floor(y)) + 1;\n    }\n\n    // Otherwise, double repeatedly to cover.\n    else if (x0 > x || x > x1 || y0 > y || y > y1) {\n      var z = x1 - x0,\n          node = this._root,\n          parent,\n          i;\n\n      switch (i = (y < (y0 + y1) / 2) << 1 | (x < (x0 + x1) / 2)) {\n        case 0: {\n          do parent = new Array(4), parent[i] = node, node = parent;\n          while (z *= 2, x1 = x0 + z, y1 = y0 + z, x > x1 || y > y1);\n          break;\n        }\n        case 1: {\n          do parent = new Array(4), parent[i] = node, node = parent;\n          while (z *= 2, x0 = x1 - z, y1 = y0 + z, x0 > x || y > y1);\n          break;\n        }\n        case 2: {\n          do parent = new Array(4), parent[i] = node, node = parent;\n          while (z *= 2, x1 = x0 + z, y0 = y1 - z, x > x1 || y0 > y);\n          break;\n        }\n        case 3: {\n          do parent = new Array(4), parent[i] = node, node = parent;\n          while (z *= 2, x0 = x1 - z, y0 = y1 - z, x0 > x || y0 > y);\n          break;\n        }\n      }\n\n      if (this._root && this._root.length) this._root = node;\n    }\n\n    // If the quadtree covers the point already, just return.\n    else return this;\n\n    this._x0 = x0;\n    this._y0 = y0;\n    this._x1 = x1;\n    this._y1 = y1;\n    return this;\n  }\n\n  function tree_data() {\n    var data = [];\n    this.visit(function(node) {\n      if (!node.length) do data.push(node.data); while (node = node.next)\n    });\n    return data;\n  }\n\n  function tree_extent(_) {\n    return arguments.length\n        ? this.cover(+_[0][0], +_[0][1]).cover(+_[1][0], +_[1][1])\n        : isNaN(this._x0) ? undefined : [[this._x0, this._y0], [this._x1, this._y1]];\n  }\n\n  function Quad(node, x0, y0, x1, y1) {\n    this.node = node;\n    this.x0 = x0;\n    this.y0 = y0;\n    this.x1 = x1;\n    this.y1 = y1;\n  }\n\n  function tree_find(x, y, radius) {\n    var data,\n        x0 = this._x0,\n        y0 = this._y0,\n        x1,\n        y1,\n        x2,\n        y2,\n        x3 = this._x1,\n        y3 = this._y1,\n        quads = [],\n        node = this._root,\n        q,\n        i;\n\n    if (node) quads.push(new Quad(node, x0, y0, x3, y3));\n    if (radius == null) radius = Infinity;\n    else {\n      x0 = x - radius, y0 = y - radius;\n      x3 = x + radius, y3 = y + radius;\n      radius *= radius;\n    }\n\n    while (q = quads.pop()) {\n\n      // Stop searching if this quadrant can’t contain a closer node.\n      if (!(node = q.node)\n          || (x1 = q.x0) > x3\n          || (y1 = q.y0) > y3\n          || (x2 = q.x1) < x0\n          || (y2 = q.y1) < y0) continue;\n\n      // Bisect the current quadrant.\n      if (node.length) {\n        var xm = (x1 + x2) / 2,\n            ym = (y1 + y2) / 2;\n\n        quads.push(\n          new Quad(node[3], xm, ym, x2, y2),\n          new Quad(node[2], x1, ym, xm, y2),\n          new Quad(node[1], xm, y1, x2, ym),\n          new Quad(node[0], x1, y1, xm, ym)\n        );\n\n        // Visit the closest quadrant first.\n        if (i = (y >= ym) << 1 | (x >= xm)) {\n          q = quads[quads.length - 1];\n          quads[quads.length - 1] = quads[quads.length - 1 - i];\n          quads[quads.length - 1 - i] = q;\n        }\n      }\n\n      // Visit this point. (Visiting coincident points isn’t necessary!)\n      else {\n        var dx = x - +this._x.call(null, node.data),\n            dy = y - +this._y.call(null, node.data),\n            d2 = dx * dx + dy * dy;\n        if (d2 < radius) {\n          var d = Math.sqrt(radius = d2);\n          x0 = x - d, y0 = y - d;\n          x3 = x + d, y3 = y + d;\n          data = node.data;\n        }\n      }\n    }\n\n    return data;\n  }\n\n  function tree_remove(d) {\n    if (isNaN(x = +this._x.call(null, d)) || isNaN(y = +this._y.call(null, d))) return this; // ignore invalid points\n\n    var parent,\n        node = this._root,\n        retainer,\n        previous,\n        next,\n        x0 = this._x0,\n        y0 = this._y0,\n        x1 = this._x1,\n        y1 = this._y1,\n        x,\n        y,\n        xm,\n        ym,\n        right,\n        bottom,\n        i,\n        j;\n\n    // If the tree is empty, initialize the root as a leaf.\n    if (!node) return this;\n\n    // Find the leaf node for the point.\n    // While descending, also retain the deepest parent with a non-removed sibling.\n    if (node.length) while (true) {\n      if (right = x >= (xm = (x0 + x1) / 2)) x0 = xm; else x1 = xm;\n      if (bottom = y >= (ym = (y0 + y1) / 2)) y0 = ym; else y1 = ym;\n      if (!(parent = node, node = node[i = bottom << 1 | right])) return this;\n      if (!node.length) break;\n      if (parent[(i + 1) & 3] || parent[(i + 2) & 3] || parent[(i + 3) & 3]) retainer = parent, j = i;\n    }\n\n    // Find the point to remove.\n    while (node.data !== d) if (!(previous = node, node = node.next)) return this;\n    if (next = node.next) delete node.next;\n\n    // If there are multiple coincident points, remove just the point.\n    if (previous) return (next ? previous.next = next : delete previous.next), this;\n\n    // If this is the root point, remove it.\n    if (!parent) return this._root = next, this;\n\n    // Remove this leaf.\n    next ? parent[i] = next : delete parent[i];\n\n    // If the parent now contains exactly one leaf, collapse superfluous parents.\n    if ((node = parent[0] || parent[1] || parent[2] || parent[3])\n        && node === (parent[3] || parent[2] || parent[1] || parent[0])\n        && !node.length) {\n      if (retainer) retainer[j] = node;\n      else this._root = node;\n    }\n\n    return this;\n  }\n\n  function removeAll(data) {\n    for (var i = 0, n = data.length; i < n; ++i) this.remove(data[i]);\n    return this;\n  }\n\n  function tree_root() {\n    return this._root;\n  }\n\n  function tree_size() {\n    var size = 0;\n    this.visit(function(node) {\n      if (!node.length) do ++size; while (node = node.next)\n    });\n    return size;\n  }\n\n  function tree_visit(callback) {\n    var quads = [], q, node = this._root, child, x0, y0, x1, y1;\n    if (node) quads.push(new Quad(node, this._x0, this._y0, this._x1, this._y1));\n    while (q = quads.pop()) {\n      if (!callback(node = q.node, x0 = q.x0, y0 = q.y0, x1 = q.x1, y1 = q.y1) && node.length) {\n        var xm = (x0 + x1) / 2, ym = (y0 + y1) / 2;\n        if (child = node[3]) quads.push(new Quad(child, xm, ym, x1, y1));\n        if (child = node[2]) quads.push(new Quad(child, x0, ym, xm, y1));\n        if (child = node[1]) quads.push(new Quad(child, xm, y0, x1, ym));\n        if (child = node[0]) quads.push(new Quad(child, x0, y0, xm, ym));\n      }\n    }\n    return this;\n  }\n\n  function tree_visitAfter(callback) {\n    var quads = [], next = [], q;\n    if (this._root) quads.push(new Quad(this._root, this._x0, this._y0, this._x1, this._y1));\n    while (q = quads.pop()) {\n      var node = q.node;\n      if (node.length) {\n        var child, x0 = q.x0, y0 = q.y0, x1 = q.x1, y1 = q.y1, xm = (x0 + x1) / 2, ym = (y0 + y1) / 2;\n        if (child = node[0]) quads.push(new Quad(child, x0, y0, xm, ym));\n        if (child = node[1]) quads.push(new Quad(child, xm, y0, x1, ym));\n        if (child = node[2]) quads.push(new Quad(child, x0, ym, xm, y1));\n        if (child = node[3]) quads.push(new Quad(child, xm, ym, x1, y1));\n      }\n      next.push(q);\n    }\n    while (q = next.pop()) {\n      callback(q.node, q.x0, q.y0, q.x1, q.y1);\n    }\n    return this;\n  }\n\n  function defaultX(d) {\n    return d[0];\n  }\n\n  function tree_x(_) {\n    return arguments.length ? (this._x = _, this) : this._x;\n  }\n\n  function defaultY(d) {\n    return d[1];\n  }\n\n  function tree_y(_) {\n    return arguments.length ? (this._y = _, this) : this._y;\n  }\n\n  function quadtree(nodes, x, y) {\n    var tree = new Quadtree(x == null ? defaultX : x, y == null ? defaultY : y, NaN, NaN, NaN, NaN);\n    return nodes == null ? tree : tree.addAll(nodes);\n  }\n\n  function Quadtree(x, y, x0, y0, x1, y1) {\n    this._x = x;\n    this._y = y;\n    this._x0 = x0;\n    this._y0 = y0;\n    this._x1 = x1;\n    this._y1 = y1;\n    this._root = undefined;\n  }\n\n  function leaf_copy(leaf) {\n    var copy = {data: leaf.data}, next = copy;\n    while (leaf = leaf.next) next = next.next = {data: leaf.data};\n    return copy;\n  }\n\n  var treeProto = quadtree.prototype = Quadtree.prototype;\n\n  treeProto.copy = function() {\n    var copy = new Quadtree(this._x, this._y, this._x0, this._y0, this._x1, this._y1),\n        node = this._root,\n        nodes,\n        child;\n\n    if (!node) return copy;\n\n    if (!node.length) return copy._root = leaf_copy(node), copy;\n\n    nodes = [{source: node, target: copy._root = new Array(4)}];\n    while (node = nodes.pop()) {\n      for (var i = 0; i < 4; ++i) {\n        if (child = node.source[i]) {\n          if (child.length) nodes.push({source: child, target: node.target[i] = new Array(4)});\n          else node.target[i] = leaf_copy(child);\n        }\n      }\n    }\n\n    return copy;\n  };\n\n  treeProto.add = tree_add;\n  treeProto.addAll = addAll;\n  treeProto.cover = tree_cover;\n  treeProto.data = tree_data;\n  treeProto.extent = tree_extent;\n  treeProto.find = tree_find;\n  treeProto.remove = tree_remove;\n  treeProto.removeAll = removeAll;\n  treeProto.root = tree_root;\n  treeProto.size = tree_size;\n  treeProto.visit = tree_visit;\n  treeProto.visitAfter = tree_visitAfter;\n  treeProto.x = tree_x;\n  treeProto.y = tree_y;\n\n  var slice$1 = [].slice;\n\n  var noabort = {};\n\n  function Queue(size) {\n    if (!(size >= 1)) throw new Error;\n    this._size = size;\n    this._call =\n    this._error = null;\n    this._tasks = [];\n    this._data = [];\n    this._waiting =\n    this._active =\n    this._ended =\n    this._start = 0; // inside a synchronous task callback?\n  }\n\n  Queue.prototype = queue.prototype = {\n    constructor: Queue,\n    defer: function(callback) {\n      if (typeof callback !== \"function\" || this._call) throw new Error;\n      if (this._error != null) return this;\n      var t = slice$1.call(arguments, 1);\n      t.push(callback);\n      ++this._waiting, this._tasks.push(t);\n      poke(this);\n      return this;\n    },\n    abort: function() {\n      if (this._error == null) abort(this, new Error(\"abort\"));\n      return this;\n    },\n    await: function(callback) {\n      if (typeof callback !== \"function\" || this._call) throw new Error;\n      this._call = function(error, results) { callback.apply(null, [error].concat(results)); };\n      maybeNotify(this);\n      return this;\n    },\n    awaitAll: function(callback) {\n      if (typeof callback !== \"function\" || this._call) throw new Error;\n      this._call = callback;\n      maybeNotify(this);\n      return this;\n    }\n  };\n\n  function poke(q) {\n    if (!q._start) try { start(q); } // let the current task complete\n    catch (e) { if (q._tasks[q._ended + q._active - 1]) abort(q, e); } // task errored synchronously\n  }\n\n  function start(q) {\n    while (q._start = q._waiting && q._active < q._size) {\n      var i = q._ended + q._active,\n          t = q._tasks[i],\n          j = t.length - 1,\n          c = t[j];\n      t[j] = end(q, i);\n      --q._waiting, ++q._active;\n      t = c.apply(null, t);\n      if (!q._tasks[i]) continue; // task finished synchronously\n      q._tasks[i] = t || noabort;\n    }\n  }\n\n  function end(q, i) {\n    return function(e, r) {\n      if (!q._tasks[i]) return; // ignore multiple callbacks\n      --q._active, ++q._ended;\n      q._tasks[i] = null;\n      if (q._error != null) return; // ignore secondary errors\n      if (e != null) {\n        abort(q, e);\n      } else {\n        q._data[i] = r;\n        if (q._waiting) poke(q);\n        else maybeNotify(q);\n      }\n    };\n  }\n\n  function abort(q, e) {\n    var i = q._tasks.length, t;\n    q._error = e; // ignore active callbacks\n    q._data = undefined; // allow gc\n    q._waiting = NaN; // prevent starting\n\n    while (--i >= 0) {\n      if (t = q._tasks[i]) {\n        q._tasks[i] = null;\n        if (t.abort) try { t.abort(); }\n        catch (e) { /* ignore */ }\n      }\n    }\n\n    q._active = NaN; // allow notification\n    maybeNotify(q);\n  }\n\n  function maybeNotify(q) {\n    if (!q._active && q._call) q._call(q._error, q._data);\n  }\n\n  function queue(concurrency) {\n    return new Queue(arguments.length ? +concurrency : Infinity);\n  }\n\n  function constant$1(x) {\n    return function constant() {\n      return x;\n    };\n  }\n\n  var epsilon$1 = 1e-12;\n  var pi$2 = Math.PI;\n  var halfPi$1 = pi$2 / 2;\n  var tau$2 = 2 * pi$2;\n\n  function arcInnerRadius(d) {\n    return d.innerRadius;\n  }\n\n  function arcOuterRadius(d) {\n    return d.outerRadius;\n  }\n\n  function arcStartAngle(d) {\n    return d.startAngle;\n  }\n\n  function arcEndAngle(d) {\n    return d.endAngle;\n  }\n\n  function arcPadAngle(d) {\n    return d && d.padAngle; // Note: optional!\n  }\n\n  function asin(x) {\n    return x >= 1 ? halfPi$1 : x <= -1 ? -halfPi$1 : Math.asin(x);\n  }\n\n  function intersect(x0, y0, x1, y1, x2, y2, x3, y3) {\n    var x10 = x1 - x0, y10 = y1 - y0,\n        x32 = x3 - x2, y32 = y3 - y2,\n        t = (x32 * (y0 - y2) - y32 * (x0 - x2)) / (y32 * x10 - x32 * y10);\n    return [x0 + t * x10, y0 + t * y10];\n  }\n\n  // Compute perpendicular offset line of length rc.\n  // http://mathworld.wolfram.com/Circle-LineIntersection.html\n  function cornerTangents(x0, y0, x1, y1, r1, rc, cw) {\n    var x01 = x0 - x1,\n        y01 = y0 - y1,\n        lo = (cw ? rc : -rc) / Math.sqrt(x01 * x01 + y01 * y01),\n        ox = lo * y01,\n        oy = -lo * x01,\n        x11 = x0 + ox,\n        y11 = y0 + oy,\n        x10 = x1 + ox,\n        y10 = y1 + oy,\n        x00 = (x11 + x10) / 2,\n        y00 = (y11 + y10) / 2,\n        dx = x10 - x11,\n        dy = y10 - y11,\n        d2 = dx * dx + dy * dy,\n        r = r1 - rc,\n        D = x11 * y10 - x10 * y11,\n        d = (dy < 0 ? -1 : 1) * Math.sqrt(Math.max(0, r * r * d2 - D * D)),\n        cx0 = (D * dy - dx * d) / d2,\n        cy0 = (-D * dx - dy * d) / d2,\n        cx1 = (D * dy + dx * d) / d2,\n        cy1 = (-D * dx + dy * d) / d2,\n        dx0 = cx0 - x00,\n        dy0 = cy0 - y00,\n        dx1 = cx1 - x00,\n        dy1 = cy1 - y00;\n\n    // Pick the closer of the two intersection points.\n    // TODO Is there a faster way to determine which intersection to use?\n    if (dx0 * dx0 + dy0 * dy0 > dx1 * dx1 + dy1 * dy1) cx0 = cx1, cy0 = cy1;\n\n    return {\n      cx: cx0,\n      cy: cy0,\n      x01: -ox,\n      y01: -oy,\n      x11: cx0 * (r1 / r - 1),\n      y11: cy0 * (r1 / r - 1)\n    };\n  }\n\n  function arc() {\n    var innerRadius = arcInnerRadius,\n        outerRadius = arcOuterRadius,\n        cornerRadius = constant$1(0),\n        padRadius = null,\n        startAngle = arcStartAngle,\n        endAngle = arcEndAngle,\n        padAngle = arcPadAngle,\n        context = null;\n\n    function arc() {\n      var buffer,\n          r,\n          r0 = +innerRadius.apply(this, arguments),\n          r1 = +outerRadius.apply(this, arguments),\n          a0 = startAngle.apply(this, arguments) - halfPi$1,\n          a1 = endAngle.apply(this, arguments) - halfPi$1,\n          da = Math.abs(a1 - a0),\n          cw = a1 > a0;\n\n      if (!context) context = buffer = path();\n\n      // Ensure that the outer radius is always larger than the inner radius.\n      if (r1 < r0) r = r1, r1 = r0, r0 = r;\n\n      // Is it a point?\n      if (!(r1 > epsilon$1)) context.moveTo(0, 0);\n\n      // Or is it a circle or annulus?\n      else if (da > tau$2 - epsilon$1) {\n        context.moveTo(r1 * Math.cos(a0), r1 * Math.sin(a0));\n        context.arc(0, 0, r1, a0, a1, !cw);\n        if (r0 > epsilon$1) {\n          context.moveTo(r0 * Math.cos(a1), r0 * Math.sin(a1));\n          context.arc(0, 0, r0, a1, a0, cw);\n        }\n      }\n\n      // Or is it a circular or annular sector?\n      else {\n        var a01 = a0,\n            a11 = a1,\n            a00 = a0,\n            a10 = a1,\n            da0 = da,\n            da1 = da,\n            ap = padAngle.apply(this, arguments) / 2,\n            rp = (ap > epsilon$1) && (padRadius ? +padRadius.apply(this, arguments) : Math.sqrt(r0 * r0 + r1 * r1)),\n            rc = Math.min(Math.abs(r1 - r0) / 2, +cornerRadius.apply(this, arguments)),\n            rc0 = rc,\n            rc1 = rc,\n            t0,\n            t1;\n\n        // Apply padding? Note that since r1 ≥ r0, da1 ≥ da0.\n        if (rp > epsilon$1) {\n          var p0 = asin(rp / r0 * Math.sin(ap)),\n              p1 = asin(rp / r1 * Math.sin(ap));\n          if ((da0 -= p0 * 2) > epsilon$1) p0 *= (cw ? 1 : -1), a00 += p0, a10 -= p0;\n          else da0 = 0, a00 = a10 = (a0 + a1) / 2;\n          if ((da1 -= p1 * 2) > epsilon$1) p1 *= (cw ? 1 : -1), a01 += p1, a11 -= p1;\n          else da1 = 0, a01 = a11 = (a0 + a1) / 2;\n        }\n\n        var x01 = r1 * Math.cos(a01),\n            y01 = r1 * Math.sin(a01),\n            x10 = r0 * Math.cos(a10),\n            y10 = r0 * Math.sin(a10);\n\n        // Apply rounded corners?\n        if (rc > epsilon$1) {\n          var x11 = r1 * Math.cos(a11),\n              y11 = r1 * Math.sin(a11),\n              x00 = r0 * Math.cos(a00),\n              y00 = r0 * Math.sin(a00);\n\n          // Restrict the corner radius according to the sector angle.\n          if (da < pi$2) {\n            var oc = da0 > epsilon$1 ? intersect(x01, y01, x00, y00, x11, y11, x10, y10) : [x10, y10],\n                ax = x01 - oc[0],\n                ay = y01 - oc[1],\n                bx = x11 - oc[0],\n                by = y11 - oc[1],\n                kc = 1 / Math.sin(Math.acos((ax * bx + ay * by) / (Math.sqrt(ax * ax + ay * ay) * Math.sqrt(bx * bx + by * by))) / 2),\n                lc = Math.sqrt(oc[0] * oc[0] + oc[1] * oc[1]);\n            rc0 = Math.min(rc, (r0 - lc) / (kc - 1));\n            rc1 = Math.min(rc, (r1 - lc) / (kc + 1));\n          }\n        }\n\n        // Is the sector collapsed to a line?\n        if (!(da1 > epsilon$1)) context.moveTo(x01, y01);\n\n        // Does the sector’s outer ring have rounded corners?\n        else if (rc1 > epsilon$1) {\n          t0 = cornerTangents(x00, y00, x01, y01, r1, rc1, cw);\n          t1 = cornerTangents(x11, y11, x10, y10, r1, rc1, cw);\n\n          context.moveTo(t0.cx + t0.x01, t0.cy + t0.y01);\n\n          // Have the corners merged?\n          if (rc1 < rc) context.arc(t0.cx, t0.cy, rc1, Math.atan2(t0.y01, t0.x01), Math.atan2(t1.y01, t1.x01), !cw);\n\n          // Otherwise, draw the two corners and the ring.\n          else {\n            context.arc(t0.cx, t0.cy, rc1, Math.atan2(t0.y01, t0.x01), Math.atan2(t0.y11, t0.x11), !cw);\n            context.arc(0, 0, r1, Math.atan2(t0.cy + t0.y11, t0.cx + t0.x11), Math.atan2(t1.cy + t1.y11, t1.cx + t1.x11), !cw);\n            context.arc(t1.cx, t1.cy, rc1, Math.atan2(t1.y11, t1.x11), Math.atan2(t1.y01, t1.x01), !cw);\n          }\n        }\n\n        // Or is the outer ring just a circular arc?\n        else context.moveTo(x01, y01), context.arc(0, 0, r1, a01, a11, !cw);\n\n        // Is there no inner ring, and it’s a circular sector?\n        // Or perhaps it’s an annular sector collapsed due to padding?\n        if (!(r0 > epsilon$1) || !(da0 > epsilon$1)) context.lineTo(x10, y10);\n\n        // Does the sector’s inner ring (or point) have rounded corners?\n        else if (rc0 > epsilon$1) {\n          t0 = cornerTangents(x10, y10, x11, y11, r0, -rc0, cw);\n          t1 = cornerTangents(x01, y01, x00, y00, r0, -rc0, cw);\n\n          context.lineTo(t0.cx + t0.x01, t0.cy + t0.y01);\n\n          // Have the corners merged?\n          if (rc0 < rc) context.arc(t0.cx, t0.cy, rc0, Math.atan2(t0.y01, t0.x01), Math.atan2(t1.y01, t1.x01), !cw);\n\n          // Otherwise, draw the two corners and the ring.\n          else {\n            context.arc(t0.cx, t0.cy, rc0, Math.atan2(t0.y01, t0.x01), Math.atan2(t0.y11, t0.x11), !cw);\n            context.arc(0, 0, r0, Math.atan2(t0.cy + t0.y11, t0.cx + t0.x11), Math.atan2(t1.cy + t1.y11, t1.cx + t1.x11), cw);\n            context.arc(t1.cx, t1.cy, rc0, Math.atan2(t1.y11, t1.x11), Math.atan2(t1.y01, t1.x01), !cw);\n          }\n        }\n\n        // Or is the inner ring just a circular arc?\n        else context.arc(0, 0, r0, a10, a00, cw);\n      }\n\n      context.closePath();\n\n      if (buffer) return context = null, buffer + \"\" || null;\n    }\n\n    arc.centroid = function() {\n      var r = (+innerRadius.apply(this, arguments) + +outerRadius.apply(this, arguments)) / 2,\n          a = (+startAngle.apply(this, arguments) + +endAngle.apply(this, arguments)) / 2 - pi$2 / 2;\n      return [Math.cos(a) * r, Math.sin(a) * r];\n    };\n\n    arc.innerRadius = function(_) {\n      return arguments.length ? (innerRadius = typeof _ === \"function\" ? _ : constant$1(+_), arc) : innerRadius;\n    };\n\n    arc.outerRadius = function(_) {\n      return arguments.length ? (outerRadius = typeof _ === \"function\" ? _ : constant$1(+_), arc) : outerRadius;\n    };\n\n    arc.cornerRadius = function(_) {\n      return arguments.length ? (cornerRadius = typeof _ === \"function\" ? _ : constant$1(+_), arc) : cornerRadius;\n    };\n\n    arc.padRadius = function(_) {\n      return arguments.length ? (padRadius = _ == null ? null : typeof _ === \"function\" ? _ : constant$1(+_), arc) : padRadius;\n    };\n\n    arc.startAngle = function(_) {\n      return arguments.length ? (startAngle = typeof _ === \"function\" ? _ : constant$1(+_), arc) : startAngle;\n    };\n\n    arc.endAngle = function(_) {\n      return arguments.length ? (endAngle = typeof _ === \"function\" ? _ : constant$1(+_), arc) : endAngle;\n    };\n\n    arc.padAngle = function(_) {\n      return arguments.length ? (padAngle = typeof _ === \"function\" ? _ : constant$1(+_), arc) : padAngle;\n    };\n\n    arc.context = function(_) {\n      return arguments.length ? ((context = _ == null ? null : _), arc) : context;\n    };\n\n    return arc;\n  }\n\n  function Linear(context) {\n    this._context = context;\n  }\n\n  Linear.prototype = {\n    areaStart: function() {\n      this._line = 0;\n    },\n    areaEnd: function() {\n      this._line = NaN;\n    },\n    lineStart: function() {\n      this._point = 0;\n    },\n    lineEnd: function() {\n      if (this._line || (this._line !== 0 && this._point === 1)) this._context.closePath();\n      this._line = 1 - this._line;\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n      switch (this._point) {\n        case 0: this._point = 1; this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y); break;\n        case 1: this._point = 2; // proceed\n        default: this._context.lineTo(x, y); break;\n      }\n    }\n  };\n\n  function curveLinear(context) {\n    return new Linear(context);\n  }\n\n  function x(p) {\n    return p[0];\n  }\n\n  function y(p) {\n    return p[1];\n  }\n\n  function line() {\n    var x$$ = x,\n        y$$ = y,\n        defined = constant$1(true),\n        context = null,\n        curve = curveLinear,\n        output = null;\n\n    function line(data) {\n      var i,\n          n = data.length,\n          d,\n          defined0 = false,\n          buffer;\n\n      if (context == null) output = curve(buffer = path());\n\n      for (i = 0; i <= n; ++i) {\n        if (!(i < n && defined(d = data[i], i, data)) === defined0) {\n          if (defined0 = !defined0) output.lineStart();\n          else output.lineEnd();\n        }\n        if (defined0) output.point(+x$$(d, i, data), +y$$(d, i, data));\n      }\n\n      if (buffer) return output = null, buffer + \"\" || null;\n    }\n\n    line.x = function(_) {\n      return arguments.length ? (x$$ = typeof _ === \"function\" ? _ : constant$1(+_), line) : x$$;\n    };\n\n    line.y = function(_) {\n      return arguments.length ? (y$$ = typeof _ === \"function\" ? _ : constant$1(+_), line) : y$$;\n    };\n\n    line.defined = function(_) {\n      return arguments.length ? (defined = typeof _ === \"function\" ? _ : constant$1(!!_), line) : defined;\n    };\n\n    line.curve = function(_) {\n      return arguments.length ? (curve = _, context != null && (output = curve(context)), line) : curve;\n    };\n\n    line.context = function(_) {\n      return arguments.length ? (_ == null ? context = output = null : output = curve(context = _), line) : context;\n    };\n\n    return line;\n  }\n\n  function area$1() {\n    var x0 = x,\n        x1 = null,\n        y0 = constant$1(0),\n        y1 = y,\n        defined = constant$1(true),\n        context = null,\n        curve = curveLinear,\n        output = null;\n\n    function area(data) {\n      var i,\n          j,\n          k,\n          n = data.length,\n          d,\n          defined0 = false,\n          buffer,\n          x0z = new Array(n),\n          y0z = new Array(n);\n\n      if (context == null) output = curve(buffer = path());\n\n      for (i = 0; i <= n; ++i) {\n        if (!(i < n && defined(d = data[i], i, data)) === defined0) {\n          if (defined0 = !defined0) {\n            j = i;\n            output.areaStart();\n            output.lineStart();\n          } else {\n            output.lineEnd();\n            output.lineStart();\n            for (k = i - 1; k >= j; --k) {\n              output.point(x0z[k], y0z[k]);\n            }\n            output.lineEnd();\n            output.areaEnd();\n          }\n        }\n        if (defined0) {\n          x0z[i] = +x0(d, i, data), y0z[i] = +y0(d, i, data);\n          output.point(x1 ? +x1(d, i, data) : x0z[i], y1 ? +y1(d, i, data) : y0z[i]);\n        }\n      }\n\n      if (buffer) return output = null, buffer + \"\" || null;\n    }\n\n    function arealine() {\n      return line().defined(defined).curve(curve).context(context);\n    }\n\n    area.x = function(_) {\n      return arguments.length ? (x0 = typeof _ === \"function\" ? _ : constant$1(+_), x1 = null, area) : x0;\n    };\n\n    area.x0 = function(_) {\n      return arguments.length ? (x0 = typeof _ === \"function\" ? _ : constant$1(+_), area) : x0;\n    };\n\n    area.x1 = function(_) {\n      return arguments.length ? (x1 = _ == null ? null : typeof _ === \"function\" ? _ : constant$1(+_), area) : x1;\n    };\n\n    area.y = function(_) {\n      return arguments.length ? (y0 = typeof _ === \"function\" ? _ : constant$1(+_), y1 = null, area) : y0;\n    };\n\n    area.y0 = function(_) {\n      return arguments.length ? (y0 = typeof _ === \"function\" ? _ : constant$1(+_), area) : y0;\n    };\n\n    area.y1 = function(_) {\n      return arguments.length ? (y1 = _ == null ? null : typeof _ === \"function\" ? _ : constant$1(+_), area) : y1;\n    };\n\n    area.lineX0 =\n    area.lineY0 = function() {\n      return arealine().x(x0).y(y0);\n    };\n\n    area.lineY1 = function() {\n      return arealine().x(x0).y(y1);\n    };\n\n    area.lineX1 = function() {\n      return arealine().x(x1).y(y0);\n    };\n\n    area.defined = function(_) {\n      return arguments.length ? (defined = typeof _ === \"function\" ? _ : constant$1(!!_), area) : defined;\n    };\n\n    area.curve = function(_) {\n      return arguments.length ? (curve = _, context != null && (output = curve(context)), area) : curve;\n    };\n\n    area.context = function(_) {\n      return arguments.length ? (_ == null ? context = output = null : output = curve(context = _), area) : context;\n    };\n\n    return area;\n  }\n\n  function descending$1(a, b) {\n    return b < a ? -1 : b > a ? 1 : b >= a ? 0 : NaN;\n  }\n\n  function identity$1(d) {\n    return d;\n  }\n\n  function pie() {\n    var value = identity$1,\n        sortValues = descending$1,\n        sort = null,\n        startAngle = constant$1(0),\n        endAngle = constant$1(tau$2),\n        padAngle = constant$1(0);\n\n    function pie(data) {\n      var i,\n          n = data.length,\n          j,\n          k,\n          sum = 0,\n          index = new Array(n),\n          arcs = new Array(n),\n          a0 = +startAngle.apply(this, arguments),\n          da = Math.min(tau$2, Math.max(-tau$2, endAngle.apply(this, arguments) - a0)),\n          a1,\n          p = Math.min(Math.abs(da) / n, padAngle.apply(this, arguments)),\n          pa = p * (da < 0 ? -1 : 1),\n          v;\n\n      for (i = 0; i < n; ++i) {\n        if ((v = arcs[index[i] = i] = +value(data[i], i, data)) > 0) {\n          sum += v;\n        }\n      }\n\n      // Optionally sort the arcs by previously-computed values or by data.\n      if (sortValues != null) index.sort(function(i, j) { return sortValues(arcs[i], arcs[j]); });\n      else if (sort != null) index.sort(function(i, j) { return sort(data[i], data[j]); });\n\n      // Compute the arcs! They are stored in the original data's order.\n      for (i = 0, k = sum ? (da - n * pa) / sum : 0; i < n; ++i, a0 = a1) {\n        j = index[i], v = arcs[j], a1 = a0 + (v > 0 ? v * k : 0) + pa, arcs[j] = {\n          data: data[j],\n          index: i,\n          value: v,\n          startAngle: a0,\n          endAngle: a1,\n          padAngle: p\n        };\n      }\n\n      return arcs;\n    }\n\n    pie.value = function(_) {\n      return arguments.length ? (value = typeof _ === \"function\" ? _ : constant$1(+_), pie) : value;\n    };\n\n    pie.sortValues = function(_) {\n      return arguments.length ? (sortValues = _, sort = null, pie) : sortValues;\n    };\n\n    pie.sort = function(_) {\n      return arguments.length ? (sort = _, sortValues = null, pie) : sort;\n    };\n\n    pie.startAngle = function(_) {\n      return arguments.length ? (startAngle = typeof _ === \"function\" ? _ : constant$1(+_), pie) : startAngle;\n    };\n\n    pie.endAngle = function(_) {\n      return arguments.length ? (endAngle = typeof _ === \"function\" ? _ : constant$1(+_), pie) : endAngle;\n    };\n\n    pie.padAngle = function(_) {\n      return arguments.length ? (padAngle = typeof _ === \"function\" ? _ : constant$1(+_), pie) : padAngle;\n    };\n\n    return pie;\n  }\n\n  var curveRadialLinear = curveRadial(curveLinear);\n\n  function Radial(curve) {\n    this._curve = curve;\n  }\n\n  Radial.prototype = {\n    areaStart: function() {\n      this._curve.areaStart();\n    },\n    areaEnd: function() {\n      this._curve.areaEnd();\n    },\n    lineStart: function() {\n      this._curve.lineStart();\n    },\n    lineEnd: function() {\n      this._curve.lineEnd();\n    },\n    point: function(a, r) {\n      this._curve.point(r * Math.sin(a), r * -Math.cos(a));\n    }\n  };\n\n  function curveRadial(curve) {\n\n    function radial(context) {\n      return new Radial(curve(context));\n    }\n\n    radial._curve = curve;\n\n    return radial;\n  }\n\n  function radialLine(l) {\n    var c = l.curve;\n\n    l.angle = l.x, delete l.x;\n    l.radius = l.y, delete l.y;\n\n    l.curve = function(_) {\n      return arguments.length ? c(curveRadial(_)) : c()._curve;\n    };\n\n    return l;\n  }\n\n  function radialLine$1() {\n    return radialLine(line().curve(curveRadialLinear));\n  }\n\n  function radialArea() {\n    var a = area$1().curve(curveRadialLinear),\n        c = a.curve,\n        x0 = a.lineX0,\n        x1 = a.lineX1,\n        y0 = a.lineY0,\n        y1 = a.lineY1;\n\n    a.angle = a.x, delete a.x;\n    a.startAngle = a.x0, delete a.x0;\n    a.endAngle = a.x1, delete a.x1;\n    a.radius = a.y, delete a.y;\n    a.innerRadius = a.y0, delete a.y0;\n    a.outerRadius = a.y1, delete a.y1;\n    a.lineStartAngle = function() { return radialLine(x0()); }, delete a.lineX0;\n    a.lineEndAngle = function() { return radialLine(x1()); }, delete a.lineX1;\n    a.lineInnerRadius = function() { return radialLine(y0()); }, delete a.lineY0;\n    a.lineOuterRadius = function() { return radialLine(y1()); }, delete a.lineY1;\n\n    a.curve = function(_) {\n      return arguments.length ? c(curveRadial(_)) : c()._curve;\n    };\n\n    return a;\n  }\n\n  var circle = {\n    draw: function(context, size) {\n      var r = Math.sqrt(size / pi$2);\n      context.moveTo(r, 0);\n      context.arc(0, 0, r, 0, tau$2);\n    }\n  };\n\n  var cross$1 = {\n    draw: function(context, size) {\n      var r = Math.sqrt(size / 5) / 2;\n      context.moveTo(-3 * r, -r);\n      context.lineTo(-r, -r);\n      context.lineTo(-r, -3 * r);\n      context.lineTo(r, -3 * r);\n      context.lineTo(r, -r);\n      context.lineTo(3 * r, -r);\n      context.lineTo(3 * r, r);\n      context.lineTo(r, r);\n      context.lineTo(r, 3 * r);\n      context.lineTo(-r, 3 * r);\n      context.lineTo(-r, r);\n      context.lineTo(-3 * r, r);\n      context.closePath();\n    }\n  };\n\n  var tan30 = Math.sqrt(1 / 3);\n  var tan30_2 = tan30 * 2;\n  var diamond = {\n    draw: function(context, size) {\n      var y = Math.sqrt(size / tan30_2),\n          x = y * tan30;\n      context.moveTo(0, -y);\n      context.lineTo(x, 0);\n      context.lineTo(0, y);\n      context.lineTo(-x, 0);\n      context.closePath();\n    }\n  };\n\n  var ka = 0.89081309152928522810;\n  var kr = Math.sin(pi$2 / 10) / Math.sin(7 * pi$2 / 10);\n  var kx = Math.sin(tau$2 / 10) * kr;\n  var ky = -Math.cos(tau$2 / 10) * kr;\n  var star = {\n    draw: function(context, size) {\n      var r = Math.sqrt(size * ka),\n          x = kx * r,\n          y = ky * r;\n      context.moveTo(0, -r);\n      context.lineTo(x, y);\n      for (var i = 1; i < 5; ++i) {\n        var a = tau$2 * i / 5,\n            c = Math.cos(a),\n            s = Math.sin(a);\n        context.lineTo(s * r, -c * r);\n        context.lineTo(c * x - s * y, s * x + c * y);\n      }\n      context.closePath();\n    }\n  };\n\n  var square = {\n    draw: function(context, size) {\n      var w = Math.sqrt(size),\n          x = -w / 2;\n      context.rect(x, x, w, w);\n    }\n  };\n\n  var sqrt3 = Math.sqrt(3);\n\n  var triangle = {\n    draw: function(context, size) {\n      var y = -Math.sqrt(size / (sqrt3 * 3));\n      context.moveTo(0, y * 2);\n      context.lineTo(-sqrt3 * y, -y);\n      context.lineTo(sqrt3 * y, -y);\n      context.closePath();\n    }\n  };\n\n  var c = -0.5;\n  var s = Math.sqrt(3) / 2;\n  var k = 1 / Math.sqrt(12);\n  var a = (k / 2 + 1) * 3;\n  var wye = {\n    draw: function(context, size) {\n      var r = Math.sqrt(size / a),\n          x0 = r / 2,\n          y0 = r * k,\n          x1 = x0,\n          y1 = r * k + r,\n          x2 = -x1,\n          y2 = y1;\n      context.moveTo(x0, y0);\n      context.lineTo(x1, y1);\n      context.lineTo(x2, y2);\n      context.lineTo(c * x0 - s * y0, s * x0 + c * y0);\n      context.lineTo(c * x1 - s * y1, s * x1 + c * y1);\n      context.lineTo(c * x2 - s * y2, s * x2 + c * y2);\n      context.lineTo(c * x0 + s * y0, c * y0 - s * x0);\n      context.lineTo(c * x1 + s * y1, c * y1 - s * x1);\n      context.lineTo(c * x2 + s * y2, c * y2 - s * x2);\n      context.closePath();\n    }\n  };\n\n  var symbols = [\n    circle,\n    cross$1,\n    diamond,\n    square,\n    star,\n    triangle,\n    wye\n  ];\n\n  function symbol() {\n    var type = constant$1(circle),\n        size = constant$1(64),\n        context = null;\n\n    function symbol() {\n      var buffer;\n      if (!context) context = buffer = path();\n      type.apply(this, arguments).draw(context, +size.apply(this, arguments));\n      if (buffer) return context = null, buffer + \"\" || null;\n    }\n\n    symbol.type = function(_) {\n      return arguments.length ? (type = typeof _ === \"function\" ? _ : constant$1(_), symbol) : type;\n    };\n\n    symbol.size = function(_) {\n      return arguments.length ? (size = typeof _ === \"function\" ? _ : constant$1(+_), symbol) : size;\n    };\n\n    symbol.context = function(_) {\n      return arguments.length ? (context = _ == null ? null : _, symbol) : context;\n    };\n\n    return symbol;\n  }\n\n  function noop() {}\n\n  function point(that, x, y) {\n    that._context.bezierCurveTo(\n      (2 * that._x0 + that._x1) / 3,\n      (2 * that._y0 + that._y1) / 3,\n      (that._x0 + 2 * that._x1) / 3,\n      (that._y0 + 2 * that._y1) / 3,\n      (that._x0 + 4 * that._x1 + x) / 6,\n      (that._y0 + 4 * that._y1 + y) / 6\n    );\n  }\n\n  function Basis(context) {\n    this._context = context;\n  }\n\n  Basis.prototype = {\n    areaStart: function() {\n      this._line = 0;\n    },\n    areaEnd: function() {\n      this._line = NaN;\n    },\n    lineStart: function() {\n      this._x0 = this._x1 =\n      this._y0 = this._y1 = NaN;\n      this._point = 0;\n    },\n    lineEnd: function() {\n      switch (this._point) {\n        case 3: point(this, this._x1, this._y1); // proceed\n        case 2: this._context.lineTo(this._x1, this._y1); break;\n      }\n      if (this._line || (this._line !== 0 && this._point === 1)) this._context.closePath();\n      this._line = 1 - this._line;\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n      switch (this._point) {\n        case 0: this._point = 1; this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y); break;\n        case 1: this._point = 2; break;\n        case 2: this._point = 3; this._context.lineTo((5 * this._x0 + this._x1) / 6, (5 * this._y0 + this._y1) / 6); // proceed\n        default: point(this, x, y); break;\n      }\n      this._x0 = this._x1, this._x1 = x;\n      this._y0 = this._y1, this._y1 = y;\n    }\n  };\n\n  function basis(context) {\n    return new Basis(context);\n  }\n\n  function BasisClosed(context) {\n    this._context = context;\n  }\n\n  BasisClosed.prototype = {\n    areaStart: noop,\n    areaEnd: noop,\n    lineStart: function() {\n      this._x0 = this._x1 = this._x2 = this._x3 = this._x4 =\n      this._y0 = this._y1 = this._y2 = this._y3 = this._y4 = NaN;\n      this._point = 0;\n    },\n    lineEnd: function() {\n      switch (this._point) {\n        case 1: {\n          this._context.moveTo(this._x2, this._y2);\n          this._context.closePath();\n          break;\n        }\n        case 2: {\n          this._context.moveTo((this._x2 + 2 * this._x3) / 3, (this._y2 + 2 * this._y3) / 3);\n          this._context.lineTo((this._x3 + 2 * this._x2) / 3, (this._y3 + 2 * this._y2) / 3);\n          this._context.closePath();\n          break;\n        }\n        case 3: {\n          this.point(this._x2, this._y2);\n          this.point(this._x3, this._y3);\n          this.point(this._x4, this._y4);\n          break;\n        }\n      }\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n      switch (this._point) {\n        case 0: this._point = 1; this._x2 = x, this._y2 = y; break;\n        case 1: this._point = 2; this._x3 = x, this._y3 = y; break;\n        case 2: this._point = 3; this._x4 = x, this._y4 = y; this._context.moveTo((this._x0 + 4 * this._x1 + x) / 6, (this._y0 + 4 * this._y1 + y) / 6); break;\n        default: point(this, x, y); break;\n      }\n      this._x0 = this._x1, this._x1 = x;\n      this._y0 = this._y1, this._y1 = y;\n    }\n  };\n\n  function basisClosed(context) {\n    return new BasisClosed(context);\n  }\n\n  function BasisOpen(context) {\n    this._context = context;\n  }\n\n  BasisOpen.prototype = {\n    areaStart: function() {\n      this._line = 0;\n    },\n    areaEnd: function() {\n      this._line = NaN;\n    },\n    lineStart: function() {\n      this._x0 = this._x1 =\n      this._y0 = this._y1 = NaN;\n      this._point = 0;\n    },\n    lineEnd: function() {\n      if (this._line || (this._line !== 0 && this._point === 3)) this._context.closePath();\n      this._line = 1 - this._line;\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n      switch (this._point) {\n        case 0: this._point = 1; break;\n        case 1: this._point = 2; break;\n        case 2: this._point = 3; var x0 = (this._x0 + 4 * this._x1 + x) / 6, y0 = (this._y0 + 4 * this._y1 + y) / 6; this._line ? this._context.lineTo(x0, y0) : this._context.moveTo(x0, y0); break;\n        case 3: this._point = 4; // proceed\n        default: point(this, x, y); break;\n      }\n      this._x0 = this._x1, this._x1 = x;\n      this._y0 = this._y1, this._y1 = y;\n    }\n  };\n\n  function basisOpen(context) {\n    return new BasisOpen(context);\n  }\n\n  function Bundle(context, beta) {\n    this._basis = new Basis(context);\n    this._beta = beta;\n  }\n\n  Bundle.prototype = {\n    lineStart: function() {\n      this._x = [];\n      this._y = [];\n      this._basis.lineStart();\n    },\n    lineEnd: function() {\n      var x = this._x,\n          y = this._y,\n          j = x.length - 1;\n\n      if (j > 0) {\n        var x0 = x[0],\n            y0 = y[0],\n            dx = x[j] - x0,\n            dy = y[j] - y0,\n            i = -1,\n            t;\n\n        while (++i <= j) {\n          t = i / j;\n          this._basis.point(\n            this._beta * x[i] + (1 - this._beta) * (x0 + t * dx),\n            this._beta * y[i] + (1 - this._beta) * (y0 + t * dy)\n          );\n        }\n      }\n\n      this._x = this._y = null;\n      this._basis.lineEnd();\n    },\n    point: function(x, y) {\n      this._x.push(+x);\n      this._y.push(+y);\n    }\n  };\n\n  var bundle = (function custom(beta) {\n\n    function bundle(context) {\n      return beta === 1 ? new Basis(context) : new Bundle(context, beta);\n    }\n\n    bundle.beta = function(beta) {\n      return custom(+beta);\n    };\n\n    return bundle;\n  })(0.85);\n\n  function point$1(that, x, y) {\n    that._context.bezierCurveTo(\n      that._x1 + that._k * (that._x2 - that._x0),\n      that._y1 + that._k * (that._y2 - that._y0),\n      that._x2 + that._k * (that._x1 - x),\n      that._y2 + that._k * (that._y1 - y),\n      that._x2,\n      that._y2\n    );\n  }\n\n  function Cardinal(context, tension) {\n    this._context = context;\n    this._k = (1 - tension) / 6;\n  }\n\n  Cardinal.prototype = {\n    areaStart: function() {\n      this._line = 0;\n    },\n    areaEnd: function() {\n      this._line = NaN;\n    },\n    lineStart: function() {\n      this._x0 = this._x1 = this._x2 =\n      this._y0 = this._y1 = this._y2 = NaN;\n      this._point = 0;\n    },\n    lineEnd: function() {\n      switch (this._point) {\n        case 2: this._context.lineTo(this._x2, this._y2); break;\n        case 3: point$1(this, this._x1, this._y1); break;\n      }\n      if (this._line || (this._line !== 0 && this._point === 1)) this._context.closePath();\n      this._line = 1 - this._line;\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n      switch (this._point) {\n        case 0: this._point = 1; this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y); break;\n        case 1: this._point = 2; this._x1 = x, this._y1 = y; break;\n        case 2: this._point = 3; // proceed\n        default: point$1(this, x, y); break;\n      }\n      this._x0 = this._x1, this._x1 = this._x2, this._x2 = x;\n      this._y0 = this._y1, this._y1 = this._y2, this._y2 = y;\n    }\n  };\n\n  var cardinal = (function custom(tension) {\n\n    function cardinal(context) {\n      return new Cardinal(context, tension);\n    }\n\n    cardinal.tension = function(tension) {\n      return custom(+tension);\n    };\n\n    return cardinal;\n  })(0);\n\n  function CardinalClosed(context, tension) {\n    this._context = context;\n    this._k = (1 - tension) / 6;\n  }\n\n  CardinalClosed.prototype = {\n    areaStart: noop,\n    areaEnd: noop,\n    lineStart: function() {\n      this._x0 = this._x1 = this._x2 = this._x3 = this._x4 = this._x5 =\n      this._y0 = this._y1 = this._y2 = this._y3 = this._y4 = this._y5 = NaN;\n      this._point = 0;\n    },\n    lineEnd: function() {\n      switch (this._point) {\n        case 1: {\n          this._context.moveTo(this._x3, this._y3);\n          this._context.closePath();\n          break;\n        }\n        case 2: {\n          this._context.lineTo(this._x3, this._y3);\n          this._context.closePath();\n          break;\n        }\n        case 3: {\n          this.point(this._x3, this._y3);\n          this.point(this._x4, this._y4);\n          this.point(this._x5, this._y5);\n          break;\n        }\n      }\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n      switch (this._point) {\n        case 0: this._point = 1; this._x3 = x, this._y3 = y; break;\n        case 1: this._point = 2; this._context.moveTo(this._x4 = x, this._y4 = y); break;\n        case 2: this._point = 3; this._x5 = x, this._y5 = y; break;\n        default: point$1(this, x, y); break;\n      }\n      this._x0 = this._x1, this._x1 = this._x2, this._x2 = x;\n      this._y0 = this._y1, this._y1 = this._y2, this._y2 = y;\n    }\n  };\n\n  var cardinalClosed = (function custom(tension) {\n\n    function cardinal(context) {\n      return new CardinalClosed(context, tension);\n    }\n\n    cardinal.tension = function(tension) {\n      return custom(+tension);\n    };\n\n    return cardinal;\n  })(0);\n\n  function CardinalOpen(context, tension) {\n    this._context = context;\n    this._k = (1 - tension) / 6;\n  }\n\n  CardinalOpen.prototype = {\n    areaStart: function() {\n      this._line = 0;\n    },\n    areaEnd: function() {\n      this._line = NaN;\n    },\n    lineStart: function() {\n      this._x0 = this._x1 = this._x2 =\n      this._y0 = this._y1 = this._y2 = NaN;\n      this._point = 0;\n    },\n    lineEnd: function() {\n      if (this._line || (this._line !== 0 && this._point === 3)) this._context.closePath();\n      this._line = 1 - this._line;\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n      switch (this._point) {\n        case 0: this._point = 1; break;\n        case 1: this._point = 2; break;\n        case 2: this._point = 3; this._line ? this._context.lineTo(this._x2, this._y2) : this._context.moveTo(this._x2, this._y2); break;\n        case 3: this._point = 4; // proceed\n        default: point$1(this, x, y); break;\n      }\n      this._x0 = this._x1, this._x1 = this._x2, this._x2 = x;\n      this._y0 = this._y1, this._y1 = this._y2, this._y2 = y;\n    }\n  };\n\n  var cardinalOpen = (function custom(tension) {\n\n    function cardinal(context) {\n      return new CardinalOpen(context, tension);\n    }\n\n    cardinal.tension = function(tension) {\n      return custom(+tension);\n    };\n\n    return cardinal;\n  })(0);\n\n  function point$2(that, x, y) {\n    var x1 = that._x1,\n        y1 = that._y1,\n        x2 = that._x2,\n        y2 = that._y2;\n\n    if (that._l01_a > epsilon$1) {\n      var a = 2 * that._l01_2a + 3 * that._l01_a * that._l12_a + that._l12_2a,\n          n = 3 * that._l01_a * (that._l01_a + that._l12_a);\n      x1 = (x1 * a - that._x0 * that._l12_2a + that._x2 * that._l01_2a) / n;\n      y1 = (y1 * a - that._y0 * that._l12_2a + that._y2 * that._l01_2a) / n;\n    }\n\n    if (that._l23_a > epsilon$1) {\n      var b = 2 * that._l23_2a + 3 * that._l23_a * that._l12_a + that._l12_2a,\n          m = 3 * that._l23_a * (that._l23_a + that._l12_a);\n      x2 = (x2 * b + that._x1 * that._l23_2a - x * that._l12_2a) / m;\n      y2 = (y2 * b + that._y1 * that._l23_2a - y * that._l12_2a) / m;\n    }\n\n    that._context.bezierCurveTo(x1, y1, x2, y2, that._x2, that._y2);\n  }\n\n  function CatmullRom(context, alpha) {\n    this._context = context;\n    this._alpha = alpha;\n  }\n\n  CatmullRom.prototype = {\n    areaStart: function() {\n      this._line = 0;\n    },\n    areaEnd: function() {\n      this._line = NaN;\n    },\n    lineStart: function() {\n      this._x0 = this._x1 = this._x2 =\n      this._y0 = this._y1 = this._y2 = NaN;\n      this._l01_a = this._l12_a = this._l23_a =\n      this._l01_2a = this._l12_2a = this._l23_2a =\n      this._point = 0;\n    },\n    lineEnd: function() {\n      switch (this._point) {\n        case 2: this._context.lineTo(this._x2, this._y2); break;\n        case 3: this.point(this, this._x2, this._y2); break;\n      }\n      if (this._line || (this._line !== 0 && this._point === 1)) this._context.closePath();\n      this._line = 1 - this._line;\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n\n      if (this._point) {\n        var x23 = this._x2 - x,\n            y23 = this._y2 - y;\n        this._l23_a = Math.sqrt(this._l23_2a = Math.pow(x23 * x23 + y23 * y23, this._alpha));\n      }\n\n      switch (this._point) {\n        case 0: this._point = 1; this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y); break;\n        case 1: this._point = 2; break;\n        case 2: this._point = 3; // proceed\n        default: point$2(this, x, y); break;\n      }\n\n      this._l01_a = this._l12_a, this._l12_a = this._l23_a;\n      this._l01_2a = this._l12_2a, this._l12_2a = this._l23_2a;\n      this._x0 = this._x1, this._x1 = this._x2, this._x2 = x;\n      this._y0 = this._y1, this._y1 = this._y2, this._y2 = y;\n    }\n  };\n\n  var catmullRom = (function custom(alpha) {\n\n    function catmullRom(context) {\n      return alpha ? new CatmullRom(context, alpha) : new Cardinal(context, 0);\n    }\n\n    catmullRom.alpha = function(alpha) {\n      return custom(+alpha);\n    };\n\n    return catmullRom;\n  })(0.5);\n\n  function CatmullRomClosed(context, alpha) {\n    this._context = context;\n    this._alpha = alpha;\n  }\n\n  CatmullRomClosed.prototype = {\n    areaStart: noop,\n    areaEnd: noop,\n    lineStart: function() {\n      this._x0 = this._x1 = this._x2 = this._x3 = this._x4 = this._x5 =\n      this._y0 = this._y1 = this._y2 = this._y3 = this._y4 = this._y5 = NaN;\n      this._l01_a = this._l12_a = this._l23_a =\n      this._l01_2a = this._l12_2a = this._l23_2a =\n      this._point = 0;\n    },\n    lineEnd: function() {\n      switch (this._point) {\n        case 1: {\n          this._context.moveTo(this._x3, this._y3);\n          this._context.closePath();\n          break;\n        }\n        case 2: {\n          this._context.lineTo(this._x3, this._y3);\n          this._context.closePath();\n          break;\n        }\n        case 3: {\n          this.point(this._x3, this._y3);\n          this.point(this._x4, this._y4);\n          this.point(this._x5, this._y5);\n          break;\n        }\n      }\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n\n      if (this._point) {\n        var x23 = this._x2 - x,\n            y23 = this._y2 - y;\n        this._l23_a = Math.sqrt(this._l23_2a = Math.pow(x23 * x23 + y23 * y23, this._alpha));\n      }\n\n      switch (this._point) {\n        case 0: this._point = 1; this._x3 = x, this._y3 = y; break;\n        case 1: this._point = 2; this._context.moveTo(this._x4 = x, this._y4 = y); break;\n        case 2: this._point = 3; this._x5 = x, this._y5 = y; break;\n        default: point$2(this, x, y); break;\n      }\n\n      this._l01_a = this._l12_a, this._l12_a = this._l23_a;\n      this._l01_2a = this._l12_2a, this._l12_2a = this._l23_2a;\n      this._x0 = this._x1, this._x1 = this._x2, this._x2 = x;\n      this._y0 = this._y1, this._y1 = this._y2, this._y2 = y;\n    }\n  };\n\n  var catmullRomClosed = (function custom(alpha) {\n\n    function catmullRom(context) {\n      return alpha ? new CatmullRomClosed(context, alpha) : new CardinalClosed(context, 0);\n    }\n\n    catmullRom.alpha = function(alpha) {\n      return custom(+alpha);\n    };\n\n    return catmullRom;\n  })(0.5);\n\n  function CatmullRomOpen(context, alpha) {\n    this._context = context;\n    this._alpha = alpha;\n  }\n\n  CatmullRomOpen.prototype = {\n    areaStart: function() {\n      this._line = 0;\n    },\n    areaEnd: function() {\n      this._line = NaN;\n    },\n    lineStart: function() {\n      this._x0 = this._x1 = this._x2 =\n      this._y0 = this._y1 = this._y2 = NaN;\n      this._l01_a = this._l12_a = this._l23_a =\n      this._l01_2a = this._l12_2a = this._l23_2a =\n      this._point = 0;\n    },\n    lineEnd: function() {\n      if (this._line || (this._line !== 0 && this._point === 3)) this._context.closePath();\n      this._line = 1 - this._line;\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n\n      if (this._point) {\n        var x23 = this._x2 - x,\n            y23 = this._y2 - y;\n        this._l23_a = Math.sqrt(this._l23_2a = Math.pow(x23 * x23 + y23 * y23, this._alpha));\n      }\n\n      switch (this._point) {\n        case 0: this._point = 1; break;\n        case 1: this._point = 2; break;\n        case 2: this._point = 3; this._line ? this._context.lineTo(this._x2, this._y2) : this._context.moveTo(this._x2, this._y2); break;\n        case 3: this._point = 4; // proceed\n        default: point$2(this, x, y); break;\n      }\n\n      this._l01_a = this._l12_a, this._l12_a = this._l23_a;\n      this._l01_2a = this._l12_2a, this._l12_2a = this._l23_2a;\n      this._x0 = this._x1, this._x1 = this._x2, this._x2 = x;\n      this._y0 = this._y1, this._y1 = this._y2, this._y2 = y;\n    }\n  };\n\n  var catmullRomOpen = (function custom(alpha) {\n\n    function catmullRom(context) {\n      return alpha ? new CatmullRomOpen(context, alpha) : new CardinalOpen(context, 0);\n    }\n\n    catmullRom.alpha = function(alpha) {\n      return custom(+alpha);\n    };\n\n    return catmullRom;\n  })(0.5);\n\n  function LinearClosed(context) {\n    this._context = context;\n  }\n\n  LinearClosed.prototype = {\n    areaStart: noop,\n    areaEnd: noop,\n    lineStart: function() {\n      this._point = 0;\n    },\n    lineEnd: function() {\n      if (this._point) this._context.closePath();\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n      if (this._point) this._context.lineTo(x, y);\n      else this._point = 1, this._context.moveTo(x, y);\n    }\n  };\n\n  function linearClosed(context) {\n    return new LinearClosed(context);\n  }\n\n  function sign(x) {\n    return x < 0 ? -1 : 1;\n  }\n\n  // Calculate the slopes of the tangents (Hermite-type interpolation) based on\n  // the following paper: Steffen, M. 1990. A Simple Method for Monotonic\n  // Interpolation in One Dimension. Astronomy and Astrophysics, Vol. 239, NO.\n  // NOV(II), P. 443, 1990.\n  function slope3(that, x2, y2) {\n    var h0 = that._x1 - that._x0,\n        h1 = x2 - that._x1,\n        s0 = (that._y1 - that._y0) / (h0 || h1 < 0 && -0),\n        s1 = (y2 - that._y1) / (h1 || h0 < 0 && -0),\n        p = (s0 * h1 + s1 * h0) / (h0 + h1);\n    return (sign(s0) + sign(s1)) * Math.min(Math.abs(s0), Math.abs(s1), 0.5 * Math.abs(p)) || 0;\n  }\n\n  // Calculate a one-sided slope.\n  function slope2(that, t) {\n    var h = that._x1 - that._x0;\n    return h ? (3 * (that._y1 - that._y0) / h - t) / 2 : t;\n  }\n\n  // According to https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Representations\n  // \"you can express cubic Hermite interpolation in terms of cubic Bézier curves\n  // with respect to the four values p0, p0 + m0 / 3, p1 - m1 / 3, p1\".\n  function point$3(that, t0, t1) {\n    var x0 = that._x0,\n        y0 = that._y0,\n        x1 = that._x1,\n        y1 = that._y1,\n        dx = (x1 - x0) / 3;\n    that._context.bezierCurveTo(x0 + dx, y0 + dx * t0, x1 - dx, y1 - dx * t1, x1, y1);\n  }\n\n  function MonotoneX(context) {\n    this._context = context;\n  }\n\n  MonotoneX.prototype = {\n    areaStart: function() {\n      this._line = 0;\n    },\n    areaEnd: function() {\n      this._line = NaN;\n    },\n    lineStart: function() {\n      this._x0 = this._x1 =\n      this._y0 = this._y1 =\n      this._t0 = NaN;\n      this._point = 0;\n    },\n    lineEnd: function() {\n      switch (this._point) {\n        case 2: this._context.lineTo(this._x1, this._y1); break;\n        case 3: point$3(this, this._t0, slope2(this, this._t0)); break;\n      }\n      if (this._line || (this._line !== 0 && this._point === 1)) this._context.closePath();\n      this._line = 1 - this._line;\n    },\n    point: function(x, y) {\n      var t1 = NaN;\n\n      x = +x, y = +y;\n      if (x === this._x1 && y === this._y1) return; // Ignore coincident points.\n      switch (this._point) {\n        case 0: this._point = 1; this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y); break;\n        case 1: this._point = 2; break;\n        case 2: this._point = 3; point$3(this, slope2(this, t1 = slope3(this, x, y)), t1); break;\n        default: point$3(this, this._t0, t1 = slope3(this, x, y)); break;\n      }\n\n      this._x0 = this._x1, this._x1 = x;\n      this._y0 = this._y1, this._y1 = y;\n      this._t0 = t1;\n    }\n  }\n\n  function MonotoneY(context) {\n    this._context = new ReflectContext(context);\n  }\n\n  (MonotoneY.prototype = Object.create(MonotoneX.prototype)).point = function(x, y) {\n    MonotoneX.prototype.point.call(this, y, x);\n  };\n\n  function ReflectContext(context) {\n    this._context = context;\n  }\n\n  ReflectContext.prototype = {\n    moveTo: function(x, y) { this._context.moveTo(y, x); },\n    closePath: function() { this._context.closePath(); },\n    lineTo: function(x, y) { this._context.lineTo(y, x); },\n    bezierCurveTo: function(x1, y1, x2, y2, x, y) { this._context.bezierCurveTo(y1, x1, y2, x2, y, x); }\n  };\n\n  function monotoneX(context) {\n    return new MonotoneX(context);\n  }\n\n  function monotoneY(context) {\n    return new MonotoneY(context);\n  }\n\n  function Natural(context) {\n    this._context = context;\n  }\n\n  Natural.prototype = {\n    areaStart: function() {\n      this._line = 0;\n    },\n    areaEnd: function() {\n      this._line = NaN;\n    },\n    lineStart: function() {\n      this._x = [];\n      this._y = [];\n    },\n    lineEnd: function() {\n      var x = this._x,\n          y = this._y,\n          n = x.length;\n\n      if (n) {\n        this._line ? this._context.lineTo(x[0], y[0]) : this._context.moveTo(x[0], y[0]);\n        if (n === 2) {\n          this._context.lineTo(x[1], y[1]);\n        } else {\n          var px = controlPoints(x),\n              py = controlPoints(y);\n          for (var i0 = 0, i1 = 1; i1 < n; ++i0, ++i1) {\n            this._context.bezierCurveTo(px[0][i0], py[0][i0], px[1][i0], py[1][i0], x[i1], y[i1]);\n          }\n        }\n      }\n\n      if (this._line || (this._line !== 0 && n === 1)) this._context.closePath();\n      this._line = 1 - this._line;\n      this._x = this._y = null;\n    },\n    point: function(x, y) {\n      this._x.push(+x);\n      this._y.push(+y);\n    }\n  };\n\n  // See https://www.particleincell.com/2012/bezier-splines/ for derivation.\n  function controlPoints(x) {\n    var i,\n        n = x.length - 1,\n        m,\n        a = new Array(n),\n        b = new Array(n),\n        r = new Array(n);\n    a[0] = 0, b[0] = 2, r[0] = x[0] + 2 * x[1];\n    for (i = 1; i < n - 1; ++i) a[i] = 1, b[i] = 4, r[i] = 4 * x[i] + 2 * x[i + 1];\n    a[n - 1] = 2, b[n - 1] = 7, r[n - 1] = 8 * x[n - 1] + x[n];\n    for (i = 1; i < n; ++i) m = a[i] / b[i - 1], b[i] -= m, r[i] -= m * r[i - 1];\n    a[n - 1] = r[n - 1] / b[n - 1];\n    for (i = n - 2; i >= 0; --i) a[i] = (r[i] - a[i + 1]) / b[i];\n    b[n - 1] = (x[n] + a[n - 1]) / 2;\n    for (i = 0; i < n - 1; ++i) b[i] = 2 * x[i + 1] - a[i + 1];\n    return [a, b];\n  }\n\n  function natural(context) {\n    return new Natural(context);\n  }\n\n  function Step(context, t) {\n    this._context = context;\n    this._t = t;\n  }\n\n  Step.prototype = {\n    areaStart: function() {\n      this._line = 0;\n    },\n    areaEnd: function() {\n      this._line = NaN;\n    },\n    lineStart: function() {\n      this._x = this._y = NaN;\n      this._point = 0;\n    },\n    lineEnd: function() {\n      if (0 < this._t && this._t < 1 && this._point === 2) this._context.lineTo(this._x, this._y);\n      if (this._line || (this._line !== 0 && this._point === 1)) this._context.closePath();\n      if (this._line >= 0) this._t = 1 - this._t, this._line = 1 - this._line;\n    },\n    point: function(x, y) {\n      x = +x, y = +y;\n      switch (this._point) {\n        case 0: this._point = 1; this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y); break;\n        case 1: this._point = 2; // proceed\n        default: {\n          if (this._t <= 0) {\n            this._context.lineTo(this._x, y);\n            this._context.lineTo(x, y);\n          } else {\n            var x1 = this._x * (1 - this._t) + x * this._t;\n            this._context.lineTo(x1, this._y);\n            this._context.lineTo(x1, y);\n          }\n          break;\n        }\n      }\n      this._x = x, this._y = y;\n    }\n  };\n\n  function step(context) {\n    return new Step(context, 0.5);\n  }\n\n  function stepBefore(context) {\n    return new Step(context, 0);\n  }\n\n  function stepAfter(context) {\n    return new Step(context, 1);\n  }\n\n  var slice$2 = Array.prototype.slice;\n\n  function none(series, order) {\n    if (!((n = series.length) > 1)) return;\n    for (var i = 1, s0, s1 = series[order[0]], n, m = s1.length; i < n; ++i) {\n      s0 = s1, s1 = series[order[i]];\n      for (var j = 0; j < m; ++j) {\n        s1[j][1] += s1[j][0] = isNaN(s0[j][1]) ? s0[j][0] : s0[j][1];\n      }\n    }\n  }\n\n  function none$1(series) {\n    var n = series.length, o = new Array(n);\n    while (--n >= 0) o[n] = n;\n    return o;\n  }\n\n  function stackValue(d, key) {\n    return d[key];\n  }\n\n  function stack() {\n    var keys = constant$1([]),\n        order = none$1,\n        offset = none,\n        value = stackValue;\n\n    function stack(data) {\n      var kz = keys.apply(this, arguments),\n          i,\n          m = data.length,\n          n = kz.length,\n          sz = new Array(n),\n          oz;\n\n      for (i = 0; i < n; ++i) {\n        for (var ki = kz[i], si = sz[i] = new Array(m), j = 0, sij; j < m; ++j) {\n          si[j] = sij = [0, +value(data[j], ki, j, data)];\n          sij.data = data[j];\n        }\n        si.key = ki;\n      }\n\n      for (i = 0, oz = order(sz); i < n; ++i) {\n        sz[oz[i]].index = i;\n      }\n\n      offset(sz, oz);\n      return sz;\n    }\n\n    stack.keys = function(_) {\n      return arguments.length ? (keys = typeof _ === \"function\" ? _ : constant$1(slice$2.call(_)), stack) : keys;\n    };\n\n    stack.value = function(_) {\n      return arguments.length ? (value = typeof _ === \"function\" ? _ : constant$1(+_), stack) : value;\n    };\n\n    stack.order = function(_) {\n      return arguments.length ? (order = _ == null ? none$1 : typeof _ === \"function\" ? _ : constant$1(slice$2.call(_)), stack) : order;\n    };\n\n    stack.offset = function(_) {\n      return arguments.length ? (offset = _ == null ? none : _, stack) : offset;\n    };\n\n    return stack;\n  }\n\n  function expand(series, order) {\n    if (!((n = series.length) > 0)) return;\n    for (var i, n, j = 0, m = series[0].length, y; j < m; ++j) {\n      for (y = i = 0; i < n; ++i) y += series[i][j][1] || 0;\n      if (y) for (i = 0; i < n; ++i) series[i][j][1] /= y;\n    }\n    none(series, order);\n  }\n\n  function silhouette(series, order) {\n    if (!((n = series.length) > 0)) return;\n    for (var j = 0, s0 = series[order[0]], n, m = s0.length; j < m; ++j) {\n      for (var i = 0, y = 0; i < n; ++i) y += series[i][j][1] || 0;\n      s0[j][1] += s0[j][0] = -y / 2;\n    }\n    none(series, order);\n  }\n\n  function wiggle(series, order) {\n    if (!((n = series.length) > 0) || !((m = (s0 = series[order[0]]).length) > 0)) return;\n    for (var y = 0, j = 1, s0, m, n; j < m; ++j) {\n      for (var i = 0, s1 = 0, s2 = 0; i < n; ++i) {\n        var si = series[order[i]],\n            sij0 = si[j][1] || 0,\n            sij1 = si[j - 1][1] || 0,\n            s3 = (sij0 - sij1) / 2;\n        for (var k = 0; k < i; ++k) {\n          var sk = series[order[k]],\n              skj0 = sk[j][1] || 0,\n              skj1 = sk[j - 1][1] || 0;\n          s3 += skj0 - skj1;\n        }\n        s1 += sij0, s2 += s3 * sij0;\n      }\n      s0[j - 1][1] += s0[j - 1][0] = y;\n      if (s1) y -= s2 / s1;\n    }\n    s0[j - 1][1] += s0[j - 1][0] = y;\n    none(series, order);\n  }\n\n  function ascending$1(series) {\n    var sums = series.map(sum$1);\n    return none$1(series).sort(function(a, b) { return sums[a] - sums[b]; });\n  }\n\n  function sum$1(series) {\n    var s = 0, i = -1, n = series.length, v;\n    while (++i < n) if (v = +series[i][1]) s += v;\n    return s;\n  }\n\n  function descending$2(series) {\n    return ascending$1(series).reverse();\n  }\n\n  function insideOut(series) {\n    var n = series.length,\n        i,\n        j,\n        sums = series.map(sum$1),\n        order = none$1(series).sort(function(a, b) { return sums[b] - sums[a]; }),\n        top = 0,\n        bottom = 0,\n        tops = [],\n        bottoms = [];\n\n    for (i = 0; i < n; ++i) {\n      j = order[i];\n      if (top < bottom) {\n        top += sums[j];\n        tops.push(j);\n      } else {\n        bottom += sums[j];\n        bottoms.push(j);\n      }\n    }\n\n    return bottoms.reverse().concat(tops);\n  }\n\n  function reverse(series) {\n    return none$1(series).reverse();\n  }\n\n  function define(constructor, factory, prototype) {\n    constructor.prototype = factory.prototype = prototype;\n    prototype.constructor = constructor;\n  }\n\n  function extend(parent, definition) {\n    var prototype = Object.create(parent.prototype);\n    for (var key in definition) prototype[key] = definition[key];\n    return prototype;\n  }\n\n  function Color() {}\n\n  var darker = 0.7;\n  var brighter = 1 / darker;\n\n  var reHex3 = /^#([0-9a-f]{3})$/;\n  var reHex6 = /^#([0-9a-f]{6})$/;\n  var reRgbInteger = /^rgb\\(\\s*([-+]?\\d+)\\s*,\\s*([-+]?\\d+)\\s*,\\s*([-+]?\\d+)\\s*\\)$/;\n  var reRgbPercent = /^rgb\\(\\s*([-+]?\\d+(?:\\.\\d+)?)%\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)%\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)%\\s*\\)$/;\n  var reRgbaInteger = /^rgba\\(\\s*([-+]?\\d+)\\s*,\\s*([-+]?\\d+)\\s*,\\s*([-+]?\\d+)\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)\\s*\\)$/;\n  var reRgbaPercent = /^rgba\\(\\s*([-+]?\\d+(?:\\.\\d+)?)%\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)%\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)%\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)\\s*\\)$/;\n  var reHslPercent = /^hsl\\(\\s*([-+]?\\d+(?:\\.\\d+)?)\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)%\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)%\\s*\\)$/;\n  var reHslaPercent = /^hsla\\(\\s*([-+]?\\d+(?:\\.\\d+)?)\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)%\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)%\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)\\s*\\)$/;\n  var named = {\n    aliceblue: 0xf0f8ff,\n    antiquewhite: 0xfaebd7,\n    aqua: 0x00ffff,\n    aquamarine: 0x7fffd4,\n    azure: 0xf0ffff,\n    beige: 0xf5f5dc,\n    bisque: 0xffe4c4,\n    black: 0x000000,\n    blanchedalmond: 0xffebcd,\n    blue: 0x0000ff,\n    blueviolet: 0x8a2be2,\n    brown: 0xa52a2a,\n    burlywood: 0xdeb887,\n    cadetblue: 0x5f9ea0,\n    chartreuse: 0x7fff00,\n    chocolate: 0xd2691e,\n    coral: 0xff7f50,\n    cornflowerblue: 0x6495ed,\n    cornsilk: 0xfff8dc,\n    crimson: 0xdc143c,\n    cyan: 0x00ffff,\n    darkblue: 0x00008b,\n    darkcyan: 0x008b8b,\n    darkgoldenrod: 0xb8860b,\n    darkgray: 0xa9a9a9,\n    darkgreen: 0x006400,\n    darkgrey: 0xa9a9a9,\n    darkkhaki: 0xbdb76b,\n    darkmagenta: 0x8b008b,\n    darkolivegreen: 0x556b2f,\n    darkorange: 0xff8c00,\n    darkorchid: 0x9932cc,\n    darkred: 0x8b0000,\n    darksalmon: 0xe9967a,\n    darkseagreen: 0x8fbc8f,\n    darkslateblue: 0x483d8b,\n    darkslategray: 0x2f4f4f,\n    darkslategrey: 0x2f4f4f,\n    darkturquoise: 0x00ced1,\n    darkviolet: 0x9400d3,\n    deeppink: 0xff1493,\n    deepskyblue: 0x00bfff,\n    dimgray: 0x696969,\n    dimgrey: 0x696969,\n    dodgerblue: 0x1e90ff,\n    firebrick: 0xb22222,\n    floralwhite: 0xfffaf0,\n    forestgreen: 0x228b22,\n    fuchsia: 0xff00ff,\n    gainsboro: 0xdcdcdc,\n    ghostwhite: 0xf8f8ff,\n    gold: 0xffd700,\n    goldenrod: 0xdaa520,\n    gray: 0x808080,\n    green: 0x008000,\n    greenyellow: 0xadff2f,\n    grey: 0x808080,\n    honeydew: 0xf0fff0,\n    hotpink: 0xff69b4,\n    indianred: 0xcd5c5c,\n    indigo: 0x4b0082,\n    ivory: 0xfffff0,\n    khaki: 0xf0e68c,\n    lavender: 0xe6e6fa,\n    lavenderblush: 0xfff0f5,\n    lawngreen: 0x7cfc00,\n    lemonchiffon: 0xfffacd,\n    lightblue: 0xadd8e6,\n    lightcoral: 0xf08080,\n    lightcyan: 0xe0ffff,\n    lightgoldenrodyellow: 0xfafad2,\n    lightgray: 0xd3d3d3,\n    lightgreen: 0x90ee90,\n    lightgrey: 0xd3d3d3,\n    lightpink: 0xffb6c1,\n    lightsalmon: 0xffa07a,\n    lightseagreen: 0x20b2aa,\n    lightskyblue: 0x87cefa,\n    lightslategray: 0x778899,\n    lightslategrey: 0x778899,\n    lightsteelblue: 0xb0c4de,\n    lightyellow: 0xffffe0,\n    lime: 0x00ff00,\n    limegreen: 0x32cd32,\n    linen: 0xfaf0e6,\n    magenta: 0xff00ff,\n    maroon: 0x800000,\n    mediumaquamarine: 0x66cdaa,\n    mediumblue: 0x0000cd,\n    mediumorchid: 0xba55d3,\n    mediumpurple: 0x9370db,\n    mediumseagreen: 0x3cb371,\n    mediumslateblue: 0x7b68ee,\n    mediumspringgreen: 0x00fa9a,\n    mediumturquoise: 0x48d1cc,\n    mediumvioletred: 0xc71585,\n    midnightblue: 0x191970,\n    mintcream: 0xf5fffa,\n    mistyrose: 0xffe4e1,\n    moccasin: 0xffe4b5,\n    navajowhite: 0xffdead,\n    navy: 0x000080,\n    oldlace: 0xfdf5e6,\n    olive: 0x808000,\n    olivedrab: 0x6b8e23,\n    orange: 0xffa500,\n    orangered: 0xff4500,\n    orchid: 0xda70d6,\n    palegoldenrod: 0xeee8aa,\n    palegreen: 0x98fb98,\n    paleturquoise: 0xafeeee,\n    palevioletred: 0xdb7093,\n    papayawhip: 0xffefd5,\n    peachpuff: 0xffdab9,\n    peru: 0xcd853f,\n    pink: 0xffc0cb,\n    plum: 0xdda0dd,\n    powderblue: 0xb0e0e6,\n    purple: 0x800080,\n    rebeccapurple: 0x663399,\n    red: 0xff0000,\n    rosybrown: 0xbc8f8f,\n    royalblue: 0x4169e1,\n    saddlebrown: 0x8b4513,\n    salmon: 0xfa8072,\n    sandybrown: 0xf4a460,\n    seagreen: 0x2e8b57,\n    seashell: 0xfff5ee,\n    sienna: 0xa0522d,\n    silver: 0xc0c0c0,\n    skyblue: 0x87ceeb,\n    slateblue: 0x6a5acd,\n    slategray: 0x708090,\n    slategrey: 0x708090,\n    snow: 0xfffafa,\n    springgreen: 0x00ff7f,\n    steelblue: 0x4682b4,\n    tan: 0xd2b48c,\n    teal: 0x008080,\n    thistle: 0xd8bfd8,\n    tomato: 0xff6347,\n    turquoise: 0x40e0d0,\n    violet: 0xee82ee,\n    wheat: 0xf5deb3,\n    white: 0xffffff,\n    whitesmoke: 0xf5f5f5,\n    yellow: 0xffff00,\n    yellowgreen: 0x9acd32\n  };\n\n  define(Color, color, {\n    displayable: function() {\n      return this.rgb().displayable();\n    },\n    toString: function() {\n      return this.rgb() + \"\";\n    }\n  });\n\n  function color(format) {\n    var m;\n    format = (format + \"\").trim().toLowerCase();\n    return (m = reHex3.exec(format)) ? (m = parseInt(m[1], 16), new Rgb((m >> 8 & 0xf) | (m >> 4 & 0x0f0), (m >> 4 & 0xf) | (m & 0xf0), ((m & 0xf) << 4) | (m & 0xf), 1)) // #f00\n        : (m = reHex6.exec(format)) ? rgbn(parseInt(m[1], 16)) // #ff0000\n        : (m = reRgbInteger.exec(format)) ? new Rgb(m[1], m[2], m[3], 1) // rgb(255, 0, 0)\n        : (m = reRgbPercent.exec(format)) ? new Rgb(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, 1) // rgb(100%, 0%, 0%)\n        : (m = reRgbaInteger.exec(format)) ? rgba(m[1], m[2], m[3], m[4]) // rgba(255, 0, 0, 1)\n        : (m = reRgbaPercent.exec(format)) ? rgba(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, m[4]) // rgb(100%, 0%, 0%, 1)\n        : (m = reHslPercent.exec(format)) ? hsla(m[1], m[2] / 100, m[3] / 100, 1) // hsl(120, 50%, 50%)\n        : (m = reHslaPercent.exec(format)) ? hsla(m[1], m[2] / 100, m[3] / 100, m[4]) // hsla(120, 50%, 50%, 1)\n        : named.hasOwnProperty(format) ? rgbn(named[format])\n        : format === \"transparent\" ? new Rgb(NaN, NaN, NaN, 0)\n        : null;\n  }\n\n  function rgbn(n) {\n    return new Rgb(n >> 16 & 0xff, n >> 8 & 0xff, n & 0xff, 1);\n  }\n\n  function rgba(r, g, b, a) {\n    if (a <= 0) r = g = b = NaN;\n    return new Rgb(r, g, b, a);\n  }\n\n  function rgbConvert(o) {\n    if (!(o instanceof Color)) o = color(o);\n    if (!o) return new Rgb;\n    o = o.rgb();\n    return new Rgb(o.r, o.g, o.b, o.opacity);\n  }\n\n  function colorRgb(r, g, b, opacity) {\n    return arguments.length === 1 ? rgbConvert(r) : new Rgb(r, g, b, opacity == null ? 1 : opacity);\n  }\n\n  function Rgb(r, g, b, opacity) {\n    this.r = +r;\n    this.g = +g;\n    this.b = +b;\n    this.opacity = +opacity;\n  }\n\n  define(Rgb, colorRgb, extend(Color, {\n    brighter: function(k) {\n      k = k == null ? brighter : Math.pow(brighter, k);\n      return new Rgb(this.r * k, this.g * k, this.b * k, this.opacity);\n    },\n    darker: function(k) {\n      k = k == null ? darker : Math.pow(darker, k);\n      return new Rgb(this.r * k, this.g * k, this.b * k, this.opacity);\n    },\n    rgb: function() {\n      return this;\n    },\n    displayable: function() {\n      return (0 <= this.r && this.r <= 255)\n          && (0 <= this.g && this.g <= 255)\n          && (0 <= this.b && this.b <= 255)\n          && (0 <= this.opacity && this.opacity <= 1);\n    },\n    toString: function() {\n      var a = this.opacity; a = isNaN(a) ? 1 : Math.max(0, Math.min(1, a));\n      return (a === 1 ? \"rgb(\" : \"rgba(\")\n          + Math.max(0, Math.min(255, Math.round(this.r) || 0)) + \", \"\n          + Math.max(0, Math.min(255, Math.round(this.g) || 0)) + \", \"\n          + Math.max(0, Math.min(255, Math.round(this.b) || 0))\n          + (a === 1 ? \")\" : \", \" + a + \")\");\n    }\n  }));\n\n  function hsla(h, s, l, a) {\n    if (a <= 0) h = s = l = NaN;\n    else if (l <= 0 || l >= 1) h = s = NaN;\n    else if (s <= 0) h = NaN;\n    return new Hsl(h, s, l, a);\n  }\n\n  function hslConvert(o) {\n    if (o instanceof Hsl) return new Hsl(o.h, o.s, o.l, o.opacity);\n    if (!(o instanceof Color)) o = color(o);\n    if (!o) return new Hsl;\n    if (o instanceof Hsl) return o;\n    o = o.rgb();\n    var r = o.r / 255,\n        g = o.g / 255,\n        b = o.b / 255,\n        min = Math.min(r, g, b),\n        max = Math.max(r, g, b),\n        h = NaN,\n        s = max - min,\n        l = (max + min) / 2;\n    if (s) {\n      if (r === max) h = (g - b) / s + (g < b) * 6;\n      else if (g === max) h = (b - r) / s + 2;\n      else h = (r - g) / s + 4;\n      s /= l < 0.5 ? max + min : 2 - max - min;\n      h *= 60;\n    } else {\n      s = l > 0 && l < 1 ? 0 : h;\n    }\n    return new Hsl(h, s, l, o.opacity);\n  }\n\n  function colorHsl(h, s, l, opacity) {\n    return arguments.length === 1 ? hslConvert(h) : new Hsl(h, s, l, opacity == null ? 1 : opacity);\n  }\n\n  function Hsl(h, s, l, opacity) {\n    this.h = +h;\n    this.s = +s;\n    this.l = +l;\n    this.opacity = +opacity;\n  }\n\n  define(Hsl, colorHsl, extend(Color, {\n    brighter: function(k) {\n      k = k == null ? brighter : Math.pow(brighter, k);\n      return new Hsl(this.h, this.s, this.l * k, this.opacity);\n    },\n    darker: function(k) {\n      k = k == null ? darker : Math.pow(darker, k);\n      return new Hsl(this.h, this.s, this.l * k, this.opacity);\n    },\n    rgb: function() {\n      var h = this.h % 360 + (this.h < 0) * 360,\n          s = isNaN(h) || isNaN(this.s) ? 0 : this.s,\n          l = this.l,\n          m2 = l + (l < 0.5 ? l : 1 - l) * s,\n          m1 = 2 * l - m2;\n      return new Rgb(\n        hsl2rgb(h >= 240 ? h - 240 : h + 120, m1, m2),\n        hsl2rgb(h, m1, m2),\n        hsl2rgb(h < 120 ? h + 240 : h - 120, m1, m2),\n        this.opacity\n      );\n    },\n    displayable: function() {\n      return (0 <= this.s && this.s <= 1 || isNaN(this.s))\n          && (0 <= this.l && this.l <= 1)\n          && (0 <= this.opacity && this.opacity <= 1);\n    }\n  }));\n\n  /* From FvD 13.37, CSS Color Module Level 3 */\n  function hsl2rgb(h, m1, m2) {\n    return (h < 60 ? m1 + (m2 - m1) * h / 60\n        : h < 180 ? m2\n        : h < 240 ? m1 + (m2 - m1) * (240 - h) / 60\n        : m1) * 255;\n  }\n\n  var deg2rad = Math.PI / 180;\n  var rad2deg = 180 / Math.PI;\n\n  var Kn = 18;\n  var Xn = 0.950470;\n  var Yn = 1;\n  var Zn = 1.088830;\n  var t0 = 4 / 29;\n  var t1 = 6 / 29;\n  var t2 = 3 * t1 * t1;\n  var t3 = t1 * t1 * t1;\n  function labConvert(o) {\n    if (o instanceof Lab) return new Lab(o.l, o.a, o.b, o.opacity);\n    if (o instanceof Hcl) {\n      var h = o.h * deg2rad;\n      return new Lab(o.l, Math.cos(h) * o.c, Math.sin(h) * o.c, o.opacity);\n    }\n    if (!(o instanceof Rgb)) o = rgbConvert(o);\n    var b = rgb2xyz(o.r),\n        a = rgb2xyz(o.g),\n        l = rgb2xyz(o.b),\n        x = xyz2lab((0.4124564 * b + 0.3575761 * a + 0.1804375 * l) / Xn),\n        y = xyz2lab((0.2126729 * b + 0.7151522 * a + 0.0721750 * l) / Yn),\n        z = xyz2lab((0.0193339 * b + 0.1191920 * a + 0.9503041 * l) / Zn);\n    return new Lab(116 * y - 16, 500 * (x - y), 200 * (y - z), o.opacity);\n  }\n\n  function lab(l, a, b, opacity) {\n    return arguments.length === 1 ? labConvert(l) : new Lab(l, a, b, opacity == null ? 1 : opacity);\n  }\n\n  function Lab(l, a, b, opacity) {\n    this.l = +l;\n    this.a = +a;\n    this.b = +b;\n    this.opacity = +opacity;\n  }\n\n  define(Lab, lab, extend(Color, {\n    brighter: function(k) {\n      return new Lab(this.l + Kn * (k == null ? 1 : k), this.a, this.b, this.opacity);\n    },\n    darker: function(k) {\n      return new Lab(this.l - Kn * (k == null ? 1 : k), this.a, this.b, this.opacity);\n    },\n    rgb: function() {\n      var y = (this.l + 16) / 116,\n          x = isNaN(this.a) ? y : y + this.a / 500,\n          z = isNaN(this.b) ? y : y - this.b / 200;\n      y = Yn * lab2xyz(y);\n      x = Xn * lab2xyz(x);\n      z = Zn * lab2xyz(z);\n      return new Rgb(\n        xyz2rgb( 3.2404542 * x - 1.5371385 * y - 0.4985314 * z), // D65 -> sRGB\n        xyz2rgb(-0.9692660 * x + 1.8760108 * y + 0.0415560 * z),\n        xyz2rgb( 0.0556434 * x - 0.2040259 * y + 1.0572252 * z),\n        this.opacity\n      );\n    }\n  }));\n\n  function xyz2lab(t) {\n    return t > t3 ? Math.pow(t, 1 / 3) : t / t2 + t0;\n  }\n\n  function lab2xyz(t) {\n    return t > t1 ? t * t * t : t2 * (t - t0);\n  }\n\n  function xyz2rgb(x) {\n    return 255 * (x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055);\n  }\n\n  function rgb2xyz(x) {\n    return (x /= 255) <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);\n  }\n\n  function hclConvert(o) {\n    if (o instanceof Hcl) return new Hcl(o.h, o.c, o.l, o.opacity);\n    if (!(o instanceof Lab)) o = labConvert(o);\n    var h = Math.atan2(o.b, o.a) * rad2deg;\n    return new Hcl(h < 0 ? h + 360 : h, Math.sqrt(o.a * o.a + o.b * o.b), o.l, o.opacity);\n  }\n\n  function colorHcl(h, c, l, opacity) {\n    return arguments.length === 1 ? hclConvert(h) : new Hcl(h, c, l, opacity == null ? 1 : opacity);\n  }\n\n  function Hcl(h, c, l, opacity) {\n    this.h = +h;\n    this.c = +c;\n    this.l = +l;\n    this.opacity = +opacity;\n  }\n\n  define(Hcl, colorHcl, extend(Color, {\n    brighter: function(k) {\n      return new Hcl(this.h, this.c, this.l + Kn * (k == null ? 1 : k), this.opacity);\n    },\n    darker: function(k) {\n      return new Hcl(this.h, this.c, this.l - Kn * (k == null ? 1 : k), this.opacity);\n    },\n    rgb: function() {\n      return labConvert(this).rgb();\n    }\n  }));\n\n  var A = -0.14861;\n  var B = +1.78277;\n  var C = -0.29227;\n  var D = -0.90649;\n  var E = +1.97294;\n  var ED = E * D;\n  var EB = E * B;\n  var BC_DA = B * C - D * A;\n  function cubehelixConvert(o) {\n    if (o instanceof Cubehelix) return new Cubehelix(o.h, o.s, o.l, o.opacity);\n    if (!(o instanceof Rgb)) o = rgbConvert(o);\n    var r = o.r / 255,\n        g = o.g / 255,\n        b = o.b / 255,\n        l = (BC_DA * b + ED * r - EB * g) / (BC_DA + ED - EB),\n        bl = b - l,\n        k = (E * (g - l) - C * bl) / D,\n        s = Math.sqrt(k * k + bl * bl) / (E * l * (1 - l)), // NaN if l=0 or l=1\n        h = s ? Math.atan2(k, bl) * rad2deg - 120 : NaN;\n    return new Cubehelix(h < 0 ? h + 360 : h, s, l, o.opacity);\n  }\n\n  function cubehelix(h, s, l, opacity) {\n    return arguments.length === 1 ? cubehelixConvert(h) : new Cubehelix(h, s, l, opacity == null ? 1 : opacity);\n  }\n\n  function Cubehelix(h, s, l, opacity) {\n    this.h = +h;\n    this.s = +s;\n    this.l = +l;\n    this.opacity = +opacity;\n  }\n\n  define(Cubehelix, cubehelix, extend(Color, {\n    brighter: function(k) {\n      k = k == null ? brighter : Math.pow(brighter, k);\n      return new Cubehelix(this.h, this.s, this.l * k, this.opacity);\n    },\n    darker: function(k) {\n      k = k == null ? darker : Math.pow(darker, k);\n      return new Cubehelix(this.h, this.s, this.l * k, this.opacity);\n    },\n    rgb: function() {\n      var h = isNaN(this.h) ? 0 : (this.h + 120) * deg2rad,\n          l = +this.l,\n          a = isNaN(this.s) ? 0 : this.s * l * (1 - l),\n          cosh = Math.cos(h),\n          sinh = Math.sin(h);\n      return new Rgb(\n        255 * (l + a * (A * cosh + B * sinh)),\n        255 * (l + a * (C * cosh + D * sinh)),\n        255 * (l + a * (E * cosh)),\n        this.opacity\n      );\n    }\n  }));\n\n  function basis$1(t1, v0, v1, v2, v3) {\n    var t2 = t1 * t1, t3 = t2 * t1;\n    return ((1 - 3 * t1 + 3 * t2 - t3) * v0\n        + (4 - 6 * t2 + 3 * t3) * v1\n        + (1 + 3 * t1 + 3 * t2 - 3 * t3) * v2\n        + t3 * v3) / 6;\n  }\n\n  function basis$2(values) {\n    var n = values.length - 1;\n    return function(t) {\n      var i = t <= 0 ? (t = 0) : t >= 1 ? (t = 1, n - 1) : Math.floor(t * n),\n          v1 = values[i],\n          v2 = values[i + 1],\n          v0 = i > 0 ? values[i - 1] : 2 * v1 - v2,\n          v3 = i < n - 1 ? values[i + 2] : 2 * v2 - v1;\n      return basis$1((t - i / n) * n, v0, v1, v2, v3);\n    };\n  }\n\n  function basisClosed$1(values) {\n    var n = values.length;\n    return function(t) {\n      var i = Math.floor(((t %= 1) < 0 ? ++t : t) * n),\n          v0 = values[(i + n - 1) % n],\n          v1 = values[i % n],\n          v2 = values[(i + 1) % n],\n          v3 = values[(i + 2) % n];\n      return basis$1((t - i / n) * n, v0, v1, v2, v3);\n    };\n  }\n\n  function constant$2(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  function linear$1(a, d) {\n    return function(t) {\n      return a + t * d;\n    };\n  }\n\n  function exponential$1(a, b, y) {\n    return a = Math.pow(a, y), b = Math.pow(b, y) - a, y = 1 / y, function(t) {\n      return Math.pow(a + t * b, y);\n    };\n  }\n\n  function hue(a, b) {\n    var d = b - a;\n    return d ? linear$1(a, d > 180 || d < -180 ? d - 360 * Math.round(d / 360) : d) : constant$2(isNaN(a) ? b : a);\n  }\n\n  function gamma(y) {\n    return (y = +y) === 1 ? nogamma : function(a, b) {\n      return b - a ? exponential$1(a, b, y) : constant$2(isNaN(a) ? b : a);\n    };\n  }\n\n  function nogamma(a, b) {\n    var d = b - a;\n    return d ? linear$1(a, d) : constant$2(isNaN(a) ? b : a);\n  }\n\n  var interpolateRgb = (function rgbGamma(y) {\n    var color = gamma(y);\n\n    function rgb(start, end) {\n      var r = color((start = colorRgb(start)).r, (end = colorRgb(end)).r),\n          g = color(start.g, end.g),\n          b = color(start.b, end.b),\n          opacity = color(start.opacity, end.opacity);\n      return function(t) {\n        start.r = r(t);\n        start.g = g(t);\n        start.b = b(t);\n        start.opacity = opacity(t);\n        return start + \"\";\n      };\n    }\n\n    rgb.gamma = rgbGamma;\n\n    return rgb;\n  })(1);\n\n  function rgbSpline(spline) {\n    return function(colors) {\n      var n = colors.length,\n          r = new Array(n),\n          g = new Array(n),\n          b = new Array(n),\n          i, color;\n      for (i = 0; i < n; ++i) {\n        color = colorRgb(colors[i]);\n        r[i] = color.r || 0;\n        g[i] = color.g || 0;\n        b[i] = color.b || 0;\n      }\n      r = spline(r);\n      g = spline(g);\n      b = spline(b);\n      color.opacity = 1;\n      return function(t) {\n        color.r = r(t);\n        color.g = g(t);\n        color.b = b(t);\n        return color + \"\";\n      };\n    };\n  }\n\n  var rgbBasis = rgbSpline(basis$2);\n  var rgbBasisClosed = rgbSpline(basisClosed$1);\n\n  function array$1(a, b) {\n    var nb = b ? b.length : 0,\n        na = a ? Math.min(nb, a.length) : 0,\n        x = new Array(nb),\n        c = new Array(nb),\n        i;\n\n    for (i = 0; i < na; ++i) x[i] = interpolate(a[i], b[i]);\n    for (; i < nb; ++i) c[i] = b[i];\n\n    return function(t) {\n      for (i = 0; i < na; ++i) c[i] = x[i](t);\n      return c;\n    };\n  }\n\n  function date(a, b) {\n    var d = new Date;\n    return a = +a, b -= a, function(t) {\n      return d.setTime(a + b * t), d;\n    };\n  }\n\n  function interpolateNumber(a, b) {\n    return a = +a, b -= a, function(t) {\n      return a + b * t;\n    };\n  }\n\n  function object(a, b) {\n    var i = {},\n        c = {},\n        k;\n\n    if (a === null || typeof a !== \"object\") a = {};\n    if (b === null || typeof b !== \"object\") b = {};\n\n    for (k in b) {\n      if (k in a) {\n        i[k] = interpolate(a[k], b[k]);\n      } else {\n        c[k] = b[k];\n      }\n    }\n\n    return function(t) {\n      for (k in i) c[k] = i[k](t);\n      return c;\n    };\n  }\n\n  var reA = /[-+]?(?:\\d+\\.?\\d*|\\.?\\d+)(?:[eE][-+]?\\d+)?/g;\n  var reB = new RegExp(reA.source, \"g\");\n  function zero(b) {\n    return function() {\n      return b;\n    };\n  }\n\n  function one(b) {\n    return function(t) {\n      return b(t) + \"\";\n    };\n  }\n\n  function interpolateString(a, b) {\n    var bi = reA.lastIndex = reB.lastIndex = 0, // scan index for next number in b\n        am, // current match in a\n        bm, // current match in b\n        bs, // string preceding current number in b, if any\n        i = -1, // index in s\n        s = [], // string constants and placeholders\n        q = []; // number interpolators\n\n    // Coerce inputs to strings.\n    a = a + \"\", b = b + \"\";\n\n    // Interpolate pairs of numbers in a & b.\n    while ((am = reA.exec(a))\n        && (bm = reB.exec(b))) {\n      if ((bs = bm.index) > bi) { // a string precedes the next number in b\n        bs = b.slice(bi, bs);\n        if (s[i]) s[i] += bs; // coalesce with previous string\n        else s[++i] = bs;\n      }\n      if ((am = am[0]) === (bm = bm[0])) { // numbers in a & b match\n        if (s[i]) s[i] += bm; // coalesce with previous string\n        else s[++i] = bm;\n      } else { // interpolate non-matching numbers\n        s[++i] = null;\n        q.push({i: i, x: interpolateNumber(am, bm)});\n      }\n      bi = reB.lastIndex;\n    }\n\n    // Add remains of b.\n    if (bi < b.length) {\n      bs = b.slice(bi);\n      if (s[i]) s[i] += bs; // coalesce with previous string\n      else s[++i] = bs;\n    }\n\n    // Special optimization for only a single match.\n    // Otherwise, interpolate each of the numbers and rejoin the string.\n    return s.length < 2 ? (q[0]\n        ? one(q[0].x)\n        : zero(b))\n        : (b = q.length, function(t) {\n            for (var i = 0, o; i < b; ++i) s[(o = q[i]).i] = o.x(t);\n            return s.join(\"\");\n          });\n  }\n\n  function interpolate(a, b) {\n    var t = typeof b, c;\n    return b == null || t === \"boolean\" ? constant$2(b)\n        : (t === \"number\" ? interpolateNumber\n        : t === \"string\" ? ((c = color(b)) ? (b = c, interpolateRgb) : interpolateString)\n        : b instanceof color ? interpolateRgb\n        : b instanceof Date ? date\n        : Array.isArray(b) ? array$1\n        : isNaN(b) ? object\n        : interpolateNumber)(a, b);\n  }\n\n  function interpolateRound(a, b) {\n    return a = +a, b -= a, function(t) {\n      return Math.round(a + b * t);\n    };\n  }\n\n  var degrees = 180 / Math.PI;\n\n  var identity$2 = {\n    translateX: 0,\n    translateY: 0,\n    rotate: 0,\n    skewX: 0,\n    scaleX: 1,\n    scaleY: 1\n  };\n\n  function decompose(a, b, c, d, e, f) {\n    var scaleX, scaleY, skewX;\n    if (scaleX = Math.sqrt(a * a + b * b)) a /= scaleX, b /= scaleX;\n    if (skewX = a * c + b * d) c -= a * skewX, d -= b * skewX;\n    if (scaleY = Math.sqrt(c * c + d * d)) c /= scaleY, d /= scaleY, skewX /= scaleY;\n    if (a * d < b * c) a = -a, b = -b, skewX = -skewX, scaleX = -scaleX;\n    return {\n      translateX: e,\n      translateY: f,\n      rotate: Math.atan2(b, a) * degrees,\n      skewX: Math.atan(skewX) * degrees,\n      scaleX: scaleX,\n      scaleY: scaleY\n    };\n  }\n\n  var cssNode;\n  var cssRoot;\n  var cssView;\n  var svgNode;\n  function parseCss(value) {\n    if (value === \"none\") return identity$2;\n    if (!cssNode) cssNode = document.createElement(\"DIV\"), cssRoot = document.documentElement, cssView = document.defaultView;\n    cssNode.style.transform = value;\n    value = cssView.getComputedStyle(cssRoot.appendChild(cssNode), null).getPropertyValue(\"transform\");\n    cssRoot.removeChild(cssNode);\n    value = value.slice(7, -1).split(\",\");\n    return decompose(+value[0], +value[1], +value[2], +value[3], +value[4], +value[5]);\n  }\n\n  function parseSvg(value) {\n    if (value == null) return identity$2;\n    if (!svgNode) svgNode = document.createElementNS(\"http://www.w3.org/2000/svg\", \"g\");\n    svgNode.setAttribute(\"transform\", value);\n    if (!(value = svgNode.transform.baseVal.consolidate())) return identity$2;\n    value = value.matrix;\n    return decompose(value.a, value.b, value.c, value.d, value.e, value.f);\n  }\n\n  function interpolateTransform(parse, pxComma, pxParen, degParen) {\n\n    function pop(s) {\n      return s.length ? s.pop() + \" \" : \"\";\n    }\n\n    function translate(xa, ya, xb, yb, s, q) {\n      if (xa !== xb || ya !== yb) {\n        var i = s.push(\"translate(\", null, pxComma, null, pxParen);\n        q.push({i: i - 4, x: interpolateNumber(xa, xb)}, {i: i - 2, x: interpolateNumber(ya, yb)});\n      } else if (xb || yb) {\n        s.push(\"translate(\" + xb + pxComma + yb + pxParen);\n      }\n    }\n\n    function rotate(a, b, s, q) {\n      if (a !== b) {\n        if (a - b > 180) b += 360; else if (b - a > 180) a += 360; // shortest path\n        q.push({i: s.push(pop(s) + \"rotate(\", null, degParen) - 2, x: interpolateNumber(a, b)});\n      } else if (b) {\n        s.push(pop(s) + \"rotate(\" + b + degParen);\n      }\n    }\n\n    function skewX(a, b, s, q) {\n      if (a !== b) {\n        q.push({i: s.push(pop(s) + \"skewX(\", null, degParen) - 2, x: interpolateNumber(a, b)});\n      } else if (b) {\n        s.push(pop(s) + \"skewX(\" + b + degParen);\n      }\n    }\n\n    function scale(xa, ya, xb, yb, s, q) {\n      if (xa !== xb || ya !== yb) {\n        var i = s.push(pop(s) + \"scale(\", null, \",\", null, \")\");\n        q.push({i: i - 4, x: interpolateNumber(xa, xb)}, {i: i - 2, x: interpolateNumber(ya, yb)});\n      } else if (xb !== 1 || yb !== 1) {\n        s.push(pop(s) + \"scale(\" + xb + \",\" + yb + \")\");\n      }\n    }\n\n    return function(a, b) {\n      var s = [], // string constants and placeholders\n          q = []; // number interpolators\n      a = parse(a), b = parse(b);\n      translate(a.translateX, a.translateY, b.translateX, b.translateY, s, q);\n      rotate(a.rotate, b.rotate, s, q);\n      skewX(a.skewX, b.skewX, s, q);\n      scale(a.scaleX, a.scaleY, b.scaleX, b.scaleY, s, q);\n      a = b = null; // gc\n      return function(t) {\n        var i = -1, n = q.length, o;\n        while (++i < n) s[(o = q[i]).i] = o.x(t);\n        return s.join(\"\");\n      };\n    };\n  }\n\n  var interpolateTransform$1 = interpolateTransform(parseCss, \"px, \", \"px)\", \"deg)\");\n  var interpolateTransform$2 = interpolateTransform(parseSvg, \", \", \")\", \")\");\n\n  var rho = Math.SQRT2;\n  var rho2 = 2;\n  var rho4 = 4;\n  var epsilon2 = 1e-12;\n  function cosh(x) {\n    return ((x = Math.exp(x)) + 1 / x) / 2;\n  }\n\n  function sinh(x) {\n    return ((x = Math.exp(x)) - 1 / x) / 2;\n  }\n\n  function tanh(x) {\n    return ((x = Math.exp(2 * x)) - 1) / (x + 1);\n  }\n\n  // p0 = [ux0, uy0, w0]\n  // p1 = [ux1, uy1, w1]\n  function interpolateZoom(p0, p1) {\n    var ux0 = p0[0], uy0 = p0[1], w0 = p0[2],\n        ux1 = p1[0], uy1 = p1[1], w1 = p1[2],\n        dx = ux1 - ux0,\n        dy = uy1 - uy0,\n        d2 = dx * dx + dy * dy,\n        i,\n        S;\n\n    // Special case for u0 ≅ u1.\n    if (d2 < epsilon2) {\n      S = Math.log(w1 / w0) / rho;\n      i = function(t) {\n        return [\n          ux0 + t * dx,\n          uy0 + t * dy,\n          w0 * Math.exp(rho * t * S)\n        ];\n      }\n    }\n\n    // General case.\n    else {\n      var d1 = Math.sqrt(d2),\n          b0 = (w1 * w1 - w0 * w0 + rho4 * d2) / (2 * w0 * rho2 * d1),\n          b1 = (w1 * w1 - w0 * w0 - rho4 * d2) / (2 * w1 * rho2 * d1),\n          r0 = Math.log(Math.sqrt(b0 * b0 + 1) - b0),\n          r1 = Math.log(Math.sqrt(b1 * b1 + 1) - b1);\n      S = (r1 - r0) / rho;\n      i = function(t) {\n        var s = t * S,\n            coshr0 = cosh(r0),\n            u = w0 / (rho2 * d1) * (coshr0 * tanh(rho * s + r0) - sinh(r0));\n        return [\n          ux0 + u * dx,\n          uy0 + u * dy,\n          w0 * coshr0 / cosh(rho * s + r0)\n        ];\n      }\n    }\n\n    i.duration = S * 1000;\n\n    return i;\n  }\n\n  function hsl(hue) {\n    return function(start, end) {\n      var h = hue((start = colorHsl(start)).h, (end = colorHsl(end)).h),\n          s = nogamma(start.s, end.s),\n          l = nogamma(start.l, end.l),\n          opacity = nogamma(start.opacity, end.opacity);\n      return function(t) {\n        start.h = h(t);\n        start.s = s(t);\n        start.l = l(t);\n        start.opacity = opacity(t);\n        return start + \"\";\n      };\n    }\n  }\n\n  var hsl$1 = hsl(hue);\n  var hslLong = hsl(nogamma);\n\n  function lab$1(start, end) {\n    var l = nogamma((start = lab(start)).l, (end = lab(end)).l),\n        a = nogamma(start.a, end.a),\n        b = nogamma(start.b, end.b),\n        opacity = nogamma(start.opacity, end.opacity);\n    return function(t) {\n      start.l = l(t);\n      start.a = a(t);\n      start.b = b(t);\n      start.opacity = opacity(t);\n      return start + \"\";\n    };\n  }\n\n  function hcl(hue) {\n    return function(start, end) {\n      var h = hue((start = colorHcl(start)).h, (end = colorHcl(end)).h),\n          c = nogamma(start.c, end.c),\n          l = nogamma(start.l, end.l),\n          opacity = nogamma(start.opacity, end.opacity);\n      return function(t) {\n        start.h = h(t);\n        start.c = c(t);\n        start.l = l(t);\n        start.opacity = opacity(t);\n        return start + \"\";\n      };\n    }\n  }\n\n  var hcl$1 = hcl(hue);\n  var hclLong = hcl(nogamma);\n\n  function cubehelix$1(hue) {\n    return (function cubehelixGamma(y) {\n      y = +y;\n\n      function cubehelix$$(start, end) {\n        var h = hue((start = cubehelix(start)).h, (end = cubehelix(end)).h),\n            s = nogamma(start.s, end.s),\n            l = nogamma(start.l, end.l),\n            opacity = nogamma(start.opacity, end.opacity);\n        return function(t) {\n          start.h = h(t);\n          start.s = s(t);\n          start.l = l(Math.pow(t, y));\n          start.opacity = opacity(t);\n          return start + \"\";\n        };\n      }\n\n      cubehelix$$.gamma = cubehelixGamma;\n\n      return cubehelix$$;\n    })(1);\n  }\n\n  var cubehelix$2 = cubehelix$1(hue);\n  var interpolateCubehelixLong = cubehelix$1(nogamma);\n\n  function quantize(interpolator, n) {\n    var samples = new Array(n);\n    for (var i = 0; i < n; ++i) samples[i] = interpolator(i / (n - 1));\n    return samples;\n  }\n\n  var noop$1 = {value: function() {}};\n\n  function dispatch() {\n    for (var i = 0, n = arguments.length, _ = {}, t; i < n; ++i) {\n      if (!(t = arguments[i] + \"\") || (t in _)) throw new Error(\"illegal type: \" + t);\n      _[t] = [];\n    }\n    return new Dispatch(_);\n  }\n\n  function Dispatch(_) {\n    this._ = _;\n  }\n\n  function parseTypenames(typenames, types) {\n    return typenames.trim().split(/^|\\s+/).map(function(t) {\n      var name = \"\", i = t.indexOf(\".\");\n      if (i >= 0) name = t.slice(i + 1), t = t.slice(0, i);\n      if (t && !types.hasOwnProperty(t)) throw new Error(\"unknown type: \" + t);\n      return {type: t, name: name};\n    });\n  }\n\n  Dispatch.prototype = dispatch.prototype = {\n    constructor: Dispatch,\n    on: function(typename, callback) {\n      var _ = this._,\n          T = parseTypenames(typename + \"\", _),\n          t,\n          i = -1,\n          n = T.length;\n\n      // If no callback was specified, return the callback of the given type and name.\n      if (arguments.length < 2) {\n        while (++i < n) if ((t = (typename = T[i]).type) && (t = get(_[t], typename.name))) return t;\n        return;\n      }\n\n      // If a type was specified, set the callback for the given type and name.\n      // Otherwise, if a null callback was specified, remove callbacks of the given name.\n      if (callback != null && typeof callback !== \"function\") throw new Error(\"invalid callback: \" + callback);\n      while (++i < n) {\n        if (t = (typename = T[i]).type) _[t] = set$1(_[t], typename.name, callback);\n        else if (callback == null) for (t in _) _[t] = set$1(_[t], typename.name, null);\n      }\n\n      return this;\n    },\n    copy: function() {\n      var copy = {}, _ = this._;\n      for (var t in _) copy[t] = _[t].slice();\n      return new Dispatch(copy);\n    },\n    call: function(type, that) {\n      if ((n = arguments.length - 2) > 0) for (var args = new Array(n), i = 0, n, t; i < n; ++i) args[i] = arguments[i + 2];\n      if (!this._.hasOwnProperty(type)) throw new Error(\"unknown type: \" + type);\n      for (t = this._[type], i = 0, n = t.length; i < n; ++i) t[i].value.apply(that, args);\n    },\n    apply: function(type, that, args) {\n      if (!this._.hasOwnProperty(type)) throw new Error(\"unknown type: \" + type);\n      for (var t = this._[type], i = 0, n = t.length; i < n; ++i) t[i].value.apply(that, args);\n    }\n  };\n\n  function get(type, name) {\n    for (var i = 0, n = type.length, c; i < n; ++i) {\n      if ((c = type[i]).name === name) {\n        return c.value;\n      }\n    }\n  }\n\n  function set$1(type, name, callback) {\n    for (var i = 0, n = type.length; i < n; ++i) {\n      if (type[i].name === name) {\n        type[i] = noop$1, type = type.slice(0, i).concat(type.slice(i + 1));\n        break;\n      }\n    }\n    if (callback != null) type.push({name: name, value: callback});\n    return type;\n  }\n\n  function objectConverter(columns) {\n    return new Function(\"d\", \"return {\" + columns.map(function(name, i) {\n      return JSON.stringify(name) + \": d[\" + i + \"]\";\n    }).join(\",\") + \"}\");\n  }\n\n  function customConverter(columns, f) {\n    var object = objectConverter(columns);\n    return function(row, i) {\n      return f(object(row), i, columns);\n    };\n  }\n\n  // Compute unique columns in order of discovery.\n  function inferColumns(rows) {\n    var columnSet = Object.create(null),\n        columns = [];\n\n    rows.forEach(function(row) {\n      for (var column in row) {\n        if (!(column in columnSet)) {\n          columns.push(columnSet[column] = column);\n        }\n      }\n    });\n\n    return columns;\n  }\n\n  function dsv(delimiter) {\n    var reFormat = new RegExp(\"[\\\"\" + delimiter + \"\\n]\"),\n        delimiterCode = delimiter.charCodeAt(0);\n\n    function parse(text, f) {\n      var convert, columns, rows = parseRows(text, function(row, i) {\n        if (convert) return convert(row, i - 1);\n        columns = row, convert = f ? customConverter(row, f) : objectConverter(row);\n      });\n      rows.columns = columns;\n      return rows;\n    }\n\n    function parseRows(text, f) {\n      var EOL = {}, // sentinel value for end-of-line\n          EOF = {}, // sentinel value for end-of-file\n          rows = [], // output rows\n          N = text.length,\n          I = 0, // current character index\n          n = 0, // the current line number\n          t, // the current token\n          eol; // is the current token followed by EOL?\n\n      function token() {\n        if (I >= N) return EOF; // special case: end of file\n        if (eol) return eol = false, EOL; // special case: end of line\n\n        // special case: quotes\n        var j = I, c;\n        if (text.charCodeAt(j) === 34) {\n          var i = j;\n          while (i++ < N) {\n            if (text.charCodeAt(i) === 34) {\n              if (text.charCodeAt(i + 1) !== 34) break;\n              ++i;\n            }\n          }\n          I = i + 2;\n          c = text.charCodeAt(i + 1);\n          if (c === 13) {\n            eol = true;\n            if (text.charCodeAt(i + 2) === 10) ++I;\n          } else if (c === 10) {\n            eol = true;\n          }\n          return text.slice(j + 1, i).replace(/\"\"/g, \"\\\"\");\n        }\n\n        // common case: find next delimiter or newline\n        while (I < N) {\n          var k = 1;\n          c = text.charCodeAt(I++);\n          if (c === 10) eol = true; // \\n\n          else if (c === 13) { eol = true; if (text.charCodeAt(I) === 10) ++I, ++k; } // \\r|\\r\\n\n          else if (c !== delimiterCode) continue;\n          return text.slice(j, I - k);\n        }\n\n        // special case: last token before EOF\n        return text.slice(j);\n      }\n\n      while ((t = token()) !== EOF) {\n        var a = [];\n        while (t !== EOL && t !== EOF) {\n          a.push(t);\n          t = token();\n        }\n        if (f && (a = f(a, n++)) == null) continue;\n        rows.push(a);\n      }\n\n      return rows;\n    }\n\n    function format(rows, columns) {\n      if (columns == null) columns = inferColumns(rows);\n      return [columns.map(formatValue).join(delimiter)].concat(rows.map(function(row) {\n        return columns.map(function(column) {\n          return formatValue(row[column]);\n        }).join(delimiter);\n      })).join(\"\\n\");\n    }\n\n    function formatRows(rows) {\n      return rows.map(formatRow).join(\"\\n\");\n    }\n\n    function formatRow(row) {\n      return row.map(formatValue).join(delimiter);\n    }\n\n    function formatValue(text) {\n      return text == null ? \"\"\n          : reFormat.test(text += \"\") ? \"\\\"\" + text.replace(/\\\"/g, \"\\\"\\\"\") + \"\\\"\"\n          : text;\n    }\n\n    return {\n      parse: parse,\n      parseRows: parseRows,\n      format: format,\n      formatRows: formatRows\n    };\n  }\n\n  var csv = dsv(\",\");\n\n  var csvParse = csv.parse;\n  var csvParseRows = csv.parseRows;\n  var csvFormat = csv.format;\n  var csvFormatRows = csv.formatRows;\n\n  var tsv = dsv(\"\\t\");\n\n  var tsvParse = tsv.parse;\n  var tsvParseRows = tsv.parseRows;\n  var tsvFormat = tsv.format;\n  var tsvFormatRows = tsv.formatRows;\n\n  function request(url, callback) {\n    var request,\n        event = dispatch(\"beforesend\", \"progress\", \"load\", \"error\"),\n        mimeType,\n        headers = map$1(),\n        xhr = new XMLHttpRequest,\n        user = null,\n        password = null,\n        response,\n        responseType,\n        timeout = 0;\n\n    // If IE does not support CORS, use XDomainRequest.\n    if (typeof XDomainRequest !== \"undefined\"\n        && !(\"withCredentials\" in xhr)\n        && /^(http(s)?:)?\\/\\//.test(url)) xhr = new XDomainRequest;\n\n    \"onload\" in xhr\n        ? xhr.onload = xhr.onerror = xhr.ontimeout = respond\n        : xhr.onreadystatechange = function(o) { xhr.readyState > 3 && respond(o); };\n\n    function respond(o) {\n      var status = xhr.status, result;\n      if (!status && hasResponse(xhr)\n          || status >= 200 && status < 300\n          || status === 304) {\n        if (response) {\n          try {\n            result = response.call(request, xhr);\n          } catch (e) {\n            event.call(\"error\", request, e);\n            return;\n          }\n        } else {\n          result = xhr;\n        }\n        event.call(\"load\", request, result);\n      } else {\n        event.call(\"error\", request, o);\n      }\n    }\n\n    xhr.onprogress = function(e) {\n      event.call(\"progress\", request, e);\n    };\n\n    request = {\n      header: function(name, value) {\n        name = (name + \"\").toLowerCase();\n        if (arguments.length < 2) return headers.get(name);\n        if (value == null) headers.remove(name);\n        else headers.set(name, value + \"\");\n        return request;\n      },\n\n      // If mimeType is non-null and no Accept header is set, a default is used.\n      mimeType: function(value) {\n        if (!arguments.length) return mimeType;\n        mimeType = value == null ? null : value + \"\";\n        return request;\n      },\n\n      // Specifies what type the response value should take;\n      // for instance, arraybuffer, blob, document, or text.\n      responseType: function(value) {\n        if (!arguments.length) return responseType;\n        responseType = value;\n        return request;\n      },\n\n      timeout: function(value) {\n        if (!arguments.length) return timeout;\n        timeout = +value;\n        return request;\n      },\n\n      user: function(value) {\n        return arguments.length < 1 ? user : (user = value == null ? null : value + \"\", request);\n      },\n\n      password: function(value) {\n        return arguments.length < 1 ? password : (password = value == null ? null : value + \"\", request);\n      },\n\n      // Specify how to convert the response content to a specific type;\n      // changes the callback value on \"load\" events.\n      response: function(value) {\n        response = value;\n        return request;\n      },\n\n      // Alias for send(\"GET\", …).\n      get: function(data, callback) {\n        return request.send(\"GET\", data, callback);\n      },\n\n      // Alias for send(\"POST\", …).\n      post: function(data, callback) {\n        return request.send(\"POST\", data, callback);\n      },\n\n      // If callback is non-null, it will be used for error and load events.\n      send: function(method, data, callback) {\n        if (!callback && typeof data === \"function\") callback = data, data = null;\n        if (callback && callback.length === 1) callback = fixCallback(callback);\n        xhr.open(method, url, true, user, password);\n        if (mimeType != null && !headers.has(\"accept\")) headers.set(\"accept\", mimeType + \",*/*\");\n        if (xhr.setRequestHeader) headers.each(function(value, name) { xhr.setRequestHeader(name, value); });\n        if (mimeType != null && xhr.overrideMimeType) xhr.overrideMimeType(mimeType);\n        if (responseType != null) xhr.responseType = responseType;\n        if (timeout > 0) xhr.timeout = timeout;\n        if (callback) request.on(\"error\", callback).on(\"load\", function(xhr) { callback(null, xhr); });\n        event.call(\"beforesend\", request, xhr);\n        xhr.send(data == null ? null : data);\n        return request;\n      },\n\n      abort: function() {\n        xhr.abort();\n        return request;\n      },\n\n      on: function() {\n        var value = event.on.apply(event, arguments);\n        return value === event ? request : value;\n      }\n    };\n\n    return callback\n        ? request.get(callback)\n        : request;\n  }\n\n  function fixCallback(callback) {\n    return function(error, xhr) {\n      callback(error == null ? xhr : null);\n    };\n  }\n\n  function hasResponse(xhr) {\n    var type = xhr.responseType;\n    return type && type !== \"text\"\n        ? xhr.response // null on error\n        : xhr.responseText; // \"\" on error\n  }\n\n  function type(defaultMimeType, response) {\n    return function(url, callback) {\n      var r = request(url).mimeType(defaultMimeType).response(response);\n      return callback ? r.get(callback) : r;\n    };\n  }\n\n  var html = type(\"text/html\", function(xhr) {\n    return document.createRange().createContextualFragment(xhr.responseText);\n  });\n\n  var json = type(\"application/json\", function(xhr) {\n    return JSON.parse(xhr.responseText);\n  });\n\n  var text = type(\"text/plain\", function(xhr) {\n    return xhr.responseText;\n  });\n\n  var xml = type(\"application/xml\", function(xhr) {\n    var xml = xhr.responseXML;\n    if (!xml) throw new Error(\"parse error\");\n    return xml;\n  });\n\n  function dsv$1(defaultMimeType, parse) {\n    return function(url, row, callback) {\n      if (arguments.length < 3) callback = row, row = null;\n      var r = request(url).mimeType(defaultMimeType);\n      r.row = function(_) { return arguments.length ? r.response(responseOf(parse, row = _)) : row; };\n      r.row(row);\n      return callback ? r.get(callback) : r;\n    };\n  }\n\n  function responseOf(parse, row) {\n    return function(request) {\n      return parse(request.responseText, row);\n    };\n  }\n\n  var csv$1 = dsv$1(\"text/csv\", csvParse);\n\n  var tsv$1 = dsv$1(\"text/tab-separated-values\", tsvParse);\n\n  var frame = 0;\n  var timeout = 0;\n  var interval = 0;\n  var pokeDelay = 1000;\n  var taskHead;\n  var taskTail;\n  var clockLast = 0;\n  var clockNow = 0;\n  var clockSkew = 0;\n  var clock = typeof performance === \"object\" && performance.now ? performance : Date;\n  var setFrame = typeof requestAnimationFrame === \"function\"\n          ? (clock === Date ? function(f) { requestAnimationFrame(function() { f(clock.now()); }); } : requestAnimationFrame)\n          : function(f) { setTimeout(f, 17); };\n  function now() {\n    return clockNow || (setFrame(clearNow), clockNow = clock.now() + clockSkew);\n  }\n\n  function clearNow() {\n    clockNow = 0;\n  }\n\n  function Timer() {\n    this._call =\n    this._time =\n    this._next = null;\n  }\n\n  Timer.prototype = timer.prototype = {\n    constructor: Timer,\n    restart: function(callback, delay, time) {\n      if (typeof callback !== \"function\") throw new TypeError(\"callback is not a function\");\n      time = (time == null ? now() : +time) + (delay == null ? 0 : +delay);\n      if (!this._next && taskTail !== this) {\n        if (taskTail) taskTail._next = this;\n        else taskHead = this;\n        taskTail = this;\n      }\n      this._call = callback;\n      this._time = time;\n      sleep();\n    },\n    stop: function() {\n      if (this._call) {\n        this._call = null;\n        this._time = Infinity;\n        sleep();\n      }\n    }\n  };\n\n  function timer(callback, delay, time) {\n    var t = new Timer;\n    t.restart(callback, delay, time);\n    return t;\n  }\n\n  function timerFlush() {\n    now(); // Get the current time, if not already set.\n    ++frame; // Pretend we’ve set an alarm, if we haven’t already.\n    var t = taskHead, e;\n    while (t) {\n      if ((e = clockNow - t._time) >= 0) t._call.call(null, e);\n      t = t._next;\n    }\n    --frame;\n  }\n\n  function wake(time) {\n    clockNow = (clockLast = time || clock.now()) + clockSkew;\n    frame = timeout = 0;\n    try {\n      timerFlush();\n    } finally {\n      frame = 0;\n      nap();\n      clockNow = 0;\n    }\n  }\n\n  function poke$1() {\n    var now = clock.now(), delay = now - clockLast;\n    if (delay > pokeDelay) clockSkew -= delay, clockLast = now;\n  }\n\n  function nap() {\n    var t0, t1 = taskHead, t2, time = Infinity;\n    while (t1) {\n      if (t1._call) {\n        if (time > t1._time) time = t1._time;\n        t0 = t1, t1 = t1._next;\n      } else {\n        t2 = t1._next, t1._next = null;\n        t1 = t0 ? t0._next = t2 : taskHead = t2;\n      }\n    }\n    taskTail = t0;\n    sleep(time);\n  }\n\n  function sleep(time) {\n    if (frame) return; // Soonest alarm already set, or will be.\n    if (timeout) timeout = clearTimeout(timeout);\n    var delay = time - clockNow;\n    if (delay > 24) {\n      if (time < Infinity) timeout = setTimeout(wake, delay);\n      if (interval) interval = clearInterval(interval);\n    } else {\n      if (!interval) interval = setInterval(poke$1, pokeDelay);\n      frame = 1, setFrame(wake);\n    }\n  }\n\n  function timeout$1(callback, delay, time) {\n    var t = new Timer;\n    delay = delay == null ? 0 : +delay;\n    t.restart(function(elapsed) {\n      t.stop();\n      callback(elapsed + delay);\n    }, delay, time);\n    return t;\n  }\n\n  function interval$1(callback, delay, time) {\n    var t = new Timer, total = delay;\n    if (delay == null) return t.restart(callback, delay, time), t;\n    delay = +delay, time = time == null ? now() : +time;\n    t.restart(function tick(elapsed) {\n      elapsed += total;\n      t.restart(tick, total += delay, time);\n      callback(elapsed);\n    }, delay, time);\n    return t;\n  }\n\nvar   t0$1 = new Date;\nvar   t1$1 = new Date;\n  function newInterval(floori, offseti, count, field) {\n\n    function interval(date) {\n      return floori(date = new Date(+date)), date;\n    }\n\n    interval.floor = interval;\n\n    interval.ceil = function(date) {\n      return floori(date = new Date(date - 1)), offseti(date, 1), floori(date), date;\n    };\n\n    interval.round = function(date) {\n      var d0 = interval(date),\n          d1 = interval.ceil(date);\n      return date - d0 < d1 - date ? d0 : d1;\n    };\n\n    interval.offset = function(date, step) {\n      return offseti(date = new Date(+date), step == null ? 1 : Math.floor(step)), date;\n    };\n\n    interval.range = function(start, stop, step) {\n      var range = [];\n      start = interval.ceil(start);\n      step = step == null ? 1 : Math.floor(step);\n      if (!(start < stop) || !(step > 0)) return range; // also handles Invalid Date\n      do range.push(new Date(+start)); while (offseti(start, step), floori(start), start < stop)\n      return range;\n    };\n\n    interval.filter = function(test) {\n      return newInterval(function(date) {\n        while (floori(date), !test(date)) date.setTime(date - 1);\n      }, function(date, step) {\n        while (--step >= 0) while (offseti(date, 1), !test(date));\n      });\n    };\n\n    if (count) {\n      interval.count = function(start, end) {\n        t0$1.setTime(+start), t1$1.setTime(+end);\n        floori(t0$1), floori(t1$1);\n        return Math.floor(count(t0$1, t1$1));\n      };\n\n      interval.every = function(step) {\n        step = Math.floor(step);\n        return !isFinite(step) || !(step > 0) ? null\n            : !(step > 1) ? interval\n            : interval.filter(field\n                ? function(d) { return field(d) % step === 0; }\n                : function(d) { return interval.count(0, d) % step === 0; });\n      };\n    }\n\n    return interval;\n  }\n\n  var millisecond = newInterval(function() {\n    // noop\n  }, function(date, step) {\n    date.setTime(+date + step);\n  }, function(start, end) {\n    return end - start;\n  });\n\n  // An optimized implementation for this simple case.\n  millisecond.every = function(k) {\n    k = Math.floor(k);\n    if (!isFinite(k) || !(k > 0)) return null;\n    if (!(k > 1)) return millisecond;\n    return newInterval(function(date) {\n      date.setTime(Math.floor(date / k) * k);\n    }, function(date, step) {\n      date.setTime(+date + step * k);\n    }, function(start, end) {\n      return (end - start) / k;\n    });\n  };\n\n  var milliseconds = millisecond.range;\n\n  var durationSecond = 1e3;\n  var durationMinute = 6e4;\n  var durationHour = 36e5;\n  var durationDay = 864e5;\n  var durationWeek = 6048e5;\n\n  var second = newInterval(function(date) {\n    date.setTime(Math.floor(date / durationSecond) * durationSecond);\n  }, function(date, step) {\n    date.setTime(+date + step * durationSecond);\n  }, function(start, end) {\n    return (end - start) / durationSecond;\n  }, function(date) {\n    return date.getUTCSeconds();\n  });\n\n  var seconds = second.range;\n\n  var minute = newInterval(function(date) {\n    date.setTime(Math.floor(date / durationMinute) * durationMinute);\n  }, function(date, step) {\n    date.setTime(+date + step * durationMinute);\n  }, function(start, end) {\n    return (end - start) / durationMinute;\n  }, function(date) {\n    return date.getMinutes();\n  });\n\n  var minutes = minute.range;\n\n  var hour = newInterval(function(date) {\n    var offset = date.getTimezoneOffset() * durationMinute % durationHour;\n    if (offset < 0) offset += durationHour;\n    date.setTime(Math.floor((+date - offset) / durationHour) * durationHour + offset);\n  }, function(date, step) {\n    date.setTime(+date + step * durationHour);\n  }, function(start, end) {\n    return (end - start) / durationHour;\n  }, function(date) {\n    return date.getHours();\n  });\n\n  var hours = hour.range;\n\n  var day = newInterval(function(date) {\n    date.setHours(0, 0, 0, 0);\n  }, function(date, step) {\n    date.setDate(date.getDate() + step);\n  }, function(start, end) {\n    return (end - start - (end.getTimezoneOffset() - start.getTimezoneOffset()) * durationMinute) / durationDay;\n  }, function(date) {\n    return date.getDate() - 1;\n  });\n\n  var days = day.range;\n\n  function weekday(i) {\n    return newInterval(function(date) {\n      date.setDate(date.getDate() - (date.getDay() + 7 - i) % 7);\n      date.setHours(0, 0, 0, 0);\n    }, function(date, step) {\n      date.setDate(date.getDate() + step * 7);\n    }, function(start, end) {\n      return (end - start - (end.getTimezoneOffset() - start.getTimezoneOffset()) * durationMinute) / durationWeek;\n    });\n  }\n\n  var timeWeek = weekday(0);\n  var timeMonday = weekday(1);\n  var tuesday = weekday(2);\n  var wednesday = weekday(3);\n  var thursday = weekday(4);\n  var friday = weekday(5);\n  var saturday = weekday(6);\n\n  var sundays = timeWeek.range;\n  var mondays = timeMonday.range;\n  var tuesdays = tuesday.range;\n  var wednesdays = wednesday.range;\n  var thursdays = thursday.range;\n  var fridays = friday.range;\n  var saturdays = saturday.range;\n\n  var month = newInterval(function(date) {\n    date.setDate(1);\n    date.setHours(0, 0, 0, 0);\n  }, function(date, step) {\n    date.setMonth(date.getMonth() + step);\n  }, function(start, end) {\n    return end.getMonth() - start.getMonth() + (end.getFullYear() - start.getFullYear()) * 12;\n  }, function(date) {\n    return date.getMonth();\n  });\n\n  var months = month.range;\n\n  var year = newInterval(function(date) {\n    date.setMonth(0, 1);\n    date.setHours(0, 0, 0, 0);\n  }, function(date, step) {\n    date.setFullYear(date.getFullYear() + step);\n  }, function(start, end) {\n    return end.getFullYear() - start.getFullYear();\n  }, function(date) {\n    return date.getFullYear();\n  });\n\n  // An optimized implementation for this simple case.\n  year.every = function(k) {\n    return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : newInterval(function(date) {\n      date.setFullYear(Math.floor(date.getFullYear() / k) * k);\n      date.setMonth(0, 1);\n      date.setHours(0, 0, 0, 0);\n    }, function(date, step) {\n      date.setFullYear(date.getFullYear() + step * k);\n    });\n  };\n\n  var years = year.range;\n\n  var utcMinute = newInterval(function(date) {\n    date.setUTCSeconds(0, 0);\n  }, function(date, step) {\n    date.setTime(+date + step * durationMinute);\n  }, function(start, end) {\n    return (end - start) / durationMinute;\n  }, function(date) {\n    return date.getUTCMinutes();\n  });\n\n  var utcMinutes = utcMinute.range;\n\n  var utcHour = newInterval(function(date) {\n    date.setUTCMinutes(0, 0, 0);\n  }, function(date, step) {\n    date.setTime(+date + step * durationHour);\n  }, function(start, end) {\n    return (end - start) / durationHour;\n  }, function(date) {\n    return date.getUTCHours();\n  });\n\n  var utcHours = utcHour.range;\n\n  var utcDay = newInterval(function(date) {\n    date.setUTCHours(0, 0, 0, 0);\n  }, function(date, step) {\n    date.setUTCDate(date.getUTCDate() + step);\n  }, function(start, end) {\n    return (end - start) / durationDay;\n  }, function(date) {\n    return date.getUTCDate() - 1;\n  });\n\n  var utcDays = utcDay.range;\n\n  function utcWeekday(i) {\n    return newInterval(function(date) {\n      date.setUTCDate(date.getUTCDate() - (date.getUTCDay() + 7 - i) % 7);\n      date.setUTCHours(0, 0, 0, 0);\n    }, function(date, step) {\n      date.setUTCDate(date.getUTCDate() + step * 7);\n    }, function(start, end) {\n      return (end - start) / durationWeek;\n    });\n  }\n\n  var utcWeek = utcWeekday(0);\n  var utcMonday = utcWeekday(1);\n  var utcTuesday = utcWeekday(2);\n  var utcWednesday = utcWeekday(3);\n  var utcThursday = utcWeekday(4);\n  var utcFriday = utcWeekday(5);\n  var utcSaturday = utcWeekday(6);\n\n  var utcSundays = utcWeek.range;\n  var utcMondays = utcMonday.range;\n  var utcTuesdays = utcTuesday.range;\n  var utcWednesdays = utcWednesday.range;\n  var utcThursdays = utcThursday.range;\n  var utcFridays = utcFriday.range;\n  var utcSaturdays = utcSaturday.range;\n\n  var utcMonth = newInterval(function(date) {\n    date.setUTCDate(1);\n    date.setUTCHours(0, 0, 0, 0);\n  }, function(date, step) {\n    date.setUTCMonth(date.getUTCMonth() + step);\n  }, function(start, end) {\n    return end.getUTCMonth() - start.getUTCMonth() + (end.getUTCFullYear() - start.getUTCFullYear()) * 12;\n  }, function(date) {\n    return date.getUTCMonth();\n  });\n\n  var utcMonths = utcMonth.range;\n\n  var utcYear = newInterval(function(date) {\n    date.setUTCMonth(0, 1);\n    date.setUTCHours(0, 0, 0, 0);\n  }, function(date, step) {\n    date.setUTCFullYear(date.getUTCFullYear() + step);\n  }, function(start, end) {\n    return end.getUTCFullYear() - start.getUTCFullYear();\n  }, function(date) {\n    return date.getUTCFullYear();\n  });\n\n  // An optimized implementation for this simple case.\n  utcYear.every = function(k) {\n    return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : newInterval(function(date) {\n      date.setUTCFullYear(Math.floor(date.getUTCFullYear() / k) * k);\n      date.setUTCMonth(0, 1);\n      date.setUTCHours(0, 0, 0, 0);\n    }, function(date, step) {\n      date.setUTCFullYear(date.getUTCFullYear() + step * k);\n    });\n  };\n\n  var utcYears = utcYear.range;\n\n  // Computes the decimal coefficient and exponent of the specified number x with\n  // significant digits p, where x is positive and p is in [1, 21] or undefined.\n  // For example, formatDecimal(1.23) returns [\"123\", 0].\n  function formatDecimal(x, p) {\n    if ((i = (x = p ? x.toExponential(p - 1) : x.toExponential()).indexOf(\"e\")) < 0) return null; // NaN, ±Infinity\n    var i, coefficient = x.slice(0, i);\n\n    // The string returned by toExponential either has the form \\d\\.\\d+e[-+]\\d+\n    // (e.g., 1.2e+3) or the form \\de[-+]\\d+ (e.g., 1e+3).\n    return [\n      coefficient.length > 1 ? coefficient[0] + coefficient.slice(2) : coefficient,\n      +x.slice(i + 1)\n    ];\n  }\n\n  function exponent$1(x) {\n    return x = formatDecimal(Math.abs(x)), x ? x[1] : NaN;\n  }\n\n  function formatGroup(grouping, thousands) {\n    return function(value, width) {\n      var i = value.length,\n          t = [],\n          j = 0,\n          g = grouping[0],\n          length = 0;\n\n      while (i > 0 && g > 0) {\n        if (length + g + 1 > width) g = Math.max(1, width - length);\n        t.push(value.substring(i -= g, i + g));\n        if ((length += g + 1) > width) break;\n        g = grouping[j = (j + 1) % grouping.length];\n      }\n\n      return t.reverse().join(thousands);\n    };\n  }\n\n  function formatDefault(x, p) {\n    x = x.toPrecision(p);\n\n    out: for (var n = x.length, i = 1, i0 = -1, i1; i < n; ++i) {\n      switch (x[i]) {\n        case \".\": i0 = i1 = i; break;\n        case \"0\": if (i0 === 0) i0 = i; i1 = i; break;\n        case \"e\": break out;\n        default: if (i0 > 0) i0 = 0; break;\n      }\n    }\n\n    return i0 > 0 ? x.slice(0, i0) + x.slice(i1 + 1) : x;\n  }\n\n  var prefixExponent;\n\n  function formatPrefixAuto(x, p) {\n    var d = formatDecimal(x, p);\n    if (!d) return x + \"\";\n    var coefficient = d[0],\n        exponent = d[1],\n        i = exponent - (prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent / 3))) * 3) + 1,\n        n = coefficient.length;\n    return i === n ? coefficient\n        : i > n ? coefficient + new Array(i - n + 1).join(\"0\")\n        : i > 0 ? coefficient.slice(0, i) + \".\" + coefficient.slice(i)\n        : \"0.\" + new Array(1 - i).join(\"0\") + formatDecimal(x, Math.max(0, p + i - 1))[0]; // less than 1y!\n  }\n\n  function formatRounded(x, p) {\n    var d = formatDecimal(x, p);\n    if (!d) return x + \"\";\n    var coefficient = d[0],\n        exponent = d[1];\n    return exponent < 0 ? \"0.\" + new Array(-exponent).join(\"0\") + coefficient\n        : coefficient.length > exponent + 1 ? coefficient.slice(0, exponent + 1) + \".\" + coefficient.slice(exponent + 1)\n        : coefficient + new Array(exponent - coefficient.length + 2).join(\"0\");\n  }\n\n  var formatTypes = {\n    \"\": formatDefault,\n    \"%\": function(x, p) { return (x * 100).toFixed(p); },\n    \"b\": function(x) { return Math.round(x).toString(2); },\n    \"c\": function(x) { return x + \"\"; },\n    \"d\": function(x) { return Math.round(x).toString(10); },\n    \"e\": function(x, p) { return x.toExponential(p); },\n    \"f\": function(x, p) { return x.toFixed(p); },\n    \"g\": function(x, p) { return x.toPrecision(p); },\n    \"o\": function(x) { return Math.round(x).toString(8); },\n    \"p\": function(x, p) { return formatRounded(x * 100, p); },\n    \"r\": formatRounded,\n    \"s\": formatPrefixAuto,\n    \"X\": function(x) { return Math.round(x).toString(16).toUpperCase(); },\n    \"x\": function(x) { return Math.round(x).toString(16); }\n  };\n\n  // [[fill]align][sign][symbol][0][width][,][.precision][type]\n  var re = /^(?:(.)?([<>=^]))?([+\\-\\( ])?([$#])?(0)?(\\d+)?(,)?(\\.\\d+)?([a-z%])?$/i;\n\n  function formatSpecifier(specifier) {\n    return new FormatSpecifier(specifier);\n  }\n\n  function FormatSpecifier(specifier) {\n    if (!(match = re.exec(specifier))) throw new Error(\"invalid format: \" + specifier);\n\n    var match,\n        fill = match[1] || \" \",\n        align = match[2] || \">\",\n        sign = match[3] || \"-\",\n        symbol = match[4] || \"\",\n        zero = !!match[5],\n        width = match[6] && +match[6],\n        comma = !!match[7],\n        precision = match[8] && +match[8].slice(1),\n        type = match[9] || \"\";\n\n    // The \"n\" type is an alias for \",g\".\n    if (type === \"n\") comma = true, type = \"g\";\n\n    // Map invalid types to the default format.\n    else if (!formatTypes[type]) type = \"\";\n\n    // If zero fill is specified, padding goes after sign and before digits.\n    if (zero || (fill === \"0\" && align === \"=\")) zero = true, fill = \"0\", align = \"=\";\n\n    this.fill = fill;\n    this.align = align;\n    this.sign = sign;\n    this.symbol = symbol;\n    this.zero = zero;\n    this.width = width;\n    this.comma = comma;\n    this.precision = precision;\n    this.type = type;\n  }\n\n  FormatSpecifier.prototype.toString = function() {\n    return this.fill\n        + this.align\n        + this.sign\n        + this.symbol\n        + (this.zero ? \"0\" : \"\")\n        + (this.width == null ? \"\" : Math.max(1, this.width | 0))\n        + (this.comma ? \",\" : \"\")\n        + (this.precision == null ? \"\" : \".\" + Math.max(0, this.precision | 0))\n        + this.type;\n  };\n\n  var prefixes = [\"y\",\"z\",\"a\",\"f\",\"p\",\"n\",\"\\xB5\",\"m\",\"\",\"k\",\"M\",\"G\",\"T\",\"P\",\"E\",\"Z\",\"Y\"];\n\n  function identity$3(x) {\n    return x;\n  }\n\n  function formatLocale(locale) {\n    var group = locale.grouping && locale.thousands ? formatGroup(locale.grouping, locale.thousands) : identity$3,\n        currency = locale.currency,\n        decimal = locale.decimal;\n\n    function newFormat(specifier) {\n      specifier = formatSpecifier(specifier);\n\n      var fill = specifier.fill,\n          align = specifier.align,\n          sign = specifier.sign,\n          symbol = specifier.symbol,\n          zero = specifier.zero,\n          width = specifier.width,\n          comma = specifier.comma,\n          precision = specifier.precision,\n          type = specifier.type;\n\n      // Compute the prefix and suffix.\n      // For SI-prefix, the suffix is lazily computed.\n      var prefix = symbol === \"$\" ? currency[0] : symbol === \"#\" && /[boxX]/.test(type) ? \"0\" + type.toLowerCase() : \"\",\n          suffix = symbol === \"$\" ? currency[1] : /[%p]/.test(type) ? \"%\" : \"\";\n\n      // What format function should we use?\n      // Is this an integer type?\n      // Can this type generate exponential notation?\n      var formatType = formatTypes[type],\n          maybeSuffix = !type || /[defgprs%]/.test(type);\n\n      // Set the default precision if not specified,\n      // or clamp the specified precision to the supported range.\n      // For significant precision, it must be in [1, 21].\n      // For fixed precision, it must be in [0, 20].\n      precision = precision == null ? (type ? 6 : 12)\n          : /[gprs]/.test(type) ? Math.max(1, Math.min(21, precision))\n          : Math.max(0, Math.min(20, precision));\n\n      function format(value) {\n        var valuePrefix = prefix,\n            valueSuffix = suffix,\n            i, n, c;\n\n        if (type === \"c\") {\n          valueSuffix = formatType(value) + valueSuffix;\n          value = \"\";\n        } else {\n          value = +value;\n\n          // Convert negative to positive, and compute the prefix.\n          // Note that -0 is not less than 0, but 1 / -0 is!\n          var valueNegative = (value < 0 || 1 / value < 0) && (value *= -1, true);\n\n          // Perform the initial formatting.\n          value = formatType(value, precision);\n\n          // If the original value was negative, it may be rounded to zero during\n          // formatting; treat this as (positive) zero.\n          if (valueNegative) {\n            i = -1, n = value.length;\n            valueNegative = false;\n            while (++i < n) {\n              if (c = value.charCodeAt(i), (48 < c && c < 58)\n                  || (type === \"x\" && 96 < c && c < 103)\n                  || (type === \"X\" && 64 < c && c < 71)) {\n                valueNegative = true;\n                break;\n              }\n            }\n          }\n\n          // Compute the prefix and suffix.\n          valuePrefix = (valueNegative ? (sign === \"(\" ? sign : \"-\") : sign === \"-\" || sign === \"(\" ? \"\" : sign) + valuePrefix;\n          valueSuffix = valueSuffix + (type === \"s\" ? prefixes[8 + prefixExponent / 3] : \"\") + (valueNegative && sign === \"(\" ? \")\" : \"\");\n\n          // Break the formatted value into the integer “value” part that can be\n          // grouped, and fractional or exponential “suffix” part that is not.\n          if (maybeSuffix) {\n            i = -1, n = value.length;\n            while (++i < n) {\n              if (c = value.charCodeAt(i), 48 > c || c > 57) {\n                valueSuffix = (c === 46 ? decimal + value.slice(i + 1) : value.slice(i)) + valueSuffix;\n                value = value.slice(0, i);\n                break;\n              }\n            }\n          }\n        }\n\n        // If the fill character is not \"0\", grouping is applied before padding.\n        if (comma && !zero) value = group(value, Infinity);\n\n        // Compute the padding.\n        var length = valuePrefix.length + value.length + valueSuffix.length,\n            padding = length < width ? new Array(width - length + 1).join(fill) : \"\";\n\n        // If the fill character is \"0\", grouping is applied after padding.\n        if (comma && zero) value = group(padding + value, padding.length ? width - valueSuffix.length : Infinity), padding = \"\";\n\n        // Reconstruct the final output based on the desired alignment.\n        switch (align) {\n          case \"<\": return valuePrefix + value + valueSuffix + padding;\n          case \"=\": return valuePrefix + padding + value + valueSuffix;\n          case \"^\": return padding.slice(0, length = padding.length >> 1) + valuePrefix + value + valueSuffix + padding.slice(length);\n        }\n        return padding + valuePrefix + value + valueSuffix;\n      }\n\n      format.toString = function() {\n        return specifier + \"\";\n      };\n\n      return format;\n    }\n\n    function formatPrefix(specifier, value) {\n      var f = newFormat((specifier = formatSpecifier(specifier), specifier.type = \"f\", specifier)),\n          e = Math.max(-8, Math.min(8, Math.floor(exponent$1(value) / 3))) * 3,\n          k = Math.pow(10, -e),\n          prefix = prefixes[8 + e / 3];\n      return function(value) {\n        return f(k * value) + prefix;\n      };\n    }\n\n    return {\n      format: newFormat,\n      formatPrefix: formatPrefix\n    };\n  }\n\n  var locale;\n  exports.format;\n  exports.formatPrefix;\n\n  defaultLocale({\n    decimal: \".\",\n    thousands: \",\",\n    grouping: [3],\n    currency: [\"$\", \"\"]\n  });\n\n  function defaultLocale(definition) {\n    locale = formatLocale(definition);\n    exports.format = locale.format;\n    exports.formatPrefix = locale.formatPrefix;\n    return locale;\n  }\n\n  function precisionFixed(step) {\n    return Math.max(0, -exponent$1(Math.abs(step)));\n  }\n\n  function precisionPrefix(step, value) {\n    return Math.max(0, Math.max(-8, Math.min(8, Math.floor(exponent$1(value) / 3))) * 3 - exponent$1(Math.abs(step)));\n  }\n\n  function precisionRound(step, max) {\n    step = Math.abs(step), max = Math.abs(max) - step;\n    return Math.max(0, exponent$1(max) - exponent$1(step)) + 1;\n  }\n\n  function localDate(d) {\n    if (0 <= d.y && d.y < 100) {\n      var date = new Date(-1, d.m, d.d, d.H, d.M, d.S, d.L);\n      date.setFullYear(d.y);\n      return date;\n    }\n    return new Date(d.y, d.m, d.d, d.H, d.M, d.S, d.L);\n  }\n\n  function utcDate(d) {\n    if (0 <= d.y && d.y < 100) {\n      var date = new Date(Date.UTC(-1, d.m, d.d, d.H, d.M, d.S, d.L));\n      date.setUTCFullYear(d.y);\n      return date;\n    }\n    return new Date(Date.UTC(d.y, d.m, d.d, d.H, d.M, d.S, d.L));\n  }\n\n  function newYear(y) {\n    return {y: y, m: 0, d: 1, H: 0, M: 0, S: 0, L: 0};\n  }\n\n  function formatLocale$1(locale) {\n    var locale_dateTime = locale.dateTime,\n        locale_date = locale.date,\n        locale_time = locale.time,\n        locale_periods = locale.periods,\n        locale_weekdays = locale.days,\n        locale_shortWeekdays = locale.shortDays,\n        locale_months = locale.months,\n        locale_shortMonths = locale.shortMonths;\n\n    var periodRe = formatRe(locale_periods),\n        periodLookup = formatLookup(locale_periods),\n        weekdayRe = formatRe(locale_weekdays),\n        weekdayLookup = formatLookup(locale_weekdays),\n        shortWeekdayRe = formatRe(locale_shortWeekdays),\n        shortWeekdayLookup = formatLookup(locale_shortWeekdays),\n        monthRe = formatRe(locale_months),\n        monthLookup = formatLookup(locale_months),\n        shortMonthRe = formatRe(locale_shortMonths),\n        shortMonthLookup = formatLookup(locale_shortMonths);\n\n    var formats = {\n      \"a\": formatShortWeekday,\n      \"A\": formatWeekday,\n      \"b\": formatShortMonth,\n      \"B\": formatMonth,\n      \"c\": null,\n      \"d\": formatDayOfMonth,\n      \"e\": formatDayOfMonth,\n      \"H\": formatHour24,\n      \"I\": formatHour12,\n      \"j\": formatDayOfYear,\n      \"L\": formatMilliseconds,\n      \"m\": formatMonthNumber,\n      \"M\": formatMinutes,\n      \"p\": formatPeriod,\n      \"S\": formatSeconds,\n      \"U\": formatWeekNumberSunday,\n      \"w\": formatWeekdayNumber,\n      \"W\": formatWeekNumberMonday,\n      \"x\": null,\n      \"X\": null,\n      \"y\": formatYear,\n      \"Y\": formatFullYear,\n      \"Z\": formatZone,\n      \"%\": formatLiteralPercent\n    };\n\n    var utcFormats = {\n      \"a\": formatUTCShortWeekday,\n      \"A\": formatUTCWeekday,\n      \"b\": formatUTCShortMonth,\n      \"B\": formatUTCMonth,\n      \"c\": null,\n      \"d\": formatUTCDayOfMonth,\n      \"e\": formatUTCDayOfMonth,\n      \"H\": formatUTCHour24,\n      \"I\": formatUTCHour12,\n      \"j\": formatUTCDayOfYear,\n      \"L\": formatUTCMilliseconds,\n      \"m\": formatUTCMonthNumber,\n      \"M\": formatUTCMinutes,\n      \"p\": formatUTCPeriod,\n      \"S\": formatUTCSeconds,\n      \"U\": formatUTCWeekNumberSunday,\n      \"w\": formatUTCWeekdayNumber,\n      \"W\": formatUTCWeekNumberMonday,\n      \"x\": null,\n      \"X\": null,\n      \"y\": formatUTCYear,\n      \"Y\": formatUTCFullYear,\n      \"Z\": formatUTCZone,\n      \"%\": formatLiteralPercent\n    };\n\n    var parses = {\n      \"a\": parseShortWeekday,\n      \"A\": parseWeekday,\n      \"b\": parseShortMonth,\n      \"B\": parseMonth,\n      \"c\": parseLocaleDateTime,\n      \"d\": parseDayOfMonth,\n      \"e\": parseDayOfMonth,\n      \"H\": parseHour24,\n      \"I\": parseHour24,\n      \"j\": parseDayOfYear,\n      \"L\": parseMilliseconds,\n      \"m\": parseMonthNumber,\n      \"M\": parseMinutes,\n      \"p\": parsePeriod,\n      \"S\": parseSeconds,\n      \"U\": parseWeekNumberSunday,\n      \"w\": parseWeekdayNumber,\n      \"W\": parseWeekNumberMonday,\n      \"x\": parseLocaleDate,\n      \"X\": parseLocaleTime,\n      \"y\": parseYear,\n      \"Y\": parseFullYear,\n      \"Z\": parseZone,\n      \"%\": parseLiteralPercent\n    };\n\n    // These recursive directive definitions must be deferred.\n    formats.x = newFormat(locale_date, formats);\n    formats.X = newFormat(locale_time, formats);\n    formats.c = newFormat(locale_dateTime, formats);\n    utcFormats.x = newFormat(locale_date, utcFormats);\n    utcFormats.X = newFormat(locale_time, utcFormats);\n    utcFormats.c = newFormat(locale_dateTime, utcFormats);\n\n    function newFormat(specifier, formats) {\n      return function(date) {\n        var string = [],\n            i = -1,\n            j = 0,\n            n = specifier.length,\n            c,\n            pad,\n            format;\n\n        if (!(date instanceof Date)) date = new Date(+date);\n\n        while (++i < n) {\n          if (specifier.charCodeAt(i) === 37) {\n            string.push(specifier.slice(j, i));\n            if ((pad = pads[c = specifier.charAt(++i)]) != null) c = specifier.charAt(++i);\n            else pad = c === \"e\" ? \" \" : \"0\";\n            if (format = formats[c]) c = format(date, pad);\n            string.push(c);\n            j = i + 1;\n          }\n        }\n\n        string.push(specifier.slice(j, i));\n        return string.join(\"\");\n      };\n    }\n\n    function newParse(specifier, newDate) {\n      return function(string) {\n        var d = newYear(1900),\n            i = parseSpecifier(d, specifier, string += \"\", 0);\n        if (i != string.length) return null;\n\n        // The am-pm flag is 0 for AM, and 1 for PM.\n        if (\"p\" in d) d.H = d.H % 12 + d.p * 12;\n\n        // Convert day-of-week and week-of-year to day-of-year.\n        if (\"W\" in d || \"U\" in d) {\n          if (!(\"w\" in d)) d.w = \"W\" in d ? 1 : 0;\n          var day = \"Z\" in d ? utcDate(newYear(d.y)).getUTCDay() : newDate(newYear(d.y)).getDay();\n          d.m = 0;\n          d.d = \"W\" in d ? (d.w + 6) % 7 + d.W * 7 - (day + 5) % 7 : d.w + d.U * 7 - (day + 6) % 7;\n        }\n\n        // If a time zone is specified, all fields are interpreted as UTC and then\n        // offset according to the specified time zone.\n        if (\"Z\" in d) {\n          d.H += d.Z / 100 | 0;\n          d.M += d.Z % 100;\n          return utcDate(d);\n        }\n\n        // Otherwise, all fields are in local time.\n        return newDate(d);\n      };\n    }\n\n    function parseSpecifier(d, specifier, string, j) {\n      var i = 0,\n          n = specifier.length,\n          m = string.length,\n          c,\n          parse;\n\n      while (i < n) {\n        if (j >= m) return -1;\n        c = specifier.charCodeAt(i++);\n        if (c === 37) {\n          c = specifier.charAt(i++);\n          parse = parses[c in pads ? specifier.charAt(i++) : c];\n          if (!parse || ((j = parse(d, string, j)) < 0)) return -1;\n        } else if (c != string.charCodeAt(j++)) {\n          return -1;\n        }\n      }\n\n      return j;\n    }\n\n    function parsePeriod(d, string, i) {\n      var n = periodRe.exec(string.slice(i));\n      return n ? (d.p = periodLookup[n[0].toLowerCase()], i + n[0].length) : -1;\n    }\n\n    function parseShortWeekday(d, string, i) {\n      var n = shortWeekdayRe.exec(string.slice(i));\n      return n ? (d.w = shortWeekdayLookup[n[0].toLowerCase()], i + n[0].length) : -1;\n    }\n\n    function parseWeekday(d, string, i) {\n      var n = weekdayRe.exec(string.slice(i));\n      return n ? (d.w = weekdayLookup[n[0].toLowerCase()], i + n[0].length) : -1;\n    }\n\n    function parseShortMonth(d, string, i) {\n      var n = shortMonthRe.exec(string.slice(i));\n      return n ? (d.m = shortMonthLookup[n[0].toLowerCase()], i + n[0].length) : -1;\n    }\n\n    function parseMonth(d, string, i) {\n      var n = monthRe.exec(string.slice(i));\n      return n ? (d.m = monthLookup[n[0].toLowerCase()], i + n[0].length) : -1;\n    }\n\n    function parseLocaleDateTime(d, string, i) {\n      return parseSpecifier(d, locale_dateTime, string, i);\n    }\n\n    function parseLocaleDate(d, string, i) {\n      return parseSpecifier(d, locale_date, string, i);\n    }\n\n    function parseLocaleTime(d, string, i) {\n      return parseSpecifier(d, locale_time, string, i);\n    }\n\n    function formatShortWeekday(d) {\n      return locale_shortWeekdays[d.getDay()];\n    }\n\n    function formatWeekday(d) {\n      return locale_weekdays[d.getDay()];\n    }\n\n    function formatShortMonth(d) {\n      return locale_shortMonths[d.getMonth()];\n    }\n\n    function formatMonth(d) {\n      return locale_months[d.getMonth()];\n    }\n\n    function formatPeriod(d) {\n      return locale_periods[+(d.getHours() >= 12)];\n    }\n\n    function formatUTCShortWeekday(d) {\n      return locale_shortWeekdays[d.getUTCDay()];\n    }\n\n    function formatUTCWeekday(d) {\n      return locale_weekdays[d.getUTCDay()];\n    }\n\n    function formatUTCShortMonth(d) {\n      return locale_shortMonths[d.getUTCMonth()];\n    }\n\n    function formatUTCMonth(d) {\n      return locale_months[d.getUTCMonth()];\n    }\n\n    function formatUTCPeriod(d) {\n      return locale_periods[+(d.getUTCHours() >= 12)];\n    }\n\n    return {\n      format: function(specifier) {\n        var f = newFormat(specifier += \"\", formats);\n        f.toString = function() { return specifier; };\n        return f;\n      },\n      parse: function(specifier) {\n        var p = newParse(specifier += \"\", localDate);\n        p.toString = function() { return specifier; };\n        return p;\n      },\n      utcFormat: function(specifier) {\n        var f = newFormat(specifier += \"\", utcFormats);\n        f.toString = function() { return specifier; };\n        return f;\n      },\n      utcParse: function(specifier) {\n        var p = newParse(specifier, utcDate);\n        p.toString = function() { return specifier; };\n        return p;\n      }\n    };\n  }\n\n  var pads = {\"-\": \"\", \"_\": \" \", \"0\": \"0\"};\n  var numberRe = /^\\s*\\d+/;\n  var percentRe = /^%/;\n  var requoteRe = /[\\\\\\^\\$\\*\\+\\?\\|\\[\\]\\(\\)\\.\\{\\}]/g;\n  function pad(value, fill, width) {\n    var sign = value < 0 ? \"-\" : \"\",\n        string = (sign ? -value : value) + \"\",\n        length = string.length;\n    return sign + (length < width ? new Array(width - length + 1).join(fill) + string : string);\n  }\n\n  function requote(s) {\n    return s.replace(requoteRe, \"\\\\$&\");\n  }\n\n  function formatRe(names) {\n    return new RegExp(\"^(?:\" + names.map(requote).join(\"|\") + \")\", \"i\");\n  }\n\n  function formatLookup(names) {\n    var map = {}, i = -1, n = names.length;\n    while (++i < n) map[names[i].toLowerCase()] = i;\n    return map;\n  }\n\n  function parseWeekdayNumber(d, string, i) {\n    var n = numberRe.exec(string.slice(i, i + 1));\n    return n ? (d.w = +n[0], i + n[0].length) : -1;\n  }\n\n  function parseWeekNumberSunday(d, string, i) {\n    var n = numberRe.exec(string.slice(i));\n    return n ? (d.U = +n[0], i + n[0].length) : -1;\n  }\n\n  function parseWeekNumberMonday(d, string, i) {\n    var n = numberRe.exec(string.slice(i));\n    return n ? (d.W = +n[0], i + n[0].length) : -1;\n  }\n\n  function parseFullYear(d, string, i) {\n    var n = numberRe.exec(string.slice(i, i + 4));\n    return n ? (d.y = +n[0], i + n[0].length) : -1;\n  }\n\n  function parseYear(d, string, i) {\n    var n = numberRe.exec(string.slice(i, i + 2));\n    return n ? (d.y = +n[0] + (+n[0] > 68 ? 1900 : 2000), i + n[0].length) : -1;\n  }\n\n  function parseZone(d, string, i) {\n    var n = /^(Z)|([+-]\\d\\d)(?:\\:?(\\d\\d))?/.exec(string.slice(i, i + 6));\n    return n ? (d.Z = n[1] ? 0 : -(n[2] + (n[3] || \"00\")), i + n[0].length) : -1;\n  }\n\n  function parseMonthNumber(d, string, i) {\n    var n = numberRe.exec(string.slice(i, i + 2));\n    return n ? (d.m = n[0] - 1, i + n[0].length) : -1;\n  }\n\n  function parseDayOfMonth(d, string, i) {\n    var n = numberRe.exec(string.slice(i, i + 2));\n    return n ? (d.d = +n[0], i + n[0].length) : -1;\n  }\n\n  function parseDayOfYear(d, string, i) {\n    var n = numberRe.exec(string.slice(i, i + 3));\n    return n ? (d.m = 0, d.d = +n[0], i + n[0].length) : -1;\n  }\n\n  function parseHour24(d, string, i) {\n    var n = numberRe.exec(string.slice(i, i + 2));\n    return n ? (d.H = +n[0], i + n[0].length) : -1;\n  }\n\n  function parseMinutes(d, string, i) {\n    var n = numberRe.exec(string.slice(i, i + 2));\n    return n ? (d.M = +n[0], i + n[0].length) : -1;\n  }\n\n  function parseSeconds(d, string, i) {\n    var n = numberRe.exec(string.slice(i, i + 2));\n    return n ? (d.S = +n[0], i + n[0].length) : -1;\n  }\n\n  function parseMilliseconds(d, string, i) {\n    var n = numberRe.exec(string.slice(i, i + 3));\n    return n ? (d.L = +n[0], i + n[0].length) : -1;\n  }\n\n  function parseLiteralPercent(d, string, i) {\n    var n = percentRe.exec(string.slice(i, i + 1));\n    return n ? i + n[0].length : -1;\n  }\n\n  function formatDayOfMonth(d, p) {\n    return pad(d.getDate(), p, 2);\n  }\n\n  function formatHour24(d, p) {\n    return pad(d.getHours(), p, 2);\n  }\n\n  function formatHour12(d, p) {\n    return pad(d.getHours() % 12 || 12, p, 2);\n  }\n\n  function formatDayOfYear(d, p) {\n    return pad(1 + day.count(year(d), d), p, 3);\n  }\n\n  function formatMilliseconds(d, p) {\n    return pad(d.getMilliseconds(), p, 3);\n  }\n\n  function formatMonthNumber(d, p) {\n    return pad(d.getMonth() + 1, p, 2);\n  }\n\n  function formatMinutes(d, p) {\n    return pad(d.getMinutes(), p, 2);\n  }\n\n  function formatSeconds(d, p) {\n    return pad(d.getSeconds(), p, 2);\n  }\n\n  function formatWeekNumberSunday(d, p) {\n    return pad(timeWeek.count(year(d), d), p, 2);\n  }\n\n  function formatWeekdayNumber(d) {\n    return d.getDay();\n  }\n\n  function formatWeekNumberMonday(d, p) {\n    return pad(timeMonday.count(year(d), d), p, 2);\n  }\n\n  function formatYear(d, p) {\n    return pad(d.getFullYear() % 100, p, 2);\n  }\n\n  function formatFullYear(d, p) {\n    return pad(d.getFullYear() % 10000, p, 4);\n  }\n\n  function formatZone(d) {\n    var z = d.getTimezoneOffset();\n    return (z > 0 ? \"-\" : (z *= -1, \"+\"))\n        + pad(z / 60 | 0, \"0\", 2)\n        + pad(z % 60, \"0\", 2);\n  }\n\n  function formatUTCDayOfMonth(d, p) {\n    return pad(d.getUTCDate(), p, 2);\n  }\n\n  function formatUTCHour24(d, p) {\n    return pad(d.getUTCHours(), p, 2);\n  }\n\n  function formatUTCHour12(d, p) {\n    return pad(d.getUTCHours() % 12 || 12, p, 2);\n  }\n\n  function formatUTCDayOfYear(d, p) {\n    return pad(1 + utcDay.count(utcYear(d), d), p, 3);\n  }\n\n  function formatUTCMilliseconds(d, p) {\n    return pad(d.getUTCMilliseconds(), p, 3);\n  }\n\n  function formatUTCMonthNumber(d, p) {\n    return pad(d.getUTCMonth() + 1, p, 2);\n  }\n\n  function formatUTCMinutes(d, p) {\n    return pad(d.getUTCMinutes(), p, 2);\n  }\n\n  function formatUTCSeconds(d, p) {\n    return pad(d.getUTCSeconds(), p, 2);\n  }\n\n  function formatUTCWeekNumberSunday(d, p) {\n    return pad(utcWeek.count(utcYear(d), d), p, 2);\n  }\n\n  function formatUTCWeekdayNumber(d) {\n    return d.getUTCDay();\n  }\n\n  function formatUTCWeekNumberMonday(d, p) {\n    return pad(utcMonday.count(utcYear(d), d), p, 2);\n  }\n\n  function formatUTCYear(d, p) {\n    return pad(d.getUTCFullYear() % 100, p, 2);\n  }\n\n  function formatUTCFullYear(d, p) {\n    return pad(d.getUTCFullYear() % 10000, p, 4);\n  }\n\n  function formatUTCZone() {\n    return \"+0000\";\n  }\n\n  function formatLiteralPercent() {\n    return \"%\";\n  }\n\n  var locale$1;\n  exports.timeFormat;\n  exports.timeParse;\n  exports.utcFormat;\n  exports.utcParse;\n\n  defaultLocale$1({\n    dateTime: \"%x, %X\",\n    date: \"%-m/%-d/%Y\",\n    time: \"%-I:%M:%S %p\",\n    periods: [\"AM\", \"PM\"],\n    days: [\"Sunday\", \"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\", \"Saturday\"],\n    shortDays: [\"Sun\", \"Mon\", \"Tue\", \"Wed\", \"Thu\", \"Fri\", \"Sat\"],\n    months: [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\", \"July\", \"August\", \"September\", \"October\", \"November\", \"December\"],\n    shortMonths: [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\", \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\", \"Dec\"]\n  });\n\n  function defaultLocale$1(definition) {\n    locale$1 = formatLocale$1(definition);\n    exports.timeFormat = locale$1.format;\n    exports.timeParse = locale$1.parse;\n    exports.utcFormat = locale$1.utcFormat;\n    exports.utcParse = locale$1.utcParse;\n    return locale$1;\n  }\n\n  var isoSpecifier = \"%Y-%m-%dT%H:%M:%S.%LZ\";\n\n  function formatIsoNative(date) {\n    return date.toISOString();\n  }\n\n  var formatIso = Date.prototype.toISOString\n      ? formatIsoNative\n      : exports.utcFormat(isoSpecifier);\n\n  function parseIsoNative(string) {\n    var date = new Date(string);\n    return isNaN(date) ? null : date;\n  }\n\n  var parseIso = +new Date(\"2000-01-01T00:00:00.000Z\")\n      ? parseIsoNative\n      : exports.utcParse(isoSpecifier);\n\n  var array$2 = Array.prototype;\n\n  var map$2 = array$2.map;\n  var slice$3 = array$2.slice;\n\n  var implicit = {name: \"implicit\"};\n\n  function ordinal(range) {\n    var index = map$1(),\n        domain = [],\n        unknown = implicit;\n\n    range = range == null ? [] : slice$3.call(range);\n\n    function scale(d) {\n      var key = d + \"\", i = index.get(key);\n      if (!i) {\n        if (unknown !== implicit) return unknown;\n        index.set(key, i = domain.push(d));\n      }\n      return range[(i - 1) % range.length];\n    }\n\n    scale.domain = function(_) {\n      if (!arguments.length) return domain.slice();\n      domain = [], index = map$1();\n      var i = -1, n = _.length, d, key;\n      while (++i < n) if (!index.has(key = (d = _[i]) + \"\")) index.set(key, domain.push(d));\n      return scale;\n    };\n\n    scale.range = function(_) {\n      return arguments.length ? (range = slice$3.call(_), scale) : range.slice();\n    };\n\n    scale.unknown = function(_) {\n      return arguments.length ? (unknown = _, scale) : unknown;\n    };\n\n    scale.copy = function() {\n      return ordinal()\n          .domain(domain)\n          .range(range)\n          .unknown(unknown);\n    };\n\n    return scale;\n  }\n\n  function band() {\n    var scale = ordinal().unknown(undefined),\n        domain = scale.domain,\n        ordinalRange = scale.range,\n        range$$ = [0, 1],\n        step,\n        bandwidth,\n        round = false,\n        paddingInner = 0,\n        paddingOuter = 0,\n        align = 0.5;\n\n    delete scale.unknown;\n\n    function rescale() {\n      var n = domain().length,\n          reverse = range$$[1] < range$$[0],\n          start = range$$[reverse - 0],\n          stop = range$$[1 - reverse];\n      step = (stop - start) / Math.max(1, n - paddingInner + paddingOuter * 2);\n      if (round) step = Math.floor(step);\n      start += (stop - start - step * (n - paddingInner)) * align;\n      bandwidth = step * (1 - paddingInner);\n      if (round) start = Math.round(start), bandwidth = Math.round(bandwidth);\n      var values = range(n).map(function(i) { return start + step * i; });\n      return ordinalRange(reverse ? values.reverse() : values);\n    }\n\n    scale.domain = function(_) {\n      return arguments.length ? (domain(_), rescale()) : domain();\n    };\n\n    scale.range = function(_) {\n      return arguments.length ? (range$$ = [+_[0], +_[1]], rescale()) : range$$.slice();\n    };\n\n    scale.rangeRound = function(_) {\n      return range$$ = [+_[0], +_[1]], round = true, rescale();\n    };\n\n    scale.bandwidth = function() {\n      return bandwidth;\n    };\n\n    scale.step = function() {\n      return step;\n    };\n\n    scale.round = function(_) {\n      return arguments.length ? (round = !!_, rescale()) : round;\n    };\n\n    scale.padding = function(_) {\n      return arguments.length ? (paddingInner = paddingOuter = Math.max(0, Math.min(1, _)), rescale()) : paddingInner;\n    };\n\n    scale.paddingInner = function(_) {\n      return arguments.length ? (paddingInner = Math.max(0, Math.min(1, _)), rescale()) : paddingInner;\n    };\n\n    scale.paddingOuter = function(_) {\n      return arguments.length ? (paddingOuter = Math.max(0, Math.min(1, _)), rescale()) : paddingOuter;\n    };\n\n    scale.align = function(_) {\n      return arguments.length ? (align = Math.max(0, Math.min(1, _)), rescale()) : align;\n    };\n\n    scale.copy = function() {\n      return band()\n          .domain(domain())\n          .range(range$$)\n          .round(round)\n          .paddingInner(paddingInner)\n          .paddingOuter(paddingOuter)\n          .align(align);\n    };\n\n    return rescale();\n  }\n\n  function pointish(scale) {\n    var copy = scale.copy;\n\n    scale.padding = scale.paddingOuter;\n    delete scale.paddingInner;\n    delete scale.paddingOuter;\n\n    scale.copy = function() {\n      return pointish(copy());\n    };\n\n    return scale;\n  }\n\n  function point$4() {\n    return pointish(band().paddingInner(1));\n  }\n\n  function constant$3(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  function number$1(x) {\n    return +x;\n  }\n\n  var unit = [0, 1];\n\n  function deinterpolate(a, b) {\n    return (b -= (a = +a))\n        ? function(x) { return (x - a) / b; }\n        : constant$3(b);\n  }\n\n  function deinterpolateClamp(deinterpolate) {\n    return function(a, b) {\n      var d = deinterpolate(a = +a, b = +b);\n      return function(x) { return x <= a ? 0 : x >= b ? 1 : d(x); };\n    };\n  }\n\n  function reinterpolateClamp(reinterpolate) {\n    return function(a, b) {\n      var r = reinterpolate(a = +a, b = +b);\n      return function(t) { return t <= 0 ? a : t >= 1 ? b : r(t); };\n    };\n  }\n\n  function bimap(domain, range, deinterpolate, reinterpolate) {\n    var d0 = domain[0], d1 = domain[1], r0 = range[0], r1 = range[1];\n    if (d1 < d0) d0 = deinterpolate(d1, d0), r0 = reinterpolate(r1, r0);\n    else d0 = deinterpolate(d0, d1), r0 = reinterpolate(r0, r1);\n    return function(x) { return r0(d0(x)); };\n  }\n\n  function polymap(domain, range, deinterpolate, reinterpolate) {\n    var j = Math.min(domain.length, range.length) - 1,\n        d = new Array(j),\n        r = new Array(j),\n        i = -1;\n\n    // Reverse descending domains.\n    if (domain[j] < domain[0]) {\n      domain = domain.slice().reverse();\n      range = range.slice().reverse();\n    }\n\n    while (++i < j) {\n      d[i] = deinterpolate(domain[i], domain[i + 1]);\n      r[i] = reinterpolate(range[i], range[i + 1]);\n    }\n\n    return function(x) {\n      var i = bisectRight(domain, x, 1, j) - 1;\n      return r[i](d[i](x));\n    };\n  }\n\n  function copy(source, target) {\n    return target\n        .domain(source.domain())\n        .range(source.range())\n        .interpolate(source.interpolate())\n        .clamp(source.clamp());\n  }\n\n  // deinterpolate(a, b)(x) takes a domain value x in [a,b] and returns the corresponding parameter t in [0,1].\n  // reinterpolate(a, b)(t) takes a parameter t in [0,1] and returns the corresponding domain value x in [a,b].\n  function continuous(deinterpolate$$, reinterpolate) {\n    var domain = unit,\n        range = unit,\n        interpolate$$ = interpolate,\n        clamp = false,\n        piecewise,\n        output,\n        input;\n\n    function rescale() {\n      piecewise = Math.min(domain.length, range.length) > 2 ? polymap : bimap;\n      output = input = null;\n      return scale;\n    }\n\n    function scale(x) {\n      return (output || (output = piecewise(domain, range, clamp ? deinterpolateClamp(deinterpolate$$) : deinterpolate$$, interpolate$$)))(+x);\n    }\n\n    scale.invert = function(y) {\n      return (input || (input = piecewise(range, domain, deinterpolate, clamp ? reinterpolateClamp(reinterpolate) : reinterpolate)))(+y);\n    };\n\n    scale.domain = function(_) {\n      return arguments.length ? (domain = map$2.call(_, number$1), rescale()) : domain.slice();\n    };\n\n    scale.range = function(_) {\n      return arguments.length ? (range = slice$3.call(_), rescale()) : range.slice();\n    };\n\n    scale.rangeRound = function(_) {\n      return range = slice$3.call(_), interpolate$$ = interpolateRound, rescale();\n    };\n\n    scale.clamp = function(_) {\n      return arguments.length ? (clamp = !!_, rescale()) : clamp;\n    };\n\n    scale.interpolate = function(_) {\n      return arguments.length ? (interpolate$$ = _, rescale()) : interpolate$$;\n    };\n\n    return rescale();\n  }\n\n  function tickFormat(domain, count, specifier) {\n    var start = domain[0],\n        stop = domain[domain.length - 1],\n        step = tickStep(start, stop, count == null ? 10 : count),\n        precision;\n    specifier = formatSpecifier(specifier == null ? \",f\" : specifier);\n    switch (specifier.type) {\n      case \"s\": {\n        var value = Math.max(Math.abs(start), Math.abs(stop));\n        if (specifier.precision == null && !isNaN(precision = precisionPrefix(step, value))) specifier.precision = precision;\n        return exports.formatPrefix(specifier, value);\n      }\n      case \"\":\n      case \"e\":\n      case \"g\":\n      case \"p\":\n      case \"r\": {\n        if (specifier.precision == null && !isNaN(precision = precisionRound(step, Math.max(Math.abs(start), Math.abs(stop))))) specifier.precision = precision - (specifier.type === \"e\");\n        break;\n      }\n      case \"f\":\n      case \"%\": {\n        if (specifier.precision == null && !isNaN(precision = precisionFixed(step))) specifier.precision = precision - (specifier.type === \"%\") * 2;\n        break;\n      }\n    }\n    return exports.format(specifier);\n  }\n\n  function linearish(scale) {\n    var domain = scale.domain;\n\n    scale.ticks = function(count) {\n      var d = domain();\n      return ticks(d[0], d[d.length - 1], count == null ? 10 : count);\n    };\n\n    scale.tickFormat = function(count, specifier) {\n      return tickFormat(domain(), count, specifier);\n    };\n\n    scale.nice = function(count) {\n      var d = domain(),\n          i = d.length - 1,\n          n = count == null ? 10 : count,\n          start = d[0],\n          stop = d[i],\n          step = tickStep(start, stop, n);\n\n      if (step) {\n        step = tickStep(Math.floor(start / step) * step, Math.ceil(stop / step) * step, n);\n        d[0] = Math.floor(start / step) * step;\n        d[i] = Math.ceil(stop / step) * step;\n        domain(d);\n      }\n\n      return scale;\n    };\n\n    return scale;\n  }\n\n  function linear$2() {\n    var scale = continuous(deinterpolate, interpolateNumber);\n\n    scale.copy = function() {\n      return copy(scale, linear$2());\n    };\n\n    return linearish(scale);\n  }\n\n  function identity$4() {\n    var domain = [0, 1];\n\n    function scale(x) {\n      return +x;\n    }\n\n    scale.invert = scale;\n\n    scale.domain = scale.range = function(_) {\n      return arguments.length ? (domain = map$2.call(_, number$1), scale) : domain.slice();\n    };\n\n    scale.copy = function() {\n      return identity$4().domain(domain);\n    };\n\n    return linearish(scale);\n  }\n\n  function nice(domain, interval) {\n    domain = domain.slice();\n\n    var i0 = 0,\n        i1 = domain.length - 1,\n        x0 = domain[i0],\n        x1 = domain[i1],\n        t;\n\n    if (x1 < x0) {\n      t = i0, i0 = i1, i1 = t;\n      t = x0, x0 = x1, x1 = t;\n    }\n\n    domain[i0] = interval.floor(x0);\n    domain[i1] = interval.ceil(x1);\n    return domain;\n  }\n\n  function deinterpolate$1(a, b) {\n    return (b = Math.log(b / a))\n        ? function(x) { return Math.log(x / a) / b; }\n        : constant$3(b);\n  }\n\n  function reinterpolate(a, b) {\n    return a < 0\n        ? function(t) { return -Math.pow(-b, t) * Math.pow(-a, 1 - t); }\n        : function(t) { return Math.pow(b, t) * Math.pow(a, 1 - t); };\n  }\n\n  function pow10(x) {\n    return isFinite(x) ? +(\"1e\" + x) : x < 0 ? 0 : x;\n  }\n\n  function powp(base) {\n    return base === 10 ? pow10\n        : base === Math.E ? Math.exp\n        : function(x) { return Math.pow(base, x); };\n  }\n\n  function logp(base) {\n    return base === Math.E ? Math.log\n        : base === 10 && Math.log10\n        || base === 2 && Math.log2\n        || (base = Math.log(base), function(x) { return Math.log(x) / base; });\n  }\n\n  function reflect(f) {\n    return function(x) {\n      return -f(-x);\n    };\n  }\n\n  function log() {\n    var scale = continuous(deinterpolate$1, reinterpolate).domain([1, 10]),\n        domain = scale.domain,\n        base = 10,\n        logs = logp(10),\n        pows = powp(10);\n\n    function rescale() {\n      logs = logp(base), pows = powp(base);\n      if (domain()[0] < 0) logs = reflect(logs), pows = reflect(pows);\n      return scale;\n    }\n\n    scale.base = function(_) {\n      return arguments.length ? (base = +_, rescale()) : base;\n    };\n\n    scale.domain = function(_) {\n      return arguments.length ? (domain(_), rescale()) : domain();\n    };\n\n    scale.ticks = function(count) {\n      var d = domain(),\n          u = d[0],\n          v = d[d.length - 1],\n          r;\n\n      if (r = v < u) i = u, u = v, v = i;\n\n      var i = logs(u),\n          j = logs(v),\n          p,\n          k,\n          t,\n          n = count == null ? 10 : +count,\n          z = [];\n\n      if (!(base % 1) && j - i < n) {\n        i = Math.round(i) - 1, j = Math.round(j) + 1;\n        if (u > 0) for (; i < j; ++i) {\n          for (k = 1, p = pows(i); k < base; ++k) {\n            t = p * k;\n            if (t < u) continue;\n            if (t > v) break;\n            z.push(t);\n          }\n        } else for (; i < j; ++i) {\n          for (k = base - 1, p = pows(i); k >= 1; --k) {\n            t = p * k;\n            if (t < u) continue;\n            if (t > v) break;\n            z.push(t);\n          }\n        }\n      } else {\n        z = ticks(i, j, Math.min(j - i, n)).map(pows);\n      }\n\n      return r ? z.reverse() : z;\n    };\n\n    scale.tickFormat = function(count, specifier) {\n      if (specifier == null) specifier = base === 10 ? \".0e\" : \",\";\n      if (typeof specifier !== \"function\") specifier = exports.format(specifier);\n      if (count === Infinity) return specifier;\n      if (count == null) count = 10;\n      var k = Math.max(1, base * count / scale.ticks().length); // TODO fast estimate?\n      return function(d) {\n        var i = d / pows(Math.round(logs(d)));\n        if (i * base < base - 0.5) i *= base;\n        return i <= k ? specifier(d) : \"\";\n      };\n    };\n\n    scale.nice = function() {\n      return domain(nice(domain(), {\n        floor: function(x) { return pows(Math.floor(logs(x))); },\n        ceil: function(x) { return pows(Math.ceil(logs(x))); }\n      }));\n    };\n\n    scale.copy = function() {\n      return copy(scale, log().base(base));\n    };\n\n    return scale;\n  }\n\n  function raise(x, exponent) {\n    return x < 0 ? -Math.pow(-x, exponent) : Math.pow(x, exponent);\n  }\n\n  function pow() {\n    var exponent = 1,\n        scale = continuous(deinterpolate, reinterpolate),\n        domain = scale.domain;\n\n    function deinterpolate(a, b) {\n      return (b = raise(b, exponent) - (a = raise(a, exponent)))\n          ? function(x) { return (raise(x, exponent) - a) / b; }\n          : constant$3(b);\n    }\n\n    function reinterpolate(a, b) {\n      b = raise(b, exponent) - (a = raise(a, exponent));\n      return function(t) { return raise(a + b * t, 1 / exponent); };\n    }\n\n    scale.exponent = function(_) {\n      return arguments.length ? (exponent = +_, domain(domain())) : exponent;\n    };\n\n    scale.copy = function() {\n      return copy(scale, pow().exponent(exponent));\n    };\n\n    return linearish(scale);\n  }\n\n  function sqrt() {\n    return pow().exponent(0.5);\n  }\n\n  function quantile() {\n    var domain = [],\n        range = [],\n        thresholds = [];\n\n    function rescale() {\n      var i = 0, n = Math.max(1, range.length);\n      thresholds = new Array(n - 1);\n      while (++i < n) thresholds[i - 1] = threshold(domain, i / n);\n      return scale;\n    }\n\n    function scale(x) {\n      if (!isNaN(x = +x)) return range[bisectRight(thresholds, x)];\n    }\n\n    scale.invertExtent = function(y) {\n      var i = range.indexOf(y);\n      return i < 0 ? [NaN, NaN] : [\n        i > 0 ? thresholds[i - 1] : domain[0],\n        i < thresholds.length ? thresholds[i] : domain[domain.length - 1]\n      ];\n    };\n\n    scale.domain = function(_) {\n      if (!arguments.length) return domain.slice();\n      domain = [];\n      for (var i = 0, n = _.length, d; i < n; ++i) if (d = _[i], d != null && !isNaN(d = +d)) domain.push(d);\n      domain.sort(ascending);\n      return rescale();\n    };\n\n    scale.range = function(_) {\n      return arguments.length ? (range = slice$3.call(_), rescale()) : range.slice();\n    };\n\n    scale.quantiles = function() {\n      return thresholds.slice();\n    };\n\n    scale.copy = function() {\n      return quantile()\n          .domain(domain)\n          .range(range);\n    };\n\n    return scale;\n  }\n\n  function quantize$1() {\n    var x0 = 0,\n        x1 = 1,\n        n = 1,\n        domain = [0.5],\n        range = [0, 1];\n\n    function scale(x) {\n      if (x <= x) return range[bisectRight(domain, x, 0, n)];\n    }\n\n    function rescale() {\n      var i = -1;\n      domain = new Array(n);\n      while (++i < n) domain[i] = ((i + 1) * x1 - (i - n) * x0) / (n + 1);\n      return scale;\n    }\n\n    scale.domain = function(_) {\n      return arguments.length ? (x0 = +_[0], x1 = +_[1], rescale()) : [x0, x1];\n    };\n\n    scale.range = function(_) {\n      return arguments.length ? (n = (range = slice$3.call(_)).length - 1, rescale()) : range.slice();\n    };\n\n    scale.invertExtent = function(y) {\n      var i = range.indexOf(y);\n      return i < 0 ? [NaN, NaN]\n          : i < 1 ? [x0, domain[0]]\n          : i >= n ? [domain[n - 1], x1]\n          : [domain[i - 1], domain[i]];\n    };\n\n    scale.copy = function() {\n      return quantize$1()\n          .domain([x0, x1])\n          .range(range);\n    };\n\n    return linearish(scale);\n  }\n\n  function threshold$1() {\n    var domain = [0.5],\n        range = [0, 1],\n        n = 1;\n\n    function scale(x) {\n      if (x <= x) return range[bisectRight(domain, x, 0, n)];\n    }\n\n    scale.domain = function(_) {\n      return arguments.length ? (domain = slice$3.call(_), n = Math.min(domain.length, range.length - 1), scale) : domain.slice();\n    };\n\n    scale.range = function(_) {\n      return arguments.length ? (range = slice$3.call(_), n = Math.min(domain.length, range.length - 1), scale) : range.slice();\n    };\n\n    scale.invertExtent = function(y) {\n      var i = range.indexOf(y);\n      return [domain[i - 1], domain[i]];\n    };\n\n    scale.copy = function() {\n      return threshold$1()\n          .domain(domain)\n          .range(range);\n    };\n\n    return scale;\n  }\n\nvar   durationSecond$1 = 1000;\nvar   durationMinute$1 = durationSecond$1 * 60;\nvar   durationHour$1 = durationMinute$1 * 60;\nvar   durationDay$1 = durationHour$1 * 24;\nvar   durationWeek$1 = durationDay$1 * 7;\n  var durationMonth = durationDay$1 * 30;\n  var durationYear = durationDay$1 * 365;\n  function date$1(t) {\n    return new Date(t);\n  }\n\n  function number$2(t) {\n    return t instanceof Date ? +t : +new Date(+t);\n  }\n\n  function calendar(year, month, week, day, hour, minute, second, millisecond, format) {\n    var scale = continuous(deinterpolate, interpolateNumber),\n        invert = scale.invert,\n        domain = scale.domain;\n\n    var formatMillisecond = format(\".%L\"),\n        formatSecond = format(\":%S\"),\n        formatMinute = format(\"%I:%M\"),\n        formatHour = format(\"%I %p\"),\n        formatDay = format(\"%a %d\"),\n        formatWeek = format(\"%b %d\"),\n        formatMonth = format(\"%B\"),\n        formatYear = format(\"%Y\");\n\n    var tickIntervals = [\n      [second,  1,      durationSecond$1],\n      [second,  5,  5 * durationSecond$1],\n      [second, 15, 15 * durationSecond$1],\n      [second, 30, 30 * durationSecond$1],\n      [minute,  1,      durationMinute$1],\n      [minute,  5,  5 * durationMinute$1],\n      [minute, 15, 15 * durationMinute$1],\n      [minute, 30, 30 * durationMinute$1],\n      [  hour,  1,      durationHour$1  ],\n      [  hour,  3,  3 * durationHour$1  ],\n      [  hour,  6,  6 * durationHour$1  ],\n      [  hour, 12, 12 * durationHour$1  ],\n      [   day,  1,      durationDay$1   ],\n      [   day,  2,  2 * durationDay$1   ],\n      [  week,  1,      durationWeek$1  ],\n      [ month,  1,      durationMonth ],\n      [ month,  3,  3 * durationMonth ],\n      [  year,  1,      durationYear  ]\n    ];\n\n    function tickFormat(date) {\n      return (second(date) < date ? formatMillisecond\n          : minute(date) < date ? formatSecond\n          : hour(date) < date ? formatMinute\n          : day(date) < date ? formatHour\n          : month(date) < date ? (week(date) < date ? formatDay : formatWeek)\n          : year(date) < date ? formatMonth\n          : formatYear)(date);\n    }\n\n    function tickInterval(interval, start, stop, step) {\n      if (interval == null) interval = 10;\n\n      // If a desired tick count is specified, pick a reasonable tick interval\n      // based on the extent of the domain and a rough estimate of tick size.\n      // Otherwise, assume interval is already a time interval and use it.\n      if (typeof interval === \"number\") {\n        var target = Math.abs(stop - start) / interval,\n            i = bisector(function(i) { return i[2]; }).right(tickIntervals, target);\n        if (i === tickIntervals.length) {\n          step = tickStep(start / durationYear, stop / durationYear, interval);\n          interval = year;\n        } else if (i) {\n          i = tickIntervals[target / tickIntervals[i - 1][2] < tickIntervals[i][2] / target ? i - 1 : i];\n          step = i[1];\n          interval = i[0];\n        } else {\n          step = tickStep(start, stop, interval);\n          interval = millisecond;\n        }\n      }\n\n      return step == null ? interval : interval.every(step);\n    }\n\n    scale.invert = function(y) {\n      return new Date(invert(y));\n    };\n\n    scale.domain = function(_) {\n      return arguments.length ? domain(map$2.call(_, number$2)) : domain().map(date$1);\n    };\n\n    scale.ticks = function(interval, step) {\n      var d = domain(),\n          t0 = d[0],\n          t1 = d[d.length - 1],\n          r = t1 < t0,\n          t;\n      if (r) t = t0, t0 = t1, t1 = t;\n      t = tickInterval(interval, t0, t1, step);\n      t = t ? t.range(t0, t1 + 1) : []; // inclusive stop\n      return r ? t.reverse() : t;\n    };\n\n    scale.tickFormat = function(count, specifier) {\n      return specifier == null ? tickFormat : format(specifier);\n    };\n\n    scale.nice = function(interval, step) {\n      var d = domain();\n      return (interval = tickInterval(interval, d[0], d[d.length - 1], step))\n          ? domain(nice(d, interval))\n          : scale;\n    };\n\n    scale.copy = function() {\n      return copy(scale, calendar(year, month, week, day, hour, minute, second, millisecond, format));\n    };\n\n    return scale;\n  }\n\n  function time() {\n    return calendar(year, month, timeWeek, day, hour, minute, second, millisecond, exports.timeFormat).domain([new Date(2000, 0, 1), new Date(2000, 0, 2)]);\n  }\n\n  function utcTime() {\n    return calendar(utcYear, utcMonth, utcWeek, utcDay, utcHour, utcMinute, second, millisecond, exports.utcFormat).domain([Date.UTC(2000, 0, 1), Date.UTC(2000, 0, 2)]);\n  }\n\n  function colors(s) {\n    return s.match(/.{6}/g).map(function(x) {\n      return \"#\" + x;\n    });\n  }\n\n  var category10 = colors(\"1f77b4ff7f0e2ca02cd627289467bd8c564be377c27f7f7fbcbd2217becf\");\n\n  var category20b = colors(\"393b795254a36b6ecf9c9ede6379398ca252b5cf6bcedb9c8c6d31bd9e39e7ba52e7cb94843c39ad494ad6616be7969c7b4173a55194ce6dbdde9ed6\");\n\n  var category20c = colors(\"3182bd6baed69ecae1c6dbefe6550dfd8d3cfdae6bfdd0a231a35474c476a1d99bc7e9c0756bb19e9ac8bcbddcdadaeb636363969696bdbdbdd9d9d9\");\n\n  var category20 = colors(\"1f77b4aec7e8ff7f0effbb782ca02c98df8ad62728ff98969467bdc5b0d58c564bc49c94e377c2f7b6d27f7f7fc7c7c7bcbd22dbdb8d17becf9edae5\");\n\n  var cubehelix$3 = interpolateCubehelixLong(cubehelix(300, 0.5, 0.0), cubehelix(-240, 0.5, 1.0));\n\n  var warm = interpolateCubehelixLong(cubehelix(-100, 0.75, 0.35), cubehelix(80, 1.50, 0.8));\n\n  var cool = interpolateCubehelixLong(cubehelix(260, 0.75, 0.35), cubehelix(80, 1.50, 0.8));\n\n  var rainbow = cubehelix();\n\n  function rainbow$1(t) {\n    if (t < 0 || t > 1) t -= Math.floor(t);\n    var ts = Math.abs(t - 0.5);\n    rainbow.h = 360 * t - 100;\n    rainbow.s = 1.5 - 1.5 * ts;\n    rainbow.l = 0.8 - 0.9 * ts;\n    return rainbow + \"\";\n  }\n\n  function ramp(range) {\n    var n = range.length;\n    return function(t) {\n      return range[Math.max(0, Math.min(n - 1, Math.floor(t * n)))];\n    };\n  }\n\n  var viridis = ramp(colors(\"44015444025645045745055946075a46085c460a5d460b5e470d60470e6147106347116447136548146748166848176948186a481a6c481b6d481c6e481d6f481f70482071482173482374482475482576482677482878482979472a7a472c7a472d7b472e7c472f7d46307e46327e46337f463480453581453781453882443983443a83443b84433d84433e85423f854240864241864142874144874045884046883f47883f48893e49893e4a893e4c8a3d4d8a3d4e8a3c4f8a3c508b3b518b3b528b3a538b3a548c39558c39568c38588c38598c375a8c375b8d365c8d365d8d355e8d355f8d34608d34618d33628d33638d32648e32658e31668e31678e31688e30698e306a8e2f6b8e2f6c8e2e6d8e2e6e8e2e6f8e2d708e2d718e2c718e2c728e2c738e2b748e2b758e2a768e2a778e2a788e29798e297a8e297b8e287c8e287d8e277e8e277f8e27808e26818e26828e26828e25838e25848e25858e24868e24878e23888e23898e238a8d228b8d228c8d228d8d218e8d218f8d21908d21918c20928c20928c20938c1f948c1f958b1f968b1f978b1f988b1f998a1f9a8a1e9b8a1e9c891e9d891f9e891f9f881fa0881fa1881fa1871fa28720a38620a48621a58521a68522a78522a88423a98324aa8325ab8225ac8226ad8127ad8128ae8029af7f2ab07f2cb17e2db27d2eb37c2fb47c31b57b32b67a34b67935b77937b87838b9773aba763bbb753dbc743fbc7340bd7242be7144bf7046c06f48c16e4ac16d4cc26c4ec36b50c46a52c56954c56856c66758c7655ac8645cc8635ec96260ca6063cb5f65cb5e67cc5c69cd5b6ccd5a6ece5870cf5773d05675d05477d1537ad1517cd2507fd34e81d34d84d44b86d54989d5488bd6468ed64590d74393d74195d84098d83e9bd93c9dd93ba0da39a2da37a5db36a8db34aadc32addc30b0dd2fb2dd2db5de2bb8de29bade28bddf26c0df25c2df23c5e021c8e020cae11fcde11dd0e11cd2e21bd5e21ad8e219dae319dde318dfe318e2e418e5e419e7e419eae51aece51befe51cf1e51df4e61ef6e620f8e621fbe723fde725\"));\n\n  var magma = ramp(colors(\"00000401000501010601010802010902020b02020d03030f03031204041405041606051806051a07061c08071e0907200a08220b09240c09260d0a290e0b2b100b2d110c2f120d31130d34140e36150e38160f3b180f3d19103f1a10421c10441d11471e114920114b21114e22115024125325125527125829115a2a115c2c115f2d11612f116331116533106734106936106b38106c390f6e3b0f703d0f713f0f72400f74420f75440f764510774710784910784a10794c117a4e117b4f127b51127c52137c54137d56147d57157e59157e5a167e5c167f5d177f5f187f601880621980641a80651a80671b80681c816a1c816b1d816d1d816e1e81701f81721f817320817521817621817822817922827b23827c23827e24828025828125818326818426818627818827818928818b29818c29818e2a81902a81912b81932b80942c80962c80982d80992d809b2e7f9c2e7f9e2f7fa02f7fa1307ea3307ea5317ea6317da8327daa337dab337cad347cae347bb0357bb2357bb3367ab5367ab73779b83779ba3878bc3978bd3977bf3a77c03a76c23b75c43c75c53c74c73d73c83e73ca3e72cc3f71cd4071cf4070d0416fd2426fd3436ed5446dd6456cd8456cd9466bdb476adc4869de4968df4a68e04c67e24d66e34e65e44f64e55064e75263e85362e95462ea5661eb5760ec5860ed5a5fee5b5eef5d5ef05f5ef1605df2625df2645cf3655cf4675cf4695cf56b5cf66c5cf66e5cf7705cf7725cf8745cf8765cf9785df9795df97b5dfa7d5efa7f5efa815ffb835ffb8560fb8761fc8961fc8a62fc8c63fc8e64fc9065fd9266fd9467fd9668fd9869fd9a6afd9b6bfe9d6cfe9f6dfea16efea36ffea571fea772fea973feaa74feac76feae77feb078feb27afeb47bfeb67cfeb77efeb97ffebb81febd82febf84fec185fec287fec488fec68afec88cfeca8dfecc8ffecd90fecf92fed194fed395fed597fed799fed89afdda9cfddc9efddea0fde0a1fde2a3fde3a5fde5a7fde7a9fde9aafdebacfcecaefceeb0fcf0b2fcf2b4fcf4b6fcf6b8fcf7b9fcf9bbfcfbbdfcfdbf\"));\n\n  var inferno = ramp(colors(\"00000401000501010601010802010a02020c02020e03021004031204031405041706041907051b08051d09061f0a07220b07240c08260d08290e092b10092d110a30120a32140b34150b37160b39180c3c190c3e1b0c411c0c431e0c451f0c48210c4a230c4c240c4f260c51280b53290b552b0b572d0b592f0a5b310a5c320a5e340a5f3609613809623909633b09643d09653e0966400a67420a68440a68450a69470b6a490b6a4a0c6b4c0c6b4d0d6c4f0d6c510e6c520e6d540f6d550f6d57106e59106e5a116e5c126e5d126e5f136e61136e62146e64156e65156e67166e69166e6a176e6c186e6d186e6f196e71196e721a6e741a6e751b6e771c6d781c6d7a1d6d7c1d6d7d1e6d7f1e6c801f6c82206c84206b85216b87216b88226a8a226a8c23698d23698f24699025689225689326679526679727669827669a28659b29649d29649f2a63a02a63a22b62a32c61a52c60a62d60a82e5fa92e5eab2f5ead305dae305cb0315bb1325ab3325ab43359b63458b73557b93556ba3655bc3754bd3853bf3952c03a51c13a50c33b4fc43c4ec63d4dc73e4cc83f4bca404acb4149cc4248ce4347cf4446d04545d24644d34743d44842d54a41d74b3fd84c3ed94d3dda4e3cdb503bdd513ade5238df5337e05536e15635e25734e35933e45a31e55c30e65d2fe75e2ee8602de9612bea632aeb6429eb6628ec6726ed6925ee6a24ef6c23ef6e21f06f20f1711ff1731df2741cf3761bf37819f47918f57b17f57d15f67e14f68013f78212f78410f8850ff8870ef8890cf98b0bf98c0af98e09fa9008fa9207fa9407fb9606fb9706fb9906fb9b06fb9d07fc9f07fca108fca309fca50afca60cfca80dfcaa0ffcac11fcae12fcb014fcb216fcb418fbb61afbb81dfbba1ffbbc21fbbe23fac026fac228fac42afac62df9c72ff9c932f9cb35f8cd37f8cf3af7d13df7d340f6d543f6d746f5d949f5db4cf4dd4ff4df53f4e156f3e35af3e55df2e661f2e865f2ea69f1ec6df1ed71f1ef75f1f179f2f27df2f482f3f586f3f68af4f88ef5f992f6fa96f8fb9af9fc9dfafda1fcffa4\"));\n\n  var plasma = ramp(colors(\"0d088710078813078916078a19068c1b068d1d068e20068f2206902406912605912805922a05932c05942e05952f059631059733059735049837049938049a3a049a3c049b3e049c3f049c41049d43039e44039e46039f48039f4903a04b03a14c02a14e02a25002a25102a35302a35502a45601a45801a45901a55b01a55c01a65e01a66001a66100a76300a76400a76600a76700a86900a86a00a86c00a86e00a86f00a87100a87201a87401a87501a87701a87801a87a02a87b02a87d03a87e03a88004a88104a78305a78405a78606a68707a68808a68a09a58b0aa58d0ba58e0ca48f0da4910ea3920fa39410a29511a19613a19814a099159f9a169f9c179e9d189d9e199da01a9ca11b9ba21d9aa31e9aa51f99a62098a72197a82296aa2395ab2494ac2694ad2793ae2892b02991b12a90b22b8fb32c8eb42e8db52f8cb6308bb7318ab83289ba3388bb3488bc3587bd3786be3885bf3984c03a83c13b82c23c81c33d80c43e7fc5407ec6417dc7427cc8437bc9447aca457acb4679cc4778cc4977cd4a76ce4b75cf4c74d04d73d14e72d24f71d35171d45270d5536fd5546ed6556dd7566cd8576bd9586ada5a6ada5b69db5c68dc5d67dd5e66de5f65de6164df6263e06363e16462e26561e26660e3685fe4695ee56a5de56b5de66c5ce76e5be76f5ae87059e97158e97257ea7457eb7556eb7655ec7754ed7953ed7a52ee7b51ef7c51ef7e50f07f4ff0804ef1814df1834cf2844bf3854bf3874af48849f48948f58b47f58c46f68d45f68f44f79044f79143f79342f89441f89540f9973ff9983ef99a3efa9b3dfa9c3cfa9e3bfb9f3afba139fba238fca338fca537fca636fca835fca934fdab33fdac33fdae32fdaf31fdb130fdb22ffdb42ffdb52efeb72dfeb82cfeba2cfebb2bfebd2afebe2afec029fdc229fdc328fdc527fdc627fdc827fdca26fdcb26fccd25fcce25fcd025fcd225fbd324fbd524fbd724fad824fada24f9dc24f9dd25f8df25f8e125f7e225f7e425f6e626f6e826f5e926f5eb27f4ed27f3ee27f3f027f2f227f1f426f1f525f0f724f0f921\"));\n\n  function sequential(interpolator) {\n    var x0 = 0,\n        x1 = 1,\n        clamp = false;\n\n    function scale(x) {\n      var t = (x - x0) / (x1 - x0);\n      return interpolator(clamp ? Math.max(0, Math.min(1, t)) : t);\n    }\n\n    scale.domain = function(_) {\n      return arguments.length ? (x0 = +_[0], x1 = +_[1], scale) : [x0, x1];\n    };\n\n    scale.clamp = function(_) {\n      return arguments.length ? (clamp = !!_, scale) : clamp;\n    };\n\n    scale.interpolator = function(_) {\n      return arguments.length ? (interpolator = _, scale) : interpolator;\n    };\n\n    scale.copy = function() {\n      return sequential(interpolator).domain([x0, x1]).clamp(clamp);\n    };\n\n    return linearish(scale);\n  }\n\n  var xhtml = \"http://www.w3.org/1999/xhtml\";\n\n  var namespaces = {\n    svg: \"http://www.w3.org/2000/svg\",\n    xhtml: xhtml,\n    xlink: \"http://www.w3.org/1999/xlink\",\n    xml: \"http://www.w3.org/XML/1998/namespace\",\n    xmlns: \"http://www.w3.org/2000/xmlns/\"\n  };\n\n  function namespace(name) {\n    var prefix = name += \"\", i = prefix.indexOf(\":\");\n    if (i >= 0 && (prefix = name.slice(0, i)) !== \"xmlns\") name = name.slice(i + 1);\n    return namespaces.hasOwnProperty(prefix) ? {space: namespaces[prefix], local: name} : name;\n  }\n\n  function creatorInherit(name) {\n    return function() {\n      var document = this.ownerDocument,\n          uri = this.namespaceURI;\n      return uri === xhtml && document.documentElement.namespaceURI === xhtml\n          ? document.createElement(name)\n          : document.createElementNS(uri, name);\n    };\n  }\n\n  function creatorFixed(fullname) {\n    return function() {\n      return this.ownerDocument.createElementNS(fullname.space, fullname.local);\n    };\n  }\n\n  function creator(name) {\n    var fullname = namespace(name);\n    return (fullname.local\n        ? creatorFixed\n        : creatorInherit)(fullname);\n  }\n\n  var nextId = 0;\n\n  function local() {\n    return new Local;\n  }\n\n  function Local() {\n    this._ = \"@\" + (++nextId).toString(36);\n  }\n\n  Local.prototype = local.prototype = {\n    constructor: Local,\n    get: function(node) {\n      var id = this._;\n      while (!(id in node)) if (!(node = node.parentNode)) return;\n      return node[id];\n    },\n    set: function(node, value) {\n      return node[this._] = value;\n    },\n    remove: function(node) {\n      return this._ in node && delete node[this._];\n    },\n    toString: function() {\n      return this._;\n    }\n  };\n\n  var matcher = function(selector) {\n    return function() {\n      return this.matches(selector);\n    };\n  };\n\n  if (typeof document !== \"undefined\") {\n    var element = document.documentElement;\n    if (!element.matches) {\n      var vendorMatches = element.webkitMatchesSelector\n          || element.msMatchesSelector\n          || element.mozMatchesSelector\n          || element.oMatchesSelector;\n      matcher = function(selector) {\n        return function() {\n          return vendorMatches.call(this, selector);\n        };\n      };\n    }\n  }\n\n  var matcher$1 = matcher;\n\n  var filterEvents = {};\n\n  exports.event = null;\n\n  if (typeof document !== \"undefined\") {\n    var element$1 = document.documentElement;\n    if (!(\"onmouseenter\" in element$1)) {\n      filterEvents = {mouseenter: \"mouseover\", mouseleave: \"mouseout\"};\n    }\n  }\n\n  function filterContextListener(listener, index, group) {\n    listener = contextListener(listener, index, group);\n    return function(event) {\n      var related = event.relatedTarget;\n      if (!related || (related !== this && !(related.compareDocumentPosition(this) & 8))) {\n        listener.call(this, event);\n      }\n    };\n  }\n\n  function contextListener(listener, index, group) {\n    return function(event1) {\n      var event0 = exports.event; // Events can be reentrant (e.g., focus).\n      exports.event = event1;\n      try {\n        listener.call(this, this.__data__, index, group);\n      } finally {\n        exports.event = event0;\n      }\n    };\n  }\n\n  function parseTypenames$1(typenames) {\n    return typenames.trim().split(/^|\\s+/).map(function(t) {\n      var name = \"\", i = t.indexOf(\".\");\n      if (i >= 0) name = t.slice(i + 1), t = t.slice(0, i);\n      return {type: t, name: name};\n    });\n  }\n\n  function onRemove(typename) {\n    return function() {\n      var on = this.__on;\n      if (!on) return;\n      for (var j = 0, i = -1, m = on.length, o; j < m; ++j) {\n        if (o = on[j], (!typename.type || o.type === typename.type) && o.name === typename.name) {\n          this.removeEventListener(o.type, o.listener, o.capture);\n        } else {\n          on[++i] = o;\n        }\n      }\n      if (++i) on.length = i;\n      else delete this.__on;\n    };\n  }\n\n  function onAdd(typename, value, capture) {\n    var wrap = filterEvents.hasOwnProperty(typename.type) ? filterContextListener : contextListener;\n    return function(d, i, group) {\n      var on = this.__on, o, listener = wrap(value, i, group);\n      if (on) for (var j = 0, m = on.length; j < m; ++j) {\n        if ((o = on[j]).type === typename.type && o.name === typename.name) {\n          this.removeEventListener(o.type, o.listener, o.capture);\n          this.addEventListener(o.type, o.listener = listener, o.capture = capture);\n          o.value = value;\n          return;\n        }\n      }\n      this.addEventListener(typename.type, listener, capture);\n      o = {type: typename.type, name: typename.name, value: value, listener: listener, capture: capture};\n      if (!on) this.__on = [o];\n      else on.push(o);\n    };\n  }\n\n  function selection_on(typename, value, capture) {\n    var typenames = parseTypenames$1(typename + \"\"), i, n = typenames.length, t;\n\n    if (arguments.length < 2) {\n      var on = this.node().__on;\n      if (on) for (var j = 0, m = on.length, o; j < m; ++j) {\n        for (i = 0, o = on[j]; i < n; ++i) {\n          if ((t = typenames[i]).type === o.type && t.name === o.name) {\n            return o.value;\n          }\n        }\n      }\n      return;\n    }\n\n    on = value ? onAdd : onRemove;\n    if (capture == null) capture = false;\n    for (i = 0; i < n; ++i) this.each(on(typenames[i], value, capture));\n    return this;\n  }\n\n  function customEvent(event1, listener, that, args) {\n    var event0 = exports.event;\n    event1.sourceEvent = exports.event;\n    exports.event = event1;\n    try {\n      return listener.apply(that, args);\n    } finally {\n      exports.event = event0;\n    }\n  }\n\n  function sourceEvent() {\n    var current = exports.event, source;\n    while (source = current.sourceEvent) current = source;\n    return current;\n  }\n\n  function point$5(node, event) {\n    var svg = node.ownerSVGElement || node;\n\n    if (svg.createSVGPoint) {\n      var point = svg.createSVGPoint();\n      point.x = event.clientX, point.y = event.clientY;\n      point = point.matrixTransform(node.getScreenCTM().inverse());\n      return [point.x, point.y];\n    }\n\n    var rect = node.getBoundingClientRect();\n    return [event.clientX - rect.left - node.clientLeft, event.clientY - rect.top - node.clientTop];\n  }\n\n  function mouse(node) {\n    var event = sourceEvent();\n    if (event.changedTouches) event = event.changedTouches[0];\n    return point$5(node, event);\n  }\n\n  function none$2() {}\n\n  function selector(selector) {\n    return selector == null ? none$2 : function() {\n      return this.querySelector(selector);\n    };\n  }\n\n  function selection_select(select) {\n    if (typeof select !== \"function\") select = selector(select);\n\n    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {\n      for (var group = groups[j], n = group.length, subgroup = subgroups[j] = new Array(n), node, subnode, i = 0; i < n; ++i) {\n        if ((node = group[i]) && (subnode = select.call(node, node.__data__, i, group))) {\n          if (\"__data__\" in node) subnode.__data__ = node.__data__;\n          subgroup[i] = subnode;\n        }\n      }\n    }\n\n    return new Selection(subgroups, this._parents);\n  }\n\n  function empty() {\n    return [];\n  }\n\n  function selectorAll(selector) {\n    return selector == null ? empty : function() {\n      return this.querySelectorAll(selector);\n    };\n  }\n\n  function selection_selectAll(select) {\n    if (typeof select !== \"function\") select = selectorAll(select);\n\n    for (var groups = this._groups, m = groups.length, subgroups = [], parents = [], j = 0; j < m; ++j) {\n      for (var group = groups[j], n = group.length, node, i = 0; i < n; ++i) {\n        if (node = group[i]) {\n          subgroups.push(select.call(node, node.__data__, i, group));\n          parents.push(node);\n        }\n      }\n    }\n\n    return new Selection(subgroups, parents);\n  }\n\n  function selection_filter(match) {\n    if (typeof match !== \"function\") match = matcher$1(match);\n\n    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {\n      for (var group = groups[j], n = group.length, subgroup = subgroups[j] = [], node, i = 0; i < n; ++i) {\n        if ((node = group[i]) && match.call(node, node.__data__, i, group)) {\n          subgroup.push(node);\n        }\n      }\n    }\n\n    return new Selection(subgroups, this._parents);\n  }\n\n  function sparse(update) {\n    return new Array(update.length);\n  }\n\n  function selection_enter() {\n    return new Selection(this._enter || this._groups.map(sparse), this._parents);\n  }\n\n  function EnterNode(parent, datum) {\n    this.ownerDocument = parent.ownerDocument;\n    this.namespaceURI = parent.namespaceURI;\n    this._next = null;\n    this._parent = parent;\n    this.__data__ = datum;\n  }\n\n  EnterNode.prototype = {\n    constructor: EnterNode,\n    appendChild: function(child) { return this._parent.insertBefore(child, this._next); },\n    insertBefore: function(child, next) { return this._parent.insertBefore(child, next); },\n    querySelector: function(selector) { return this._parent.querySelector(selector); },\n    querySelectorAll: function(selector) { return this._parent.querySelectorAll(selector); }\n  };\n\n  function constant$4(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  var keyPrefix = \"$\"; // Protect against keys like “__proto__”.\n\n  function bindIndex(parent, group, enter, update, exit, data) {\n    var i = 0,\n        node,\n        groupLength = group.length,\n        dataLength = data.length;\n\n    // Put any non-null nodes that fit into update.\n    // Put any null nodes into enter.\n    // Put any remaining data into enter.\n    for (; i < dataLength; ++i) {\n      if (node = group[i]) {\n        node.__data__ = data[i];\n        update[i] = node;\n      } else {\n        enter[i] = new EnterNode(parent, data[i]);\n      }\n    }\n\n    // Put any non-null nodes that don’t fit into exit.\n    for (; i < groupLength; ++i) {\n      if (node = group[i]) {\n        exit[i] = node;\n      }\n    }\n  }\n\n  function bindKey(parent, group, enter, update, exit, data, key) {\n    var i,\n        node,\n        nodeByKeyValue = {},\n        groupLength = group.length,\n        dataLength = data.length,\n        keyValues = new Array(groupLength),\n        keyValue;\n\n    // Compute the key for each node.\n    // If multiple nodes have the same key, the duplicates are added to exit.\n    for (i = 0; i < groupLength; ++i) {\n      if (node = group[i]) {\n        keyValues[i] = keyValue = keyPrefix + key.call(node, node.__data__, i, group);\n        if (keyValue in nodeByKeyValue) {\n          exit[i] = node;\n        } else {\n          nodeByKeyValue[keyValue] = node;\n        }\n      }\n    }\n\n    // Compute the key for each datum.\n    // If there a node associated with this key, join and add it to update.\n    // If there is not (or the key is a duplicate), add it to enter.\n    for (i = 0; i < dataLength; ++i) {\n      keyValue = keyPrefix + key.call(parent, data[i], i, data);\n      if (node = nodeByKeyValue[keyValue]) {\n        update[i] = node;\n        node.__data__ = data[i];\n        nodeByKeyValue[keyValue] = null;\n      } else {\n        enter[i] = new EnterNode(parent, data[i]);\n      }\n    }\n\n    // Add any remaining nodes that were not bound to data to exit.\n    for (i = 0; i < groupLength; ++i) {\n      if ((node = group[i]) && (nodeByKeyValue[keyValues[i]] === node)) {\n        exit[i] = node;\n      }\n    }\n  }\n\n  function selection_data(value, key) {\n    if (!value) {\n      data = new Array(this.size()), j = -1;\n      this.each(function(d) { data[++j] = d; });\n      return data;\n    }\n\n    var bind = key ? bindKey : bindIndex,\n        parents = this._parents,\n        groups = this._groups;\n\n    if (typeof value !== \"function\") value = constant$4(value);\n\n    for (var m = groups.length, update = new Array(m), enter = new Array(m), exit = new Array(m), j = 0; j < m; ++j) {\n      var parent = parents[j],\n          group = groups[j],\n          groupLength = group.length,\n          data = value.call(parent, parent && parent.__data__, j, parents),\n          dataLength = data.length,\n          enterGroup = enter[j] = new Array(dataLength),\n          updateGroup = update[j] = new Array(dataLength),\n          exitGroup = exit[j] = new Array(groupLength);\n\n      bind(parent, group, enterGroup, updateGroup, exitGroup, data, key);\n\n      // Now connect the enter nodes to their following update node, such that\n      // appendChild can insert the materialized enter node before this node,\n      // rather than at the end of the parent node.\n      for (var i0 = 0, i1 = 0, previous, next; i0 < dataLength; ++i0) {\n        if (previous = enterGroup[i0]) {\n          if (i0 >= i1) i1 = i0 + 1;\n          while (!(next = updateGroup[i1]) && ++i1 < dataLength);\n          previous._next = next || null;\n        }\n      }\n    }\n\n    update = new Selection(update, parents);\n    update._enter = enter;\n    update._exit = exit;\n    return update;\n  }\n\n  function selection_exit() {\n    return new Selection(this._exit || this._groups.map(sparse), this._parents);\n  }\n\n  function selection_merge(selection) {\n\n    for (var groups0 = this._groups, groups1 = selection._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m; ++j) {\n      for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge = merges[j] = new Array(n), node, i = 0; i < n; ++i) {\n        if (node = group0[i] || group1[i]) {\n          merge[i] = node;\n        }\n      }\n    }\n\n    for (; j < m0; ++j) {\n      merges[j] = groups0[j];\n    }\n\n    return new Selection(merges, this._parents);\n  }\n\n  function selection_order() {\n\n    for (var groups = this._groups, j = -1, m = groups.length; ++j < m;) {\n      for (var group = groups[j], i = group.length - 1, next = group[i], node; --i >= 0;) {\n        if (node = group[i]) {\n          if (next && next !== node.nextSibling) next.parentNode.insertBefore(node, next);\n          next = node;\n        }\n      }\n    }\n\n    return this;\n  }\n\n  function selection_sort(compare) {\n    if (!compare) compare = ascending$2;\n\n    function compareNode(a, b) {\n      return a && b ? compare(a.__data__, b.__data__) : !a - !b;\n    }\n\n    for (var groups = this._groups, m = groups.length, sortgroups = new Array(m), j = 0; j < m; ++j) {\n      for (var group = groups[j], n = group.length, sortgroup = sortgroups[j] = new Array(n), node, i = 0; i < n; ++i) {\n        if (node = group[i]) {\n          sortgroup[i] = node;\n        }\n      }\n      sortgroup.sort(compareNode);\n    }\n\n    return new Selection(sortgroups, this._parents).order();\n  }\n\n  function ascending$2(a, b) {\n    return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;\n  }\n\n  function selection_call() {\n    var callback = arguments[0];\n    arguments[0] = this;\n    callback.apply(null, arguments);\n    return this;\n  }\n\n  function selection_nodes() {\n    var nodes = new Array(this.size()), i = -1;\n    this.each(function() { nodes[++i] = this; });\n    return nodes;\n  }\n\n  function selection_node() {\n\n    for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {\n      for (var group = groups[j], i = 0, n = group.length; i < n; ++i) {\n        var node = group[i];\n        if (node) return node;\n      }\n    }\n\n    return null;\n  }\n\n  function selection_size() {\n    var size = 0;\n    this.each(function() { ++size; });\n    return size;\n  }\n\n  function selection_empty() {\n    return !this.node();\n  }\n\n  function selection_each(callback) {\n\n    for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {\n      for (var group = groups[j], i = 0, n = group.length, node; i < n; ++i) {\n        if (node = group[i]) callback.call(node, node.__data__, i, group);\n      }\n    }\n\n    return this;\n  }\n\n  function attrRemove(name) {\n    return function() {\n      this.removeAttribute(name);\n    };\n  }\n\n  function attrRemoveNS(fullname) {\n    return function() {\n      this.removeAttributeNS(fullname.space, fullname.local);\n    };\n  }\n\n  function attrConstant(name, value) {\n    return function() {\n      this.setAttribute(name, value);\n    };\n  }\n\n  function attrConstantNS(fullname, value) {\n    return function() {\n      this.setAttributeNS(fullname.space, fullname.local, value);\n    };\n  }\n\n  function attrFunction(name, value) {\n    return function() {\n      var v = value.apply(this, arguments);\n      if (v == null) this.removeAttribute(name);\n      else this.setAttribute(name, v);\n    };\n  }\n\n  function attrFunctionNS(fullname, value) {\n    return function() {\n      var v = value.apply(this, arguments);\n      if (v == null) this.removeAttributeNS(fullname.space, fullname.local);\n      else this.setAttributeNS(fullname.space, fullname.local, v);\n    };\n  }\n\n  function selection_attr(name, value) {\n    var fullname = namespace(name);\n\n    if (arguments.length < 2) {\n      var node = this.node();\n      return fullname.local\n          ? node.getAttributeNS(fullname.space, fullname.local)\n          : node.getAttribute(fullname);\n    }\n\n    return this.each((value == null\n        ? (fullname.local ? attrRemoveNS : attrRemove) : (typeof value === \"function\"\n        ? (fullname.local ? attrFunctionNS : attrFunction)\n        : (fullname.local ? attrConstantNS : attrConstant)))(fullname, value));\n  }\n\n  function window(node) {\n    return (node.ownerDocument && node.ownerDocument.defaultView) // node is a Node\n        || (node.document && node) // node is a Window\n        || node.defaultView; // node is a Document\n  }\n\n  function styleRemove(name) {\n    return function() {\n      this.style.removeProperty(name);\n    };\n  }\n\n  function styleConstant(name, value, priority) {\n    return function() {\n      this.style.setProperty(name, value, priority);\n    };\n  }\n\n  function styleFunction(name, value, priority) {\n    return function() {\n      var v = value.apply(this, arguments);\n      if (v == null) this.style.removeProperty(name);\n      else this.style.setProperty(name, v, priority);\n    };\n  }\n\n  function selection_style(name, value, priority) {\n    var node;\n    return arguments.length > 1\n        ? this.each((value == null\n              ? styleRemove : typeof value === \"function\"\n              ? styleFunction\n              : styleConstant)(name, value, priority == null ? \"\" : priority))\n        : window(node = this.node())\n            .getComputedStyle(node, null)\n            .getPropertyValue(name);\n  }\n\n  function propertyRemove(name) {\n    return function() {\n      delete this[name];\n    };\n  }\n\n  function propertyConstant(name, value) {\n    return function() {\n      this[name] = value;\n    };\n  }\n\n  function propertyFunction(name, value) {\n    return function() {\n      var v = value.apply(this, arguments);\n      if (v == null) delete this[name];\n      else this[name] = v;\n    };\n  }\n\n  function selection_property(name, value) {\n    return arguments.length > 1\n        ? this.each((value == null\n            ? propertyRemove : typeof value === \"function\"\n            ? propertyFunction\n            : propertyConstant)(name, value))\n        : this.node()[name];\n  }\n\n  function classArray(string) {\n    return string.trim().split(/^|\\s+/);\n  }\n\n  function classList(node) {\n    return node.classList || new ClassList(node);\n  }\n\n  function ClassList(node) {\n    this._node = node;\n    this._names = classArray(node.getAttribute(\"class\") || \"\");\n  }\n\n  ClassList.prototype = {\n    add: function(name) {\n      var i = this._names.indexOf(name);\n      if (i < 0) {\n        this._names.push(name);\n        this._node.setAttribute(\"class\", this._names.join(\" \"));\n      }\n    },\n    remove: function(name) {\n      var i = this._names.indexOf(name);\n      if (i >= 0) {\n        this._names.splice(i, 1);\n        this._node.setAttribute(\"class\", this._names.join(\" \"));\n      }\n    },\n    contains: function(name) {\n      return this._names.indexOf(name) >= 0;\n    }\n  };\n\n  function classedAdd(node, names) {\n    var list = classList(node), i = -1, n = names.length;\n    while (++i < n) list.add(names[i]);\n  }\n\n  function classedRemove(node, names) {\n    var list = classList(node), i = -1, n = names.length;\n    while (++i < n) list.remove(names[i]);\n  }\n\n  function classedTrue(names) {\n    return function() {\n      classedAdd(this, names);\n    };\n  }\n\n  function classedFalse(names) {\n    return function() {\n      classedRemove(this, names);\n    };\n  }\n\n  function classedFunction(names, value) {\n    return function() {\n      (value.apply(this, arguments) ? classedAdd : classedRemove)(this, names);\n    };\n  }\n\n  function selection_classed(name, value) {\n    var names = classArray(name + \"\");\n\n    if (arguments.length < 2) {\n      var list = classList(this.node()), i = -1, n = names.length;\n      while (++i < n) if (!list.contains(names[i])) return false;\n      return true;\n    }\n\n    return this.each((typeof value === \"function\"\n        ? classedFunction : value\n        ? classedTrue\n        : classedFalse)(names, value));\n  }\n\n  function textRemove() {\n    this.textContent = \"\";\n  }\n\n  function textConstant(value) {\n    return function() {\n      this.textContent = value;\n    };\n  }\n\n  function textFunction(value) {\n    return function() {\n      var v = value.apply(this, arguments);\n      this.textContent = v == null ? \"\" : v;\n    };\n  }\n\n  function selection_text(value) {\n    return arguments.length\n        ? this.each(value == null\n            ? textRemove : (typeof value === \"function\"\n            ? textFunction\n            : textConstant)(value))\n        : this.node().textContent;\n  }\n\n  function htmlRemove() {\n    this.innerHTML = \"\";\n  }\n\n  function htmlConstant(value) {\n    return function() {\n      this.innerHTML = value;\n    };\n  }\n\n  function htmlFunction(value) {\n    return function() {\n      var v = value.apply(this, arguments);\n      this.innerHTML = v == null ? \"\" : v;\n    };\n  }\n\n  function selection_html(value) {\n    return arguments.length\n        ? this.each(value == null\n            ? htmlRemove : (typeof value === \"function\"\n            ? htmlFunction\n            : htmlConstant)(value))\n        : this.node().innerHTML;\n  }\n\n  function raise$1() {\n    if (this.nextSibling) this.parentNode.appendChild(this);\n  }\n\n  function selection_raise() {\n    return this.each(raise$1);\n  }\n\n  function lower() {\n    if (this.previousSibling) this.parentNode.insertBefore(this, this.parentNode.firstChild);\n  }\n\n  function selection_lower() {\n    return this.each(lower);\n  }\n\n  function selection_append(name) {\n    var create = typeof name === \"function\" ? name : creator(name);\n    return this.select(function() {\n      return this.appendChild(create.apply(this, arguments));\n    });\n  }\n\n  function constantNull() {\n    return null;\n  }\n\n  function selection_insert(name, before) {\n    var create = typeof name === \"function\" ? name : creator(name),\n        select = before == null ? constantNull : typeof before === \"function\" ? before : selector(before);\n    return this.select(function() {\n      return this.insertBefore(create.apply(this, arguments), select.apply(this, arguments) || null);\n    });\n  }\n\n  function remove() {\n    var parent = this.parentNode;\n    if (parent) parent.removeChild(this);\n  }\n\n  function selection_remove() {\n    return this.each(remove);\n  }\n\n  function selection_datum(value) {\n    return arguments.length\n        ? this.property(\"__data__\", value)\n        : this.node().__data__;\n  }\n\n  function dispatchEvent(node, type, params) {\n    var window$$ = window(node),\n        event = window$$.CustomEvent;\n\n    if (event) {\n      event = new event(type, params);\n    } else {\n      event = window$$.document.createEvent(\"Event\");\n      if (params) event.initEvent(type, params.bubbles, params.cancelable), event.detail = params.detail;\n      else event.initEvent(type, false, false);\n    }\n\n    node.dispatchEvent(event);\n  }\n\n  function dispatchConstant(type, params) {\n    return function() {\n      return dispatchEvent(this, type, params);\n    };\n  }\n\n  function dispatchFunction(type, params) {\n    return function() {\n      return dispatchEvent(this, type, params.apply(this, arguments));\n    };\n  }\n\n  function selection_dispatch(type, params) {\n    return this.each((typeof params === \"function\"\n        ? dispatchFunction\n        : dispatchConstant)(type, params));\n  }\n\n  var root = [null];\n\n  function Selection(groups, parents) {\n    this._groups = groups;\n    this._parents = parents;\n  }\n\n  function selection() {\n    return new Selection([[document.documentElement]], root);\n  }\n\n  Selection.prototype = selection.prototype = {\n    constructor: Selection,\n    select: selection_select,\n    selectAll: selection_selectAll,\n    filter: selection_filter,\n    data: selection_data,\n    enter: selection_enter,\n    exit: selection_exit,\n    merge: selection_merge,\n    order: selection_order,\n    sort: selection_sort,\n    call: selection_call,\n    nodes: selection_nodes,\n    node: selection_node,\n    size: selection_size,\n    empty: selection_empty,\n    each: selection_each,\n    attr: selection_attr,\n    style: selection_style,\n    property: selection_property,\n    classed: selection_classed,\n    text: selection_text,\n    html: selection_html,\n    raise: selection_raise,\n    lower: selection_lower,\n    append: selection_append,\n    insert: selection_insert,\n    remove: selection_remove,\n    datum: selection_datum,\n    on: selection_on,\n    dispatch: selection_dispatch\n  };\n\n  function select(selector) {\n    return typeof selector === \"string\"\n        ? new Selection([[document.querySelector(selector)]], [document.documentElement])\n        : new Selection([[selector]], root);\n  }\n\n  function selectAll(selector) {\n    return typeof selector === \"string\"\n        ? new Selection([document.querySelectorAll(selector)], [document.documentElement])\n        : new Selection([selector == null ? [] : selector], root);\n  }\n\n  function touch(node, touches, identifier) {\n    if (arguments.length < 3) identifier = touches, touches = sourceEvent().changedTouches;\n\n    for (var i = 0, n = touches ? touches.length : 0, touch; i < n; ++i) {\n      if ((touch = touches[i]).identifier === identifier) {\n        return point$5(node, touch);\n      }\n    }\n\n    return null;\n  }\n\n  function touches(node, touches) {\n    if (touches == null) touches = sourceEvent().touches;\n\n    for (var i = 0, n = touches ? touches.length : 0, points = new Array(n); i < n; ++i) {\n      points[i] = point$5(node, touches[i]);\n    }\n\n    return points;\n  }\n\n  var emptyOn = dispatch(\"start\", \"end\", \"interrupt\");\n  var emptyTween = [];\n\n  var CREATED = 0;\n  var SCHEDULED = 1;\n  var STARTING = 2;\n  var STARTED = 3;\n  var ENDING = 4;\n  var ENDED = 5;\n\n  function schedule(node, name, id, index, group, timing) {\n    var schedules = node.__transition;\n    if (!schedules) node.__transition = {};\n    else if (id in schedules) return;\n    create(node, id, {\n      name: name,\n      index: index, // For context during callback.\n      group: group, // For context during callback.\n      on: emptyOn,\n      tween: emptyTween,\n      time: timing.time,\n      delay: timing.delay,\n      duration: timing.duration,\n      ease: timing.ease,\n      timer: null,\n      state: CREATED\n    });\n  }\n\n  function init(node, id) {\n    var schedule = node.__transition;\n    if (!schedule || !(schedule = schedule[id]) || schedule.state > CREATED) throw new Error(\"too late\");\n    return schedule;\n  }\n\n  function set$2(node, id) {\n    var schedule = node.__transition;\n    if (!schedule || !(schedule = schedule[id]) || schedule.state > STARTING) throw new Error(\"too late\");\n    return schedule;\n  }\n\n  function get$1(node, id) {\n    var schedule = node.__transition;\n    if (!schedule || !(schedule = schedule[id])) throw new Error(\"too late\");\n    return schedule;\n  }\n\n  function create(node, id, self) {\n    var schedules = node.__transition,\n        tween;\n\n    // Initialize the self timer when the transition is created.\n    // Note the actual delay is not known until the first callback!\n    schedules[id] = self;\n    self.timer = timer(schedule, 0, self.time);\n\n    // If the delay is greater than this first sleep, sleep some more;\n    // otherwise, start immediately.\n    function schedule(elapsed) {\n      self.state = SCHEDULED;\n      if (self.delay <= elapsed) start(elapsed - self.delay);\n      else self.timer.restart(start, self.delay, self.time);\n    }\n\n    function start(elapsed) {\n      var i, j, n, o;\n\n      for (i in schedules) {\n        o = schedules[i];\n        if (o.name !== self.name) continue;\n\n        // Interrupt the active transition, if any.\n        // Dispatch the interrupt event.\n        if (o.state === STARTED) {\n          o.state = ENDED;\n          o.timer.stop();\n          o.on.call(\"interrupt\", node, node.__data__, o.index, o.group);\n          delete schedules[i];\n        }\n\n        // Cancel any pre-empted transitions. No interrupt event is dispatched\n        // because the cancelled transitions never started. Note that this also\n        // removes this transition from the pending list!\n        else if (+i < id) {\n          o.state = ENDED;\n          o.timer.stop();\n          delete schedules[i];\n        }\n      }\n\n      // Defer the first tick to end of the current frame; see mbostock/d3#1576.\n      // Note the transition may be canceled after start and before the first tick!\n      // Note this must be scheduled before the start event; see d3/d3-transition#16!\n      // Assuming this is successful, subsequent callbacks go straight to tick.\n      timeout$1(function() {\n        if (self.state === STARTED) {\n          self.timer.restart(tick, self.delay, self.time);\n          tick(elapsed);\n        }\n      });\n\n      // Dispatch the start event.\n      // Note this must be done before the tween are initialized.\n      self.state = STARTING;\n      self.on.call(\"start\", node, node.__data__, self.index, self.group);\n      if (self.state !== STARTING) return; // interrupted\n      self.state = STARTED;\n\n      // Initialize the tween, deleting null tween.\n      tween = new Array(n = self.tween.length);\n      for (i = 0, j = -1; i < n; ++i) {\n        if (o = self.tween[i].value.call(node, node.__data__, self.index, self.group)) {\n          tween[++j] = o;\n        }\n      }\n      tween.length = j + 1;\n    }\n\n    function tick(elapsed) {\n      var t = elapsed < self.duration ? self.ease.call(null, elapsed / self.duration) : (self.state = ENDING, 1),\n          i = -1,\n          n = tween.length;\n\n      while (++i < n) {\n        tween[i].call(null, t);\n      }\n\n      // Dispatch the end event.\n      if (self.state === ENDING) {\n        self.state = ENDED;\n        self.timer.stop();\n        self.on.call(\"end\", node, node.__data__, self.index, self.group);\n        for (i in schedules) if (+i !== id) return void delete schedules[id];\n        delete node.__transition;\n      }\n    }\n  }\n\n  function interrupt(node, name) {\n    var schedules = node.__transition,\n        schedule,\n        active,\n        empty = true,\n        i;\n\n    if (!schedules) return;\n\n    name = name == null ? null : name + \"\";\n\n    for (i in schedules) {\n      if ((schedule = schedules[i]).name !== name) { empty = false; continue; }\n      active = schedule.state === STARTED;\n      schedule.state = ENDED;\n      schedule.timer.stop();\n      if (active) schedule.on.call(\"interrupt\", node, node.__data__, schedule.index, schedule.group);\n      delete schedules[i];\n    }\n\n    if (empty) delete node.__transition;\n  }\n\n  function selection_interrupt(name) {\n    return this.each(function() {\n      interrupt(this, name);\n    });\n  }\n\n  function tweenRemove(id, name) {\n    var tween0, tween1;\n    return function() {\n      var schedule = set$2(this, id),\n          tween = schedule.tween;\n\n      // If this node shared tween with the previous node,\n      // just assign the updated shared tween and we’re done!\n      // Otherwise, copy-on-write.\n      if (tween !== tween0) {\n        tween1 = tween0 = tween;\n        for (var i = 0, n = tween1.length; i < n; ++i) {\n          if (tween1[i].name === name) {\n            tween1 = tween1.slice();\n            tween1.splice(i, 1);\n            break;\n          }\n        }\n      }\n\n      schedule.tween = tween1;\n    };\n  }\n\n  function tweenFunction(id, name, value) {\n    var tween0, tween1;\n    if (typeof value !== \"function\") throw new Error;\n    return function() {\n      var schedule = set$2(this, id),\n          tween = schedule.tween;\n\n      // If this node shared tween with the previous node,\n      // just assign the updated shared tween and we’re done!\n      // Otherwise, copy-on-write.\n      if (tween !== tween0) {\n        tween1 = (tween0 = tween).slice();\n        for (var t = {name: name, value: value}, i = 0, n = tween1.length; i < n; ++i) {\n          if (tween1[i].name === name) {\n            tween1[i] = t;\n            break;\n          }\n        }\n        if (i === n) tween1.push(t);\n      }\n\n      schedule.tween = tween1;\n    };\n  }\n\n  function transition_tween(name, value) {\n    var id = this._id;\n\n    name += \"\";\n\n    if (arguments.length < 2) {\n      var tween = get$1(this.node(), id).tween;\n      for (var i = 0, n = tween.length, t; i < n; ++i) {\n        if ((t = tween[i]).name === name) {\n          return t.value;\n        }\n      }\n      return null;\n    }\n\n    return this.each((value == null ? tweenRemove : tweenFunction)(id, name, value));\n  }\n\n  function tweenValue(transition, name, value) {\n    var id = transition._id;\n\n    transition.each(function() {\n      var schedule = set$2(this, id);\n      (schedule.value || (schedule.value = {}))[name] = value.apply(this, arguments);\n    });\n\n    return function(node) {\n      return get$1(node, id).value[name];\n    };\n  }\n\n  function interpolate$1(a, b) {\n    var c;\n    return (typeof b === \"number\" ? interpolateNumber\n        : b instanceof color ? interpolateRgb\n        : (c = color(b)) ? (b = c, interpolateRgb)\n        : interpolateString)(a, b);\n  }\n\n  function attrRemove$1(name) {\n    return function() {\n      this.removeAttribute(name);\n    };\n  }\n\n  function attrRemoveNS$1(fullname) {\n    return function() {\n      this.removeAttributeNS(fullname.space, fullname.local);\n    };\n  }\n\n  function attrConstant$1(name, interpolate, value1) {\n    var value00,\n        interpolate0;\n    return function() {\n      var value0 = this.getAttribute(name);\n      return value0 === value1 ? null\n          : value0 === value00 ? interpolate0\n          : interpolate0 = interpolate(value00 = value0, value1);\n    };\n  }\n\n  function attrConstantNS$1(fullname, interpolate, value1) {\n    var value00,\n        interpolate0;\n    return function() {\n      var value0 = this.getAttributeNS(fullname.space, fullname.local);\n      return value0 === value1 ? null\n          : value0 === value00 ? interpolate0\n          : interpolate0 = interpolate(value00 = value0, value1);\n    };\n  }\n\n  function attrFunction$1(name, interpolate, value) {\n    var value00,\n        value10,\n        interpolate0;\n    return function() {\n      var value0, value1 = value(this);\n      if (value1 == null) return void this.removeAttribute(name);\n      value0 = this.getAttribute(name);\n      return value0 === value1 ? null\n          : value0 === value00 && value1 === value10 ? interpolate0\n          : interpolate0 = interpolate(value00 = value0, value10 = value1);\n    };\n  }\n\n  function attrFunctionNS$1(fullname, interpolate, value) {\n    var value00,\n        value10,\n        interpolate0;\n    return function() {\n      var value0, value1 = value(this);\n      if (value1 == null) return void this.removeAttributeNS(fullname.space, fullname.local);\n      value0 = this.getAttributeNS(fullname.space, fullname.local);\n      return value0 === value1 ? null\n          : value0 === value00 && value1 === value10 ? interpolate0\n          : interpolate0 = interpolate(value00 = value0, value10 = value1);\n    };\n  }\n\n  function transition_attr(name, value) {\n    var fullname = namespace(name), i = fullname === \"transform\" ? interpolateTransform$2 : interpolate$1;\n    return this.attrTween(name, typeof value === \"function\"\n        ? (fullname.local ? attrFunctionNS$1 : attrFunction$1)(fullname, i, tweenValue(this, \"attr.\" + name, value))\n        : value == null ? (fullname.local ? attrRemoveNS$1 : attrRemove$1)(fullname)\n        : (fullname.local ? attrConstantNS$1 : attrConstant$1)(fullname, i, value));\n  }\n\n  function attrTweenNS(fullname, value) {\n    function tween() {\n      var node = this, i = value.apply(node, arguments);\n      return i && function(t) {\n        node.setAttributeNS(fullname.space, fullname.local, i(t));\n      };\n    }\n    tween._value = value;\n    return tween;\n  }\n\n  function attrTween(name, value) {\n    function tween() {\n      var node = this, i = value.apply(node, arguments);\n      return i && function(t) {\n        node.setAttribute(name, i(t));\n      };\n    }\n    tween._value = value;\n    return tween;\n  }\n\n  function transition_attrTween(name, value) {\n    var key = \"attr.\" + name;\n    if (arguments.length < 2) return (key = this.tween(key)) && key._value;\n    if (value == null) return this.tween(key, null);\n    if (typeof value !== \"function\") throw new Error;\n    var fullname = namespace(name);\n    return this.tween(key, (fullname.local ? attrTweenNS : attrTween)(fullname, value));\n  }\n\n  function delayFunction(id, value) {\n    return function() {\n      init(this, id).delay = +value.apply(this, arguments);\n    };\n  }\n\n  function delayConstant(id, value) {\n    return value = +value, function() {\n      init(this, id).delay = value;\n    };\n  }\n\n  function transition_delay(value) {\n    var id = this._id;\n\n    return arguments.length\n        ? this.each((typeof value === \"function\"\n            ? delayFunction\n            : delayConstant)(id, value))\n        : get$1(this.node(), id).delay;\n  }\n\n  function durationFunction(id, value) {\n    return function() {\n      set$2(this, id).duration = +value.apply(this, arguments);\n    };\n  }\n\n  function durationConstant(id, value) {\n    return value = +value, function() {\n      set$2(this, id).duration = value;\n    };\n  }\n\n  function transition_duration(value) {\n    var id = this._id;\n\n    return arguments.length\n        ? this.each((typeof value === \"function\"\n            ? durationFunction\n            : durationConstant)(id, value))\n        : get$1(this.node(), id).duration;\n  }\n\n  function easeConstant(id, value) {\n    if (typeof value !== \"function\") throw new Error;\n    return function() {\n      set$2(this, id).ease = value;\n    };\n  }\n\n  function transition_ease(value) {\n    var id = this._id;\n\n    return arguments.length\n        ? this.each(easeConstant(id, value))\n        : get$1(this.node(), id).ease;\n  }\n\n  function transition_filter(match) {\n    if (typeof match !== \"function\") match = matcher$1(match);\n\n    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {\n      for (var group = groups[j], n = group.length, subgroup = subgroups[j] = [], node, i = 0; i < n; ++i) {\n        if ((node = group[i]) && match.call(node, node.__data__, i, group)) {\n          subgroup.push(node);\n        }\n      }\n    }\n\n    return new Transition(subgroups, this._parents, this._name, this._id);\n  }\n\n  function transition_merge(transition) {\n    if (transition._id !== this._id) throw new Error;\n\n    for (var groups0 = this._groups, groups1 = transition._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m; ++j) {\n      for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge = merges[j] = new Array(n), node, i = 0; i < n; ++i) {\n        if (node = group0[i] || group1[i]) {\n          merge[i] = node;\n        }\n      }\n    }\n\n    for (; j < m0; ++j) {\n      merges[j] = groups0[j];\n    }\n\n    return new Transition(merges, this._parents, this._name, this._id);\n  }\n\n  function start$1(name) {\n    return (name + \"\").trim().split(/^|\\s+/).every(function(t) {\n      var i = t.indexOf(\".\");\n      if (i >= 0) t = t.slice(0, i);\n      return !t || t === \"start\";\n    });\n  }\n\n  function onFunction(id, name, listener) {\n    var on0, on1, sit = start$1(name) ? init : set$2;\n    return function() {\n      var schedule = sit(this, id),\n          on = schedule.on;\n\n      // If this node shared a dispatch with the previous node,\n      // just assign the updated shared dispatch and we’re done!\n      // Otherwise, copy-on-write.\n      if (on !== on0) (on1 = (on0 = on).copy()).on(name, listener);\n\n      schedule.on = on1;\n    };\n  }\n\n  function transition_on(name, listener) {\n    var id = this._id;\n\n    return arguments.length < 2\n        ? get$1(this.node(), id).on.on(name)\n        : this.each(onFunction(id, name, listener));\n  }\n\n  function removeFunction(id) {\n    return function() {\n      var parent = this.parentNode;\n      for (var i in this.__transition) if (+i !== id) return;\n      if (parent) parent.removeChild(this);\n    };\n  }\n\n  function transition_remove() {\n    return this.on(\"end.remove\", removeFunction(this._id));\n  }\n\n  function transition_select(select) {\n    var name = this._name,\n        id = this._id;\n\n    if (typeof select !== \"function\") select = selector(select);\n\n    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {\n      for (var group = groups[j], n = group.length, subgroup = subgroups[j] = new Array(n), node, subnode, i = 0; i < n; ++i) {\n        if ((node = group[i]) && (subnode = select.call(node, node.__data__, i, group))) {\n          if (\"__data__\" in node) subnode.__data__ = node.__data__;\n          subgroup[i] = subnode;\n          schedule(subgroup[i], name, id, i, subgroup, get$1(node, id));\n        }\n      }\n    }\n\n    return new Transition(subgroups, this._parents, name, id);\n  }\n\n  function transition_selectAll(select) {\n    var name = this._name,\n        id = this._id;\n\n    if (typeof select !== \"function\") select = selectorAll(select);\n\n    for (var groups = this._groups, m = groups.length, subgroups = [], parents = [], j = 0; j < m; ++j) {\n      for (var group = groups[j], n = group.length, node, i = 0; i < n; ++i) {\n        if (node = group[i]) {\n          for (var children = select.call(node, node.__data__, i, group), child, inherit = get$1(node, id), k = 0, l = children.length; k < l; ++k) {\n            if (child = children[k]) {\n              schedule(child, name, id, k, children, inherit);\n            }\n          }\n          subgroups.push(children);\n          parents.push(node);\n        }\n      }\n    }\n\n    return new Transition(subgroups, parents, name, id);\n  }\n\n  var Selection$1 = selection.prototype.constructor;\n\n  function transition_selection() {\n    return new Selection$1(this._groups, this._parents);\n  }\n\n  function styleRemove$1(name, interpolate) {\n    var value00,\n        value10,\n        interpolate0;\n    return function() {\n      var style = window(this).getComputedStyle(this, null),\n          value0 = style.getPropertyValue(name),\n          value1 = (this.style.removeProperty(name), style.getPropertyValue(name));\n      return value0 === value1 ? null\n          : value0 === value00 && value1 === value10 ? interpolate0\n          : interpolate0 = interpolate(value00 = value0, value10 = value1);\n    };\n  }\n\n  function styleRemoveEnd(name) {\n    return function() {\n      this.style.removeProperty(name);\n    };\n  }\n\n  function styleConstant$1(name, interpolate, value1) {\n    var value00,\n        interpolate0;\n    return function() {\n      var value0 = window(this).getComputedStyle(this, null).getPropertyValue(name);\n      return value0 === value1 ? null\n          : value0 === value00 ? interpolate0\n          : interpolate0 = interpolate(value00 = value0, value1);\n    };\n  }\n\n  function styleFunction$1(name, interpolate, value) {\n    var value00,\n        value10,\n        interpolate0;\n    return function() {\n      var style = window(this).getComputedStyle(this, null),\n          value0 = style.getPropertyValue(name),\n          value1 = value(this);\n      if (value1 == null) value1 = (this.style.removeProperty(name), style.getPropertyValue(name));\n      return value0 === value1 ? null\n          : value0 === value00 && value1 === value10 ? interpolate0\n          : interpolate0 = interpolate(value00 = value0, value10 = value1);\n    };\n  }\n\n  function transition_style(name, value, priority) {\n    var i = (name += \"\") === \"transform\" ? interpolateTransform$1 : interpolate$1;\n    return value == null ? this\n            .styleTween(name, styleRemove$1(name, i))\n            .on(\"end.style.\" + name, styleRemoveEnd(name))\n        : this.styleTween(name, typeof value === \"function\"\n            ? styleFunction$1(name, i, tweenValue(this, \"style.\" + name, value))\n            : styleConstant$1(name, i, value), priority);\n  }\n\n  function styleTween(name, value, priority) {\n    function tween() {\n      var node = this, i = value.apply(node, arguments);\n      return i && function(t) {\n        node.style.setProperty(name, i(t), priority);\n      };\n    }\n    tween._value = value;\n    return tween;\n  }\n\n  function transition_styleTween(name, value, priority) {\n    var key = \"style.\" + (name += \"\");\n    if (arguments.length < 2) return (key = this.tween(key)) && key._value;\n    if (value == null) return this.tween(key, null);\n    if (typeof value !== \"function\") throw new Error;\n    return this.tween(key, styleTween(name, value, priority == null ? \"\" : priority));\n  }\n\n  function textConstant$1(value) {\n    return function() {\n      this.textContent = value;\n    };\n  }\n\n  function textFunction$1(value) {\n    return function() {\n      var value1 = value(this);\n      this.textContent = value1 == null ? \"\" : value1;\n    };\n  }\n\n  function transition_text(value) {\n    return this.tween(\"text\", typeof value === \"function\"\n        ? textFunction$1(tweenValue(this, \"text\", value))\n        : textConstant$1(value == null ? \"\" : value + \"\"));\n  }\n\n  function transition_transition() {\n    var name = this._name,\n        id0 = this._id,\n        id1 = newId();\n\n    for (var groups = this._groups, m = groups.length, j = 0; j < m; ++j) {\n      for (var group = groups[j], n = group.length, node, i = 0; i < n; ++i) {\n        if (node = group[i]) {\n          var inherit = get$1(node, id0);\n          schedule(node, name, id1, i, group, {\n            time: inherit.time + inherit.delay + inherit.duration,\n            delay: 0,\n            duration: inherit.duration,\n            ease: inherit.ease\n          });\n        }\n      }\n    }\n\n    return new Transition(groups, this._parents, name, id1);\n  }\n\n  var id = 0;\n\n  function Transition(groups, parents, name, id) {\n    this._groups = groups;\n    this._parents = parents;\n    this._name = name;\n    this._id = id;\n  }\n\n  function transition(name) {\n    return selection().transition(name);\n  }\n\n  function newId() {\n    return ++id;\n  }\n\n  var selection_prototype = selection.prototype;\n\n  Transition.prototype = transition.prototype = {\n    constructor: Transition,\n    select: transition_select,\n    selectAll: transition_selectAll,\n    filter: transition_filter,\n    merge: transition_merge,\n    selection: transition_selection,\n    transition: transition_transition,\n    call: selection_prototype.call,\n    nodes: selection_prototype.nodes,\n    node: selection_prototype.node,\n    size: selection_prototype.size,\n    empty: selection_prototype.empty,\n    each: selection_prototype.each,\n    on: transition_on,\n    attr: transition_attr,\n    attrTween: transition_attrTween,\n    style: transition_style,\n    styleTween: transition_styleTween,\n    text: transition_text,\n    remove: transition_remove,\n    tween: transition_tween,\n    delay: transition_delay,\n    duration: transition_duration,\n    ease: transition_ease\n  };\n\n  var defaultTiming = {\n    time: null, // Set on use.\n    delay: 0,\n    duration: 250,\n    ease: easeCubicInOut\n  };\n\n  function inherit(node, id) {\n    var timing;\n    while (!(timing = node.__transition) || !(timing = timing[id])) {\n      if (!(node = node.parentNode)) {\n        return defaultTiming.time = now(), defaultTiming;\n      }\n    }\n    return timing;\n  }\n\n  function selection_transition(name) {\n    var id,\n        timing;\n\n    if (name instanceof Transition) {\n      id = name._id, name = name._name;\n    } else {\n      id = newId(), (timing = defaultTiming).time = now(), name = name == null ? null : name + \"\";\n    }\n\n    for (var groups = this._groups, m = groups.length, j = 0; j < m; ++j) {\n      for (var group = groups[j], n = group.length, node, i = 0; i < n; ++i) {\n        if (node = group[i]) {\n          schedule(node, name, id, i, group, timing || inherit(node, id));\n        }\n      }\n    }\n\n    return new Transition(groups, this._parents, name, id);\n  }\n\n  selection.prototype.interrupt = selection_interrupt;\n  selection.prototype.transition = selection_transition;\n\n  var root$1 = [null];\n\n  function active(node, name) {\n    var schedules = node.__transition,\n        schedule,\n        i;\n\n    if (schedules) {\n      name = name == null ? null : name + \"\";\n      for (i in schedules) {\n        if ((schedule = schedules[i]).state > SCHEDULED && schedule.name === name) {\n          return new Transition([[node]], root$1, name, +i);\n        }\n      }\n    }\n\n    return null;\n  }\n\n  var slice$4 = Array.prototype.slice;\n\n  function identity$5(x) {\n    return x;\n  }\n\n  var top = 1;\n  var right = 2;\n  var bottom = 3;\n  var left = 4;\nvar   epsilon$2 = 1e-6;\n  function translateX(scale0, scale1, d) {\n    var x = scale0(d);\n    return \"translate(\" + (isFinite(x) ? x : scale1(d)) + \",0)\";\n  }\n\n  function translateY(scale0, scale1, d) {\n    var y = scale0(d);\n    return \"translate(0,\" + (isFinite(y) ? y : scale1(d)) + \")\";\n  }\n\n  function center(scale) {\n    var width = scale.bandwidth() / 2;\n    return function(d) {\n      return scale(d) + width;\n    };\n  }\n\n  function entering() {\n    return !this.__axis;\n  }\n\n  function axis(orient, scale) {\n    var tickArguments = [],\n        tickValues = null,\n        tickFormat = null,\n        tickSizeInner = 6,\n        tickSizeOuter = 6,\n        tickPadding = 3;\n\n    function axis(context) {\n      var values = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()) : tickValues,\n          format = tickFormat == null ? (scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity$5) : tickFormat,\n          spacing = Math.max(tickSizeInner, 0) + tickPadding,\n          transform = orient === top || orient === bottom ? translateX : translateY,\n          range = scale.range(),\n          range0 = range[0] + 0.5,\n          range1 = range[range.length - 1] + 0.5,\n          position = (scale.bandwidth ? center : identity$5)(scale.copy()),\n          selection = context.selection ? context.selection() : context,\n          path = selection.selectAll(\".domain\").data([null]),\n          tick = selection.selectAll(\".tick\").data(values, scale).order(),\n          tickExit = tick.exit(),\n          tickEnter = tick.enter().append(\"g\").attr(\"class\", \"tick\"),\n          line = tick.select(\"line\"),\n          text = tick.select(\"text\"),\n          k = orient === top || orient === left ? -1 : 1,\n          x, y = orient === left || orient === right ? (x = \"x\", \"y\") : (x = \"y\", \"x\");\n\n      path = path.merge(path.enter().insert(\"path\", \".tick\")\n          .attr(\"class\", \"domain\")\n          .attr(\"stroke\", \"#000\"));\n\n      tick = tick.merge(tickEnter);\n\n      line = line.merge(tickEnter.append(\"line\")\n          .attr(\"stroke\", \"#000\")\n          .attr(x + \"2\", k * tickSizeInner)\n          .attr(y + \"1\", 0.5)\n          .attr(y + \"2\", 0.5));\n\n      text = text.merge(tickEnter.append(\"text\")\n          .attr(\"fill\", \"#000\")\n          .attr(x, k * spacing)\n          .attr(y, 0.5)\n          .attr(\"dy\", orient === top ? \"0em\" : orient === bottom ? \".71em\" : \".32em\"));\n\n      if (context !== selection) {\n        path = path.transition(context);\n        tick = tick.transition(context);\n        line = line.transition(context);\n        text = text.transition(context);\n\n        tickExit = tickExit.transition(context)\n            .attr(\"opacity\", epsilon$2)\n            .attr(\"transform\", function(d) { return transform(position, this.parentNode.__axis || position, d); });\n\n        tickEnter\n            .attr(\"opacity\", epsilon$2)\n            .attr(\"transform\", function(d) { return transform(this.parentNode.__axis || position, position, d); });\n      }\n\n      tickExit.remove();\n\n      path\n          .attr(\"d\", orient === left || orient == right\n              ? \"M\" + k * tickSizeOuter + \",\" + range0 + \"H0.5V\" + range1 + \"H\" + k * tickSizeOuter\n              : \"M\" + range0 + \",\" + k * tickSizeOuter + \"V0.5H\" + range1 + \"V\" + k * tickSizeOuter);\n\n      tick\n          .attr(\"opacity\", 1)\n          .attr(\"transform\", function(d) { return transform(position, position, d); });\n\n      line\n          .attr(x + \"2\", k * tickSizeInner);\n\n      text\n          .attr(x, k * spacing)\n          .text(format);\n\n      selection.filter(entering)\n          .attr(\"fill\", \"none\")\n          .attr(\"font-size\", 10)\n          .attr(\"font-family\", \"sans-serif\")\n          .attr(\"text-anchor\", orient === right ? \"start\" : orient === left ? \"end\" : \"middle\");\n\n      selection\n          .each(function() { this.__axis = position; });\n    }\n\n    axis.scale = function(_) {\n      return arguments.length ? (scale = _, axis) : scale;\n    };\n\n    axis.ticks = function() {\n      return tickArguments = slice$4.call(arguments), axis;\n    };\n\n    axis.tickArguments = function(_) {\n      return arguments.length ? (tickArguments = _ == null ? [] : slice$4.call(_), axis) : tickArguments.slice();\n    };\n\n    axis.tickValues = function(_) {\n      return arguments.length ? (tickValues = _ == null ? null : slice$4.call(_), axis) : tickValues && tickValues.slice();\n    };\n\n    axis.tickFormat = function(_) {\n      return arguments.length ? (tickFormat = _, axis) : tickFormat;\n    };\n\n    axis.tickSize = function(_) {\n      return arguments.length ? (tickSizeInner = tickSizeOuter = +_, axis) : tickSizeInner;\n    };\n\n    axis.tickSizeInner = function(_) {\n      return arguments.length ? (tickSizeInner = +_, axis) : tickSizeInner;\n    };\n\n    axis.tickSizeOuter = function(_) {\n      return arguments.length ? (tickSizeOuter = +_, axis) : tickSizeOuter;\n    };\n\n    axis.tickPadding = function(_) {\n      return arguments.length ? (tickPadding = +_, axis) : tickPadding;\n    };\n\n    return axis;\n  }\n\n  function axisTop(scale) {\n    return axis(top, scale);\n  }\n\n  function axisRight(scale) {\n    return axis(right, scale);\n  }\n\n  function axisBottom(scale) {\n    return axis(bottom, scale);\n  }\n\n  function axisLeft(scale) {\n    return axis(left, scale);\n  }\n\n  function defaultSeparation(a, b) {\n    return a.parent === b.parent ? 1 : 2;\n  }\n\n  function meanX(children) {\n    return children.reduce(meanXReduce, 0) / children.length;\n  }\n\n  function meanXReduce(x, c) {\n    return x + c.x;\n  }\n\n  function maxY(children) {\n    return 1 + children.reduce(maxYReduce, 0);\n  }\n\n  function maxYReduce(y, c) {\n    return Math.max(y, c.y);\n  }\n\n  function leafLeft(node) {\n    var children;\n    while (children = node.children) node = children[0];\n    return node;\n  }\n\n  function leafRight(node) {\n    var children;\n    while (children = node.children) node = children[children.length - 1];\n    return node;\n  }\n\n  function cluster() {\n    var separation = defaultSeparation,\n        dx = 1,\n        dy = 1,\n        nodeSize = false;\n\n    function cluster(root) {\n      var previousNode,\n          x = 0;\n\n      // First walk, computing the initial x & y values.\n      root.eachAfter(function(node) {\n        var children = node.children;\n        if (children) {\n          node.x = meanX(children);\n          node.y = maxY(children);\n        } else {\n          node.x = previousNode ? x += separation(node, previousNode) : 0;\n          node.y = 0;\n          previousNode = node;\n        }\n      });\n\n      var left = leafLeft(root),\n          right = leafRight(root),\n          x0 = left.x - separation(left, right) / 2,\n          x1 = right.x + separation(right, left) / 2;\n\n      // Second walk, normalizing x & y to the desired size.\n      return root.eachAfter(nodeSize ? function(node) {\n        node.x = (node.x - root.x) * dx;\n        node.y = (root.y - node.y) * dy;\n      } : function(node) {\n        node.x = (node.x - x0) / (x1 - x0) * dx;\n        node.y = (1 - (root.y ? node.y / root.y : 1)) * dy;\n      });\n    }\n\n    cluster.separation = function(x) {\n      return arguments.length ? (separation = x, cluster) : separation;\n    };\n\n    cluster.size = function(x) {\n      return arguments.length ? (nodeSize = false, dx = +x[0], dy = +x[1], cluster) : (nodeSize ? null : [dx, dy]);\n    };\n\n    cluster.nodeSize = function(x) {\n      return arguments.length ? (nodeSize = true, dx = +x[0], dy = +x[1], cluster) : (nodeSize ? [dx, dy] : null);\n    };\n\n    return cluster;\n  }\n\n  function node_each(callback) {\n    var node = this, current, next = [node], children, i, n;\n    do {\n      current = next.reverse(), next = [];\n      while (node = current.pop()) {\n        callback(node), children = node.children;\n        if (children) for (i = 0, n = children.length; i < n; ++i) {\n          next.push(children[i]);\n        }\n      }\n    } while (next.length);\n    return this;\n  }\n\n  function node_eachBefore(callback) {\n    var node = this, nodes = [node], children, i;\n    while (node = nodes.pop()) {\n      callback(node), children = node.children;\n      if (children) for (i = children.length - 1; i >= 0; --i) {\n        nodes.push(children[i]);\n      }\n    }\n    return this;\n  }\n\n  function node_eachAfter(callback) {\n    var node = this, nodes = [node], next = [], children, i, n;\n    while (node = nodes.pop()) {\n      next.push(node), children = node.children;\n      if (children) for (i = 0, n = children.length; i < n; ++i) {\n        nodes.push(children[i]);\n      }\n    }\n    while (node = next.pop()) {\n      callback(node);\n    }\n    return this;\n  }\n\n  function node_sum(value) {\n    return this.eachAfter(function(node) {\n      var sum = +value(node.data) || 0,\n          children = node.children,\n          i = children && children.length;\n      while (--i >= 0) sum += children[i].value;\n      node.value = sum;\n    });\n  }\n\n  function node_sort(compare) {\n    return this.eachBefore(function(node) {\n      if (node.children) {\n        node.children.sort(compare);\n      }\n    });\n  }\n\n  function node_path(end) {\n    var start = this,\n        ancestor = leastCommonAncestor(start, end),\n        nodes = [start];\n    while (start !== ancestor) {\n      start = start.parent;\n      nodes.push(start);\n    }\n    var k = nodes.length;\n    while (end !== ancestor) {\n      nodes.splice(k, 0, end);\n      end = end.parent;\n    }\n    return nodes;\n  }\n\n  function leastCommonAncestor(a, b) {\n    if (a === b) return a;\n    var aNodes = a.ancestors(),\n        bNodes = b.ancestors(),\n        c = null;\n    a = aNodes.pop();\n    b = bNodes.pop();\n    while (a === b) {\n      c = a;\n      a = aNodes.pop();\n      b = bNodes.pop();\n    }\n    return c;\n  }\n\n  function node_ancestors() {\n    var node = this, nodes = [node];\n    while (node = node.parent) {\n      nodes.push(node);\n    }\n    return nodes;\n  }\n\n  function node_descendants() {\n    var nodes = [];\n    this.each(function(node) {\n      nodes.push(node);\n    });\n    return nodes;\n  }\n\n  function node_leaves() {\n    var leaves = [];\n    this.eachBefore(function(node) {\n      if (!node.children) {\n        leaves.push(node);\n      }\n    });\n    return leaves;\n  }\n\n  function node_links() {\n    var root = this, links = [];\n    root.each(function(node) {\n      if (node !== root) { // Don’t include the root’s parent, if any.\n        links.push({source: node.parent, target: node});\n      }\n    });\n    return links;\n  }\n\n  function hierarchy(data, children) {\n    var root = new Node(data),\n        valued = +data.value && (root.value = data.value),\n        node,\n        nodes = [root],\n        child,\n        childs,\n        i,\n        n;\n\n    if (children == null) children = defaultChildren;\n\n    while (node = nodes.pop()) {\n      if (valued) node.value = +node.data.value;\n      if ((childs = children(node.data)) && (n = childs.length)) {\n        node.children = new Array(n);\n        for (i = n - 1; i >= 0; --i) {\n          nodes.push(child = node.children[i] = new Node(childs[i]));\n          child.parent = node;\n          child.depth = node.depth + 1;\n        }\n      }\n    }\n\n    return root.eachBefore(computeHeight);\n  }\n\n  function node_copy() {\n    return hierarchy(this).eachBefore(copyData);\n  }\n\n  function defaultChildren(d) {\n    return d.children;\n  }\n\n  function copyData(node) {\n    node.data = node.data.data;\n  }\n\n  function computeHeight(node) {\n    var height = 0;\n    do node.height = height;\n    while ((node = node.parent) && (node.height < ++height));\n  }\n\n  function Node(data) {\n    this.data = data;\n    this.depth =\n    this.height = 0;\n    this.parent = null;\n  }\n\n  Node.prototype = hierarchy.prototype = {\n    constructor: Node,\n    each: node_each,\n    eachAfter: node_eachAfter,\n    eachBefore: node_eachBefore,\n    sum: node_sum,\n    sort: node_sort,\n    path: node_path,\n    ancestors: node_ancestors,\n    descendants: node_descendants,\n    leaves: node_leaves,\n    links: node_links,\n    copy: node_copy\n  };\n\n  function Node$2(value) {\n    this._ = value;\n    this.next = null;\n  }\n\n  function shuffle$1(array) {\n    var i,\n        n = (array = array.slice()).length,\n        head = null,\n        node = head;\n\n    while (n) {\n      var next = new Node$2(array[n - 1]);\n      if (node) node = node.next = next;\n      else node = head = next;\n      array[i] = array[--n];\n    }\n\n    return {\n      head: head,\n      tail: node\n    };\n  }\n\n  function enclose(circles) {\n    return encloseN(shuffle$1(circles), []);\n  }\n\n  function encloses(a, b) {\n    var dx = b.x - a.x,\n        dy = b.y - a.y,\n        dr = a.r - b.r;\n    return dr * dr + 1e-6 > dx * dx + dy * dy;\n  }\n\n  // Returns the smallest circle that contains circles L and intersects circles B.\n  function encloseN(L, B) {\n    var circle,\n        l0 = null,\n        l1 = L.head,\n        l2,\n        p1;\n\n    switch (B.length) {\n      case 1: circle = enclose1(B[0]); break;\n      case 2: circle = enclose2(B[0], B[1]); break;\n      case 3: circle = enclose3(B[0], B[1], B[2]); break;\n    }\n\n    while (l1) {\n      p1 = l1._, l2 = l1.next;\n      if (!circle || !encloses(circle, p1)) {\n\n        // Temporarily truncate L before l1.\n        if (l0) L.tail = l0, l0.next = null;\n        else L.head = L.tail = null;\n\n        B.push(p1);\n        circle = encloseN(L, B); // Note: reorders L!\n        B.pop();\n\n        // Move l1 to the front of L and reconnect the truncated list L.\n        if (L.head) l1.next = L.head, L.head = l1;\n        else l1.next = null, L.head = L.tail = l1;\n        l0 = L.tail, l0.next = l2;\n\n      } else {\n        l0 = l1;\n      }\n      l1 = l2;\n    }\n\n    L.tail = l0;\n    return circle;\n  }\n\n  function enclose1(a) {\n    return {\n      x: a.x,\n      y: a.y,\n      r: a.r\n    };\n  }\n\n  function enclose2(a, b) {\n    var x1 = a.x, y1 = a.y, r1 = a.r,\n        x2 = b.x, y2 = b.y, r2 = b.r,\n        x21 = x2 - x1, y21 = y2 - y1, r21 = r2 - r1,\n        l = Math.sqrt(x21 * x21 + y21 * y21);\n    return {\n      x: (x1 + x2 + x21 / l * r21) / 2,\n      y: (y1 + y2 + y21 / l * r21) / 2,\n      r: (l + r1 + r2) / 2\n    };\n  }\n\n  function enclose3(a, b, c) {\n    var x1 = a.x, y1 = a.y, r1 = a.r,\n        x2 = b.x, y2 = b.y, r2 = b.r,\n        x3 = c.x, y3 = c.y, r3 = c.r,\n        a2 = 2 * (x1 - x2),\n        b2 = 2 * (y1 - y2),\n        c2 = 2 * (r2 - r1),\n        d2 = x1 * x1 + y1 * y1 - r1 * r1 - x2 * x2 - y2 * y2 + r2 * r2,\n        a3 = 2 * (x1 - x3),\n        b3 = 2 * (y1 - y3),\n        c3 = 2 * (r3 - r1),\n        d3 = x1 * x1 + y1 * y1 - r1 * r1 - x3 * x3 - y3 * y3 + r3 * r3,\n        ab = a3 * b2 - a2 * b3,\n        xa = (b2 * d3 - b3 * d2) / ab - x1,\n        xb = (b3 * c2 - b2 * c3) / ab,\n        ya = (a3 * d2 - a2 * d3) / ab - y1,\n        yb = (a2 * c3 - a3 * c2) / ab,\n        A = xb * xb + yb * yb - 1,\n        B = 2 * (xa * xb + ya * yb + r1),\n        C = xa * xa + ya * ya - r1 * r1,\n        r = (-B - Math.sqrt(B * B - 4 * A * C)) / (2 * A);\n    return {\n      x: xa + xb * r + x1,\n      y: ya + yb * r + y1,\n      r: r\n    };\n  }\n\n  function place(a, b, c) {\n    var ax = a.x,\n        ay = a.y,\n        da = b.r + c.r,\n        db = a.r + c.r,\n        dx = b.x - ax,\n        dy = b.y - ay,\n        dc = dx * dx + dy * dy;\n    if (dc) {\n      var x = 0.5 + ((db *= db) - (da *= da)) / (2 * dc),\n          y = Math.sqrt(Math.max(0, 2 * da * (db + dc) - (db -= dc) * db - da * da)) / (2 * dc);\n      c.x = ax + x * dx + y * dy;\n      c.y = ay + x * dy - y * dx;\n    } else {\n      c.x = ax + db;\n      c.y = ay;\n    }\n  }\n\n  function intersects(a, b) {\n    var dx = b.x - a.x,\n        dy = b.y - a.y,\n        dr = a.r + b.r;\n    return dr * dr > dx * dx + dy * dy;\n  }\n\n  function distance2(circle, x, y) {\n    var dx = circle.x - x,\n        dy = circle.y - y;\n    return dx * dx + dy * dy;\n  }\n\n  function Node$1(circle) {\n    this._ = circle;\n    this.next = null;\n    this.previous = null;\n  }\n\n  function packEnclose(circles) {\n    if (!(n = circles.length)) return 0;\n\n    var a, b, c, n;\n\n    // Place the first circle.\n    a = circles[0], a.x = 0, a.y = 0;\n    if (!(n > 1)) return a.r;\n\n    // Place the second circle.\n    b = circles[1], a.x = -b.r, b.x = a.r, b.y = 0;\n    if (!(n > 2)) return a.r + b.r;\n\n    // Place the third circle.\n    place(b, a, c = circles[2]);\n\n    // Initialize the weighted centroid.\n    var aa = a.r * a.r,\n        ba = b.r * b.r,\n        ca = c.r * c.r,\n        oa = aa + ba + ca,\n        ox = aa * a.x + ba * b.x + ca * c.x,\n        oy = aa * a.y + ba * b.y + ca * c.y,\n        cx, cy, i, j, k, sj, sk;\n\n    // Initialize the front-chain using the first three circles a, b and c.\n    a = new Node$1(a), b = new Node$1(b), c = new Node$1(c);\n    a.next = c.previous = b;\n    b.next = a.previous = c;\n    c.next = b.previous = a;\n\n    // Attempt to place each remaining circle…\n    pack: for (i = 3; i < n; ++i) {\n      place(a._, b._, c = circles[i]), c = new Node$1(c);\n\n      // If there are only three elements in the front-chain…\n      if ((k = a.previous) === (j = b.next)) {\n        // If the new circle intersects the third circle,\n        // rotate the front chain to try the next position.\n        if (intersects(j._, c._)) {\n          a = b, b = j, --i;\n          continue pack;\n        }\n      }\n\n      // Find the closest intersecting circle on the front-chain, if any.\n      else {\n        sj = j._.r, sk = k._.r;\n        do {\n          if (sj <= sk) {\n            if (intersects(j._, c._)) {\n              b = j, a.next = b, b.previous = a, --i;\n              continue pack;\n            }\n            j = j.next, sj += j._.r;\n          } else {\n            if (intersects(k._, c._)) {\n              a = k, a.next = b, b.previous = a, --i;\n              continue pack;\n            }\n            k = k.previous, sk += k._.r;\n          }\n        } while (j !== k.next);\n      }\n\n      // Success! Insert the new circle c between a and b.\n      c.previous = a, c.next = b, a.next = b.previous = b = c;\n\n      // Update the weighted centroid.\n      oa += ca = c._.r * c._.r;\n      ox += ca * c._.x;\n      oy += ca * c._.y;\n\n      // Compute the new closest circle a to centroid.\n      aa = distance2(a._, cx = ox / oa, cy = oy / oa);\n      while ((c = c.next) !== b) {\n        if ((ca = distance2(c._, cx, cy)) < aa) {\n          a = c, aa = ca;\n        }\n      }\n      b = a.next;\n    }\n\n    // Compute the enclosing circle of the front chain.\n    a = [b._], c = b; while ((c = c.next) !== b) a.push(c._); c = enclose(a);\n\n    // Translate the circles to put the enclosing circle around the origin.\n    for (i = 0; i < n; ++i) a = circles[i], a.x -= c.x, a.y -= c.y;\n\n    return c.r;\n  }\n\n  function siblings(circles) {\n    packEnclose(circles);\n    return circles;\n  }\n\n  function optional(f) {\n    return f == null ? null : required(f);\n  }\n\n  function required(f) {\n    if (typeof f !== \"function\") throw new Error;\n    return f;\n  }\n\n  function constantZero() {\n    return 0;\n  }\n\n  function constant$5(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  function defaultRadius(d) {\n    return Math.sqrt(d.value);\n  }\n\n  function index() {\n    var radius = null,\n        dx = 1,\n        dy = 1,\n        padding = constantZero;\n\n    function pack(root) {\n      root.x = dx / 2, root.y = dy / 2;\n      if (radius) {\n        root.eachBefore(radiusLeaf(radius))\n            .eachAfter(packChildren(padding, 0.5))\n            .eachBefore(translateChild(1));\n      } else {\n        root.eachBefore(radiusLeaf(defaultRadius))\n            .eachAfter(packChildren(constantZero, 1))\n            .eachAfter(packChildren(padding, root.r / Math.min(dx, dy)))\n            .eachBefore(translateChild(Math.min(dx, dy) / (2 * root.r)));\n      }\n      return root;\n    }\n\n    pack.radius = function(x) {\n      return arguments.length ? (radius = optional(x), pack) : radius;\n    };\n\n    pack.size = function(x) {\n      return arguments.length ? (dx = +x[0], dy = +x[1], pack) : [dx, dy];\n    };\n\n    pack.padding = function(x) {\n      return arguments.length ? (padding = typeof x === \"function\" ? x : constant$5(+x), pack) : padding;\n    };\n\n    return pack;\n  }\n\n  function radiusLeaf(radius) {\n    return function(node) {\n      if (!node.children) {\n        node.r = Math.max(0, +radius(node) || 0);\n      }\n    };\n  }\n\n  function packChildren(padding, k) {\n    return function(node) {\n      if (children = node.children) {\n        var children,\n            i,\n            n = children.length,\n            r = padding(node) * k || 0,\n            e;\n\n        if (r) for (i = 0; i < n; ++i) children[i].r += r;\n        e = packEnclose(children);\n        if (r) for (i = 0; i < n; ++i) children[i].r -= r;\n        node.r = e + r;\n      }\n    };\n  }\n\n  function translateChild(k) {\n    return function(node) {\n      var parent = node.parent;\n      node.r *= k;\n      if (parent) {\n        node.x = parent.x + k * node.x;\n        node.y = parent.y + k * node.y;\n      }\n    };\n  }\n\n  function roundNode(node) {\n    node.x0 = Math.round(node.x0);\n    node.y0 = Math.round(node.y0);\n    node.x1 = Math.round(node.x1);\n    node.y1 = Math.round(node.y1);\n  }\n\n  function treemapDice(parent, x0, y0, x1, y1) {\n    var nodes = parent.children,\n        node,\n        i = -1,\n        n = nodes.length,\n        k = parent.value && (x1 - x0) / parent.value;\n\n    while (++i < n) {\n      node = nodes[i], node.y0 = y0, node.y1 = y1;\n      node.x0 = x0, node.x1 = x0 += node.value * k;\n    }\n  }\n\n  function partition() {\n    var dx = 1,\n        dy = 1,\n        padding = 0,\n        round = false;\n\n    function partition(root) {\n      var n = root.height + 1;\n      root.x0 =\n      root.y0 = padding;\n      root.x1 = dx;\n      root.y1 = dy / n;\n      root.eachBefore(positionNode(dy, n));\n      if (round) root.eachBefore(roundNode);\n      return root;\n    }\n\n    function positionNode(dy, n) {\n      return function(node) {\n        if (node.children) {\n          treemapDice(node, node.x0, dy * (node.depth + 1) / n, node.x1, dy * (node.depth + 2) / n);\n        }\n        var x0 = node.x0,\n            y0 = node.y0,\n            x1 = node.x1 - padding,\n            y1 = node.y1 - padding;\n        if (x1 < x0) x0 = x1 = (x0 + x1) / 2;\n        if (y1 < y0) y0 = y1 = (y0 + y1) / 2;\n        node.x0 = x0;\n        node.y0 = y0;\n        node.x1 = x1;\n        node.y1 = y1;\n      };\n    }\n\n    partition.round = function(x) {\n      return arguments.length ? (round = !!x, partition) : round;\n    };\n\n    partition.size = function(x) {\n      return arguments.length ? (dx = +x[0], dy = +x[1], partition) : [dx, dy];\n    };\n\n    partition.padding = function(x) {\n      return arguments.length ? (padding = +x, partition) : padding;\n    };\n\n    return partition;\n  }\n\nvar   keyPrefix$1 = \"$\";\n  var preroot = {depth: -1};\n  var ambiguous = {};\n  function defaultId(d) {\n    return d.id;\n  }\n\n  function defaultParentId(d) {\n    return d.parentId;\n  }\n\n  function stratify() {\n    var id = defaultId,\n        parentId = defaultParentId;\n\n    function stratify(data) {\n      var d,\n          i,\n          n = data.length,\n          root,\n          parent,\n          node,\n          nodes = new Array(n),\n          nodeId,\n          nodeKey,\n          nodeByKey = {};\n\n      for (i = 0; i < n; ++i) {\n        d = data[i], node = nodes[i] = new Node(d);\n        if ((nodeId = id(d, i, data)) != null && (nodeId += \"\")) {\n          nodeKey = keyPrefix$1 + (node.id = nodeId);\n          nodeByKey[nodeKey] = nodeKey in nodeByKey ? ambiguous : node;\n        }\n      }\n\n      for (i = 0; i < n; ++i) {\n        node = nodes[i], nodeId = parentId(data[i], i, data);\n        if (nodeId == null || !(nodeId += \"\")) {\n          if (root) throw new Error(\"multiple roots\");\n          root = node;\n        } else {\n          parent = nodeByKey[keyPrefix$1 + nodeId];\n          if (!parent) throw new Error(\"missing: \" + nodeId);\n          if (parent === ambiguous) throw new Error(\"ambiguous: \" + nodeId);\n          if (parent.children) parent.children.push(node);\n          else parent.children = [node];\n          node.parent = parent;\n        }\n      }\n\n      if (!root) throw new Error(\"no root\");\n      root.parent = preroot;\n      root.eachBefore(function(node) { node.depth = node.parent.depth + 1; --n; }).eachBefore(computeHeight);\n      root.parent = null;\n      if (n > 0) throw new Error(\"cycle\");\n\n      return root;\n    }\n\n    stratify.id = function(x) {\n      return arguments.length ? (id = required(x), stratify) : id;\n    };\n\n    stratify.parentId = function(x) {\n      return arguments.length ? (parentId = required(x), stratify) : parentId;\n    };\n\n    return stratify;\n  }\n\n  function defaultSeparation$1(a, b) {\n    return a.parent === b.parent ? 1 : 2;\n  }\n\n  // function radialSeparation(a, b) {\n  //   return (a.parent === b.parent ? 1 : 2) / a.depth;\n  // }\n\n  // This function is used to traverse the left contour of a subtree (or\n  // subforest). It returns the successor of v on this contour. This successor is\n  // either given by the leftmost child of v or by the thread of v. The function\n  // returns null if and only if v is on the highest level of its subtree.\n  function nextLeft(v) {\n    var children = v.children;\n    return children ? children[0] : v.t;\n  }\n\n  // This function works analogously to nextLeft.\n  function nextRight(v) {\n    var children = v.children;\n    return children ? children[children.length - 1] : v.t;\n  }\n\n  // Shifts the current subtree rooted at w+. This is done by increasing\n  // prelim(w+) and mod(w+) by shift.\n  function moveSubtree(wm, wp, shift) {\n    var change = shift / (wp.i - wm.i);\n    wp.c -= change;\n    wp.s += shift;\n    wm.c += change;\n    wp.z += shift;\n    wp.m += shift;\n  }\n\n  // All other shifts, applied to the smaller subtrees between w- and w+, are\n  // performed by this function. To prepare the shifts, we have to adjust\n  // change(w+), shift(w+), and change(w-).\n  function executeShifts(v) {\n    var shift = 0,\n        change = 0,\n        children = v.children,\n        i = children.length,\n        w;\n    while (--i >= 0) {\n      w = children[i];\n      w.z += shift;\n      w.m += shift;\n      shift += w.s + (change += w.c);\n    }\n  }\n\n  // If vi-’s ancestor is a sibling of v, returns vi-’s ancestor. Otherwise,\n  // returns the specified (default) ancestor.\n  function nextAncestor(vim, v, ancestor) {\n    return vim.a.parent === v.parent ? vim.a : ancestor;\n  }\n\n  function TreeNode(node, i) {\n    this._ = node;\n    this.parent = null;\n    this.children = null;\n    this.A = null; // default ancestor\n    this.a = this; // ancestor\n    this.z = 0; // prelim\n    this.m = 0; // mod\n    this.c = 0; // change\n    this.s = 0; // shift\n    this.t = null; // thread\n    this.i = i; // number\n  }\n\n  TreeNode.prototype = Object.create(Node.prototype);\n\n  function treeRoot(root) {\n    var tree = new TreeNode(root, 0),\n        node,\n        nodes = [tree],\n        child,\n        children,\n        i,\n        n;\n\n    while (node = nodes.pop()) {\n      if (children = node._.children) {\n        node.children = new Array(n = children.length);\n        for (i = n - 1; i >= 0; --i) {\n          nodes.push(child = node.children[i] = new TreeNode(children[i], i));\n          child.parent = node;\n        }\n      }\n    }\n\n    (tree.parent = new TreeNode(null, 0)).children = [tree];\n    return tree;\n  }\n\n  // Node-link tree diagram using the Reingold-Tilford \"tidy\" algorithm\n  function tree() {\n    var separation = defaultSeparation$1,\n        dx = 1,\n        dy = 1,\n        nodeSize = null;\n\n    function tree(root) {\n      var t = treeRoot(root);\n\n      // Compute the layout using Buchheim et al.’s algorithm.\n      t.eachAfter(firstWalk), t.parent.m = -t.z;\n      t.eachBefore(secondWalk);\n\n      // If a fixed node size is specified, scale x and y.\n      if (nodeSize) root.eachBefore(sizeNode);\n\n      // If a fixed tree size is specified, scale x and y based on the extent.\n      // Compute the left-most, right-most, and depth-most nodes for extents.\n      else {\n        var left = root,\n            right = root,\n            bottom = root;\n        root.eachBefore(function(node) {\n          if (node.x < left.x) left = node;\n          if (node.x > right.x) right = node;\n          if (node.depth > bottom.depth) bottom = node;\n        });\n        var s = left === right ? 1 : separation(left, right) / 2,\n            tx = s - left.x,\n            kx = dx / (right.x + s + tx),\n            ky = dy / (bottom.depth || 1);\n        root.eachBefore(function(node) {\n          node.x = (node.x + tx) * kx;\n          node.y = node.depth * ky;\n        });\n      }\n\n      return root;\n    }\n\n    // Computes a preliminary x-coordinate for v. Before that, FIRST WALK is\n    // applied recursively to the children of v, as well as the function\n    // APPORTION. After spacing out the children by calling EXECUTE SHIFTS, the\n    // node v is placed to the midpoint of its outermost children.\n    function firstWalk(v) {\n      var children = v.children,\n          siblings = v.parent.children,\n          w = v.i ? siblings[v.i - 1] : null;\n      if (children) {\n        executeShifts(v);\n        var midpoint = (children[0].z + children[children.length - 1].z) / 2;\n        if (w) {\n          v.z = w.z + separation(v._, w._);\n          v.m = v.z - midpoint;\n        } else {\n          v.z = midpoint;\n        }\n      } else if (w) {\n        v.z = w.z + separation(v._, w._);\n      }\n      v.parent.A = apportion(v, w, v.parent.A || siblings[0]);\n    }\n\n    // Computes all real x-coordinates by summing up the modifiers recursively.\n    function secondWalk(v) {\n      v._.x = v.z + v.parent.m;\n      v.m += v.parent.m;\n    }\n\n    // The core of the algorithm. Here, a new subtree is combined with the\n    // previous subtrees. Threads are used to traverse the inside and outside\n    // contours of the left and right subtree up to the highest common level. The\n    // vertices used for the traversals are vi+, vi-, vo-, and vo+, where the\n    // superscript o means outside and i means inside, the subscript - means left\n    // subtree and + means right subtree. For summing up the modifiers along the\n    // contour, we use respective variables si+, si-, so-, and so+. Whenever two\n    // nodes of the inside contours conflict, we compute the left one of the\n    // greatest uncommon ancestors using the function ANCESTOR and call MOVE\n    // SUBTREE to shift the subtree and prepare the shifts of smaller subtrees.\n    // Finally, we add a new thread (if necessary).\n    function apportion(v, w, ancestor) {\n      if (w) {\n        var vip = v,\n            vop = v,\n            vim = w,\n            vom = vip.parent.children[0],\n            sip = vip.m,\n            sop = vop.m,\n            sim = vim.m,\n            som = vom.m,\n            shift;\n        while (vim = nextRight(vim), vip = nextLeft(vip), vim && vip) {\n          vom = nextLeft(vom);\n          vop = nextRight(vop);\n          vop.a = v;\n          shift = vim.z + sim - vip.z - sip + separation(vim._, vip._);\n          if (shift > 0) {\n            moveSubtree(nextAncestor(vim, v, ancestor), v, shift);\n            sip += shift;\n            sop += shift;\n          }\n          sim += vim.m;\n          sip += vip.m;\n          som += vom.m;\n          sop += vop.m;\n        }\n        if (vim && !nextRight(vop)) {\n          vop.t = vim;\n          vop.m += sim - sop;\n        }\n        if (vip && !nextLeft(vom)) {\n          vom.t = vip;\n          vom.m += sip - som;\n          ancestor = v;\n        }\n      }\n      return ancestor;\n    }\n\n    function sizeNode(node) {\n      node.x *= dx;\n      node.y = node.depth * dy;\n    }\n\n    tree.separation = function(x) {\n      return arguments.length ? (separation = x, tree) : separation;\n    };\n\n    tree.size = function(x) {\n      return arguments.length ? (nodeSize = false, dx = +x[0], dy = +x[1], tree) : (nodeSize ? null : [dx, dy]);\n    };\n\n    tree.nodeSize = function(x) {\n      return arguments.length ? (nodeSize = true, dx = +x[0], dy = +x[1], tree) : (nodeSize ? [dx, dy] : null);\n    };\n\n    return tree;\n  }\n\n  function treemapSlice(parent, x0, y0, x1, y1) {\n    var nodes = parent.children,\n        node,\n        i = -1,\n        n = nodes.length,\n        k = parent.value && (y1 - y0) / parent.value;\n\n    while (++i < n) {\n      node = nodes[i], node.x0 = x0, node.x1 = x1;\n      node.y0 = y0, node.y1 = y0 += node.value * k;\n    }\n  }\n\n  var phi = (1 + Math.sqrt(5)) / 2;\n\n  function squarifyRatio(ratio, parent, x0, y0, x1, y1) {\n    var rows = [],\n        nodes = parent.children,\n        row,\n        nodeValue,\n        i0 = 0,\n        i1,\n        n = nodes.length,\n        dx, dy,\n        value = parent.value,\n        sumValue,\n        minValue,\n        maxValue,\n        newRatio,\n        minRatio,\n        alpha,\n        beta;\n\n    while (i0 < n) {\n      dx = x1 - x0, dy = y1 - y0;\n      minValue = maxValue = sumValue = nodes[i0].value;\n      alpha = Math.max(dy / dx, dx / dy) / (value * ratio);\n      beta = sumValue * sumValue * alpha;\n      minRatio = Math.max(maxValue / beta, beta / minValue);\n\n      // Keep adding nodes while the aspect ratio maintains or improves.\n      for (i1 = i0 + 1; i1 < n; ++i1) {\n        sumValue += nodeValue = nodes[i1].value;\n        if (nodeValue < minValue) minValue = nodeValue;\n        if (nodeValue > maxValue) maxValue = nodeValue;\n        beta = sumValue * sumValue * alpha;\n        newRatio = Math.max(maxValue / beta, beta / minValue);\n        if (newRatio > minRatio) { sumValue -= nodeValue; break; }\n        minRatio = newRatio;\n      }\n\n      // Position and record the row orientation.\n      rows.push(row = {value: sumValue, dice: dx < dy, children: nodes.slice(i0, i1)});\n      if (row.dice) treemapDice(row, x0, y0, x1, value ? y0 += dy * sumValue / value : y1);\n      else treemapSlice(row, x0, y0, value ? x0 += dx * sumValue / value : x1, y1);\n      value -= sumValue, i0 = i1;\n    }\n\n    return rows;\n  }\n\n  var squarify = (function custom(ratio) {\n\n    function squarify(parent, x0, y0, x1, y1) {\n      squarifyRatio(ratio, parent, x0, y0, x1, y1);\n    }\n\n    squarify.ratio = function(x) {\n      return custom((x = +x) > 1 ? x : 1);\n    };\n\n    return squarify;\n  })(phi);\n\n  function index$1() {\n    var tile = squarify,\n        round = false,\n        dx = 1,\n        dy = 1,\n        paddingStack = [0],\n        paddingInner = constantZero,\n        paddingTop = constantZero,\n        paddingRight = constantZero,\n        paddingBottom = constantZero,\n        paddingLeft = constantZero;\n\n    function treemap(root) {\n      root.x0 =\n      root.y0 = 0;\n      root.x1 = dx;\n      root.y1 = dy;\n      root.eachBefore(positionNode);\n      paddingStack = [0];\n      if (round) root.eachBefore(roundNode);\n      return root;\n    }\n\n    function positionNode(node) {\n      var p = paddingStack[node.depth],\n          x0 = node.x0 + p,\n          y0 = node.y0 + p,\n          x1 = node.x1 - p,\n          y1 = node.y1 - p;\n      if (x1 < x0) x0 = x1 = (x0 + x1) / 2;\n      if (y1 < y0) y0 = y1 = (y0 + y1) / 2;\n      node.x0 = x0;\n      node.y0 = y0;\n      node.x1 = x1;\n      node.y1 = y1;\n      if (node.children) {\n        p = paddingStack[node.depth + 1] = paddingInner(node) / 2;\n        x0 += paddingLeft(node) - p;\n        y0 += paddingTop(node) - p;\n        x1 -= paddingRight(node) - p;\n        y1 -= paddingBottom(node) - p;\n        if (x1 < x0) x0 = x1 = (x0 + x1) / 2;\n        if (y1 < y0) y0 = y1 = (y0 + y1) / 2;\n        tile(node, x0, y0, x1, y1);\n      }\n    }\n\n    treemap.round = function(x) {\n      return arguments.length ? (round = !!x, treemap) : round;\n    };\n\n    treemap.size = function(x) {\n      return arguments.length ? (dx = +x[0], dy = +x[1], treemap) : [dx, dy];\n    };\n\n    treemap.tile = function(x) {\n      return arguments.length ? (tile = required(x), treemap) : tile;\n    };\n\n    treemap.padding = function(x) {\n      return arguments.length ? treemap.paddingInner(x).paddingOuter(x) : treemap.paddingInner();\n    };\n\n    treemap.paddingInner = function(x) {\n      return arguments.length ? (paddingInner = typeof x === \"function\" ? x : constant$5(+x), treemap) : paddingInner;\n    };\n\n    treemap.paddingOuter = function(x) {\n      return arguments.length ? treemap.paddingTop(x).paddingRight(x).paddingBottom(x).paddingLeft(x) : treemap.paddingTop();\n    };\n\n    treemap.paddingTop = function(x) {\n      return arguments.length ? (paddingTop = typeof x === \"function\" ? x : constant$5(+x), treemap) : paddingTop;\n    };\n\n    treemap.paddingRight = function(x) {\n      return arguments.length ? (paddingRight = typeof x === \"function\" ? x : constant$5(+x), treemap) : paddingRight;\n    };\n\n    treemap.paddingBottom = function(x) {\n      return arguments.length ? (paddingBottom = typeof x === \"function\" ? x : constant$5(+x), treemap) : paddingBottom;\n    };\n\n    treemap.paddingLeft = function(x) {\n      return arguments.length ? (paddingLeft = typeof x === \"function\" ? x : constant$5(+x), treemap) : paddingLeft;\n    };\n\n    return treemap;\n  }\n\n  function binary(parent, x0, y0, x1, y1) {\n    var nodes = parent.children,\n        i, n = nodes.length,\n        sum, sums = new Array(n + 1);\n\n    for (sums[0] = sum = i = 0; i < n; ++i) {\n      sums[i + 1] = sum += nodes[i].value;\n    }\n\n    partition(0, n, parent.value, x0, y0, x1, y1);\n\n    function partition(i, j, value, x0, y0, x1, y1) {\n      if (i >= j - 1) {\n        var node = nodes[i];\n        node.x0 = x0, node.y0 = y0;\n        node.x1 = x1, node.y1 = y1;\n        return;\n      }\n\n      var valueOffset = sums[i],\n          valueTarget = (value / 2) + valueOffset,\n          k = i + 1,\n          hi = j - 1;\n\n      while (k < hi) {\n        var mid = k + hi >>> 1;\n        if (sums[mid] < valueTarget) k = mid + 1;\n        else hi = mid;\n      }\n\n      var valueLeft = sums[k] - valueOffset,\n          valueRight = value - valueLeft;\n\n      if ((y1 - y0) > (x1 - x0)) {\n        var yk = (y0 * valueRight + y1 * valueLeft) / value;\n        partition(i, k, valueLeft, x0, y0, x1, yk);\n        partition(k, j, valueRight, x0, yk, x1, y1);\n      } else {\n        var xk = (x0 * valueRight + x1 * valueLeft) / value;\n        partition(i, k, valueLeft, x0, y0, xk, y1);\n        partition(k, j, valueRight, xk, y0, x1, y1);\n      }\n    }\n  }\n\n  function sliceDice(parent, x0, y0, x1, y1) {\n    (parent.depth & 1 ? treemapSlice : treemapDice)(parent, x0, y0, x1, y1);\n  }\n\n  var resquarify = (function custom(ratio) {\n\n    function resquarify(parent, x0, y0, x1, y1) {\n      if ((rows = parent._squarify) && (rows.ratio === ratio)) {\n        var rows,\n            row,\n            nodes,\n            i,\n            j = -1,\n            n,\n            m = rows.length,\n            value = parent.value;\n\n        while (++j < m) {\n          row = rows[j], nodes = row.children;\n          for (i = row.value = 0, n = nodes.length; i < n; ++i) row.value += nodes[i].value;\n          if (row.dice) treemapDice(row, x0, y0, x1, y0 += (y1 - y0) * row.value / value);\n          else treemapSlice(row, x0, y0, x0 += (x1 - x0) * row.value / value, y1);\n          value -= row.value;\n        }\n      } else {\n        parent._squarify = rows = squarifyRatio(ratio, parent, x0, y0, x1, y1);\n        rows.ratio = ratio;\n      }\n    }\n\n    resquarify.ratio = function(x) {\n      return custom((x = +x) > 1 ? x : 1);\n    };\n\n    return resquarify;\n  })(phi);\n\n  function center$1(x, y) {\n    var nodes;\n\n    if (x == null) x = 0;\n    if (y == null) y = 0;\n\n    function force() {\n      var i,\n          n = nodes.length,\n          node,\n          sx = 0,\n          sy = 0;\n\n      for (i = 0; i < n; ++i) {\n        node = nodes[i], sx += node.x, sy += node.y;\n      }\n\n      for (sx = sx / n - x, sy = sy / n - y, i = 0; i < n; ++i) {\n        node = nodes[i], node.x -= sx, node.y -= sy;\n      }\n    }\n\n    force.initialize = function(_) {\n      nodes = _;\n    };\n\n    force.x = function(_) {\n      return arguments.length ? (x = +_, force) : x;\n    };\n\n    force.y = function(_) {\n      return arguments.length ? (y = +_, force) : y;\n    };\n\n    return force;\n  }\n\n  function constant$6(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  function jiggle() {\n    return (Math.random() - 0.5) * 1e-6;\n  }\n\n  function x$1(d) {\n    return d.x + d.vx;\n  }\n\n  function y$1(d) {\n    return d.y + d.vy;\n  }\n\n  function collide(radius) {\n    var nodes,\n        radii,\n        strength = 1,\n        iterations = 1;\n\n    if (typeof radius !== \"function\") radius = constant$6(radius == null ? 1 : +radius);\n\n    function force() {\n      var i, n = nodes.length,\n          tree,\n          node,\n          xi,\n          yi,\n          ri,\n          ri2;\n\n      for (var k = 0; k < iterations; ++k) {\n        tree = quadtree(nodes, x$1, y$1).visitAfter(prepare);\n        for (i = 0; i < n; ++i) {\n          node = nodes[i];\n          ri = radii[i], ri2 = ri * ri;\n          xi = node.x + node.vx;\n          yi = node.y + node.vy;\n          tree.visit(apply);\n        }\n      }\n\n      function apply(quad, x0, y0, x1, y1) {\n        var data = quad.data, rj = quad.r, r = ri + rj;\n        if (data) {\n          if (data.index > i) {\n            var x = xi - data.x - data.vx,\n                y = yi - data.y - data.vy,\n                l = x * x + y * y;\n            if (l < r * r) {\n              if (x === 0) x = jiggle(), l += x * x;\n              if (y === 0) y = jiggle(), l += y * y;\n              l = (r - (l = Math.sqrt(l))) / l * strength;\n              node.vx += (x *= l) * (r = (rj *= rj) / (ri2 + rj));\n              node.vy += (y *= l) * r;\n              data.vx -= x * (r = 1 - r);\n              data.vy -= y * r;\n            }\n          }\n          return;\n        }\n        return x0 > xi + r || x1 < xi - r || y0 > yi + r || y1 < yi - r;\n      }\n    }\n\n    function prepare(quad) {\n      if (quad.data) return quad.r = radii[quad.data.index];\n      for (var i = quad.r = 0; i < 4; ++i) {\n        if (quad[i] && quad[i].r > quad.r) {\n          quad.r = quad[i].r;\n        }\n      }\n    }\n\n    force.initialize = function(_) {\n      var i, n = (nodes = _).length; radii = new Array(n);\n      for (i = 0; i < n; ++i) radii[i] = +radius(nodes[i], i, nodes);\n    };\n\n    force.iterations = function(_) {\n      return arguments.length ? (iterations = +_, force) : iterations;\n    };\n\n    force.strength = function(_) {\n      return arguments.length ? (strength = +_, force) : strength;\n    };\n\n    force.radius = function(_) {\n      return arguments.length ? (radius = typeof _ === \"function\" ? _ : constant$6(+_), force) : radius;\n    };\n\n    return force;\n  }\n\n  function index$2(d, i) {\n    return i;\n  }\n\n  function link(links) {\n    var id = index$2,\n        strength = defaultStrength,\n        strengths,\n        distance = constant$6(30),\n        distances,\n        nodes,\n        count,\n        bias,\n        iterations = 1;\n\n    if (links == null) links = [];\n\n    function defaultStrength(link) {\n      return 1 / Math.min(count[link.source.index], count[link.target.index]);\n    }\n\n    function force(alpha) {\n      for (var k = 0, n = links.length; k < iterations; ++k) {\n        for (var i = 0, link, source, target, x, y, l, b; i < n; ++i) {\n          link = links[i], source = link.source, target = link.target;\n          x = target.x + target.vx - source.x - source.vx || jiggle();\n          y = target.y + target.vy - source.y - source.vy || jiggle();\n          l = Math.sqrt(x * x + y * y);\n          l = (l - distances[i]) / l * alpha * strengths[i];\n          x *= l, y *= l;\n          target.vx -= x * (b = bias[i]);\n          target.vy -= y * b;\n          source.vx += x * (b = 1 - b);\n          source.vy += y * b;\n        }\n      }\n    }\n\n    function initialize() {\n      if (!nodes) return;\n\n      var i,\n          n = nodes.length,\n          m = links.length,\n          nodeById = map$1(nodes, id),\n          link;\n\n      for (i = 0, count = new Array(n); i < n; ++i) {\n        count[i] = 0;\n      }\n\n      for (i = 0; i < m; ++i) {\n        link = links[i], link.index = i;\n        if (typeof link.source !== \"object\") link.source = nodeById.get(link.source);\n        if (typeof link.target !== \"object\") link.target = nodeById.get(link.target);\n        ++count[link.source.index], ++count[link.target.index];\n      }\n\n      for (i = 0, bias = new Array(m); i < m; ++i) {\n        link = links[i], bias[i] = count[link.source.index] / (count[link.source.index] + count[link.target.index]);\n      }\n\n      strengths = new Array(m), initializeStrength();\n      distances = new Array(m), initializeDistance();\n    }\n\n    function initializeStrength() {\n      if (!nodes) return;\n\n      for (var i = 0, n = links.length; i < n; ++i) {\n        strengths[i] = +strength(links[i], i, links);\n      }\n    }\n\n    function initializeDistance() {\n      if (!nodes) return;\n\n      for (var i = 0, n = links.length; i < n; ++i) {\n        distances[i] = +distance(links[i], i, links);\n      }\n    }\n\n    force.initialize = function(_) {\n      nodes = _;\n      initialize();\n    };\n\n    force.links = function(_) {\n      return arguments.length ? (links = _, initialize(), force) : links;\n    };\n\n    force.id = function(_) {\n      return arguments.length ? (id = _, force) : id;\n    };\n\n    force.iterations = function(_) {\n      return arguments.length ? (iterations = +_, force) : iterations;\n    };\n\n    force.strength = function(_) {\n      return arguments.length ? (strength = typeof _ === \"function\" ? _ : constant$6(+_), initializeStrength(), force) : strength;\n    };\n\n    force.distance = function(_) {\n      return arguments.length ? (distance = typeof _ === \"function\" ? _ : constant$6(+_), initializeDistance(), force) : distance;\n    };\n\n    return force;\n  }\n\n  function x$2(d) {\n    return d.x;\n  }\n\n  function y$2(d) {\n    return d.y;\n  }\n\n  var initialRadius = 10;\n  var initialAngle = Math.PI * (3 - Math.sqrt(5));\n  function simulation(nodes) {\n    var simulation,\n        alpha = 1,\n        alphaMin = 0.001,\n        alphaDecay = 1 - Math.pow(alphaMin, 1 / 300),\n        alphaTarget = 0,\n        velocityDecay = 0.6,\n        forces = map$1(),\n        stepper = timer(step),\n        event = dispatch(\"tick\", \"end\");\n\n    if (nodes == null) nodes = [];\n\n    function step() {\n      tick();\n      event.call(\"tick\", simulation);\n      if (alpha < alphaMin) {\n        stepper.stop();\n        event.call(\"end\", simulation);\n      }\n    }\n\n    function tick() {\n      var i, n = nodes.length, node;\n\n      alpha += (alphaTarget - alpha) * alphaDecay;\n\n      forces.each(function(force) {\n        force(alpha);\n      });\n\n      for (i = 0; i < n; ++i) {\n        node = nodes[i];\n        if (node.fx == null) node.x += node.vx *= velocityDecay;\n        else node.x = node.fx, node.vx = 0;\n        if (node.fy == null) node.y += node.vy *= velocityDecay;\n        else node.y = node.fy, node.vy = 0;\n      }\n    }\n\n    function initializeNodes() {\n      for (var i = 0, n = nodes.length, node; i < n; ++i) {\n        node = nodes[i], node.index = i;\n        if (isNaN(node.x) || isNaN(node.y)) {\n          var radius = initialRadius * Math.sqrt(i), angle = i * initialAngle;\n          node.x = radius * Math.cos(angle);\n          node.y = radius * Math.sin(angle);\n        }\n        if (isNaN(node.vx) || isNaN(node.vy)) {\n          node.vx = node.vy = 0;\n        }\n      }\n    }\n\n    function initializeForce(force) {\n      if (force.initialize) force.initialize(nodes);\n      return force;\n    }\n\n    initializeNodes();\n\n    return simulation = {\n      tick: tick,\n\n      restart: function() {\n        return stepper.restart(step), simulation;\n      },\n\n      stop: function() {\n        return stepper.stop(), simulation;\n      },\n\n      nodes: function(_) {\n        return arguments.length ? (nodes = _, initializeNodes(), forces.each(initializeForce), simulation) : nodes;\n      },\n\n      alpha: function(_) {\n        return arguments.length ? (alpha = +_, simulation) : alpha;\n      },\n\n      alphaMin: function(_) {\n        return arguments.length ? (alphaMin = +_, simulation) : alphaMin;\n      },\n\n      alphaDecay: function(_) {\n        return arguments.length ? (alphaDecay = +_, simulation) : +alphaDecay;\n      },\n\n      alphaTarget: function(_) {\n        return arguments.length ? (alphaTarget = +_, simulation) : alphaTarget;\n      },\n\n      velocityDecay: function(_) {\n        return arguments.length ? (velocityDecay = 1 - _, simulation) : 1 - velocityDecay;\n      },\n\n      force: function(name, _) {\n        return arguments.length > 1 ? ((_ == null ? forces.remove(name) : forces.set(name, initializeForce(_))), simulation) : forces.get(name);\n      },\n\n      find: function(x, y, radius) {\n        var i = 0,\n            n = nodes.length,\n            dx,\n            dy,\n            d2,\n            node,\n            closest;\n\n        if (radius == null) radius = Infinity;\n        else radius *= radius;\n\n        for (i = 0; i < n; ++i) {\n          node = nodes[i];\n          dx = x - node.x;\n          dy = y - node.y;\n          d2 = dx * dx + dy * dy;\n          if (d2 < radius) closest = node, radius = d2;\n        }\n\n        return closest;\n      },\n\n      on: function(name, _) {\n        return arguments.length > 1 ? (event.on(name, _), simulation) : event.on(name);\n      }\n    };\n  }\n\n  function manyBody() {\n    var nodes,\n        node,\n        alpha,\n        strength = constant$6(-30),\n        strengths,\n        distanceMin2 = 1,\n        distanceMax2 = Infinity,\n        theta2 = 0.81;\n\n    function force(_) {\n      var i, n = nodes.length, tree = quadtree(nodes, x$2, y$2).visitAfter(accumulate);\n      for (alpha = _, i = 0; i < n; ++i) node = nodes[i], tree.visit(apply);\n    }\n\n    function initialize() {\n      if (!nodes) return;\n      var i, n = nodes.length;\n      strengths = new Array(n);\n      for (i = 0; i < n; ++i) strengths[i] = +strength(nodes[i], i, nodes);\n    }\n\n    function accumulate(quad) {\n      var strength = 0, q, c, x, y, i;\n\n      // For internal nodes, accumulate forces from child quadrants.\n      if (quad.length) {\n        for (x = y = i = 0; i < 4; ++i) {\n          if ((q = quad[i]) && (c = q.value)) {\n            strength += c, x += c * q.x, y += c * q.y;\n          }\n        }\n        quad.x = x / strength;\n        quad.y = y / strength;\n      }\n\n      // For leaf nodes, accumulate forces from coincident quadrants.\n      else {\n        q = quad;\n        q.x = q.data.x;\n        q.y = q.data.y;\n        do strength += strengths[q.data.index];\n        while (q = q.next);\n      }\n\n      quad.value = strength;\n    }\n\n    function apply(quad, x1, _, x2) {\n      if (!quad.value) return true;\n\n      var x = quad.x - node.x,\n          y = quad.y - node.y,\n          w = x2 - x1,\n          l = x * x + y * y;\n\n      // Apply the Barnes-Hut approximation if possible.\n      // Limit forces for very close nodes; randomize direction if coincident.\n      if (w * w / theta2 < l) {\n        if (l < distanceMax2) {\n          if (x === 0) x = jiggle(), l += x * x;\n          if (y === 0) y = jiggle(), l += y * y;\n          if (l < distanceMin2) l = Math.sqrt(distanceMin2 * l);\n          node.vx += x * quad.value * alpha / l;\n          node.vy += y * quad.value * alpha / l;\n        }\n        return true;\n      }\n\n      // Otherwise, process points directly.\n      else if (quad.length || l >= distanceMax2) return;\n\n      // Limit forces for very close nodes; randomize direction if coincident.\n      if (quad.data !== node || quad.next) {\n        if (x === 0) x = jiggle(), l += x * x;\n        if (y === 0) y = jiggle(), l += y * y;\n        if (l < distanceMin2) l = Math.sqrt(distanceMin2 * l);\n      }\n\n      do if (quad.data !== node) {\n        w = strengths[quad.data.index] * alpha / l;\n        node.vx += x * w;\n        node.vy += y * w;\n      } while (quad = quad.next);\n    }\n\n    force.initialize = function(_) {\n      nodes = _;\n      initialize();\n    };\n\n    force.strength = function(_) {\n      return arguments.length ? (strength = typeof _ === \"function\" ? _ : constant$6(+_), initialize(), force) : strength;\n    };\n\n    force.distanceMin = function(_) {\n      return arguments.length ? (distanceMin2 = _ * _, force) : Math.sqrt(distanceMin2);\n    };\n\n    force.distanceMax = function(_) {\n      return arguments.length ? (distanceMax2 = _ * _, force) : Math.sqrt(distanceMax2);\n    };\n\n    force.theta = function(_) {\n      return arguments.length ? (theta2 = _ * _, force) : Math.sqrt(theta2);\n    };\n\n    return force;\n  }\n\n  function x$3(x) {\n    var strength = constant$6(0.1),\n        nodes,\n        strengths,\n        xz;\n\n    if (typeof x !== \"function\") x = constant$6(x == null ? 0 : +x);\n\n    function force(alpha) {\n      for (var i = 0, n = nodes.length, node; i < n; ++i) {\n        node = nodes[i], node.vx += (xz[i] - node.x) * strengths[i] * alpha;\n      }\n    }\n\n    function initialize() {\n      if (!nodes) return;\n      var i, n = nodes.length;\n      strengths = new Array(n);\n      xz = new Array(n);\n      for (i = 0; i < n; ++i) {\n        strengths[i] = isNaN(xz[i] = +x(nodes[i], i, nodes)) ? 0 : +strength(nodes[i], i, nodes);\n      }\n    }\n\n    force.initialize = function(_) {\n      nodes = _;\n      initialize();\n    };\n\n    force.strength = function(_) {\n      return arguments.length ? (strength = typeof _ === \"function\" ? _ : constant$6(+_), initialize(), force) : strength;\n    };\n\n    force.x = function(_) {\n      return arguments.length ? (x = typeof _ === \"function\" ? _ : constant$6(+_), initialize(), force) : x;\n    };\n\n    return force;\n  }\n\n  function y$3(y) {\n    var strength = constant$6(0.1),\n        nodes,\n        strengths,\n        yz;\n\n    if (typeof y !== \"function\") y = constant$6(y == null ? 0 : +y);\n\n    function force(alpha) {\n      for (var i = 0, n = nodes.length, node; i < n; ++i) {\n        node = nodes[i], node.vy += (yz[i] - node.y) * strengths[i] * alpha;\n      }\n    }\n\n    function initialize() {\n      if (!nodes) return;\n      var i, n = nodes.length;\n      strengths = new Array(n);\n      yz = new Array(n);\n      for (i = 0; i < n; ++i) {\n        strengths[i] = isNaN(yz[i] = +y(nodes[i], i, nodes)) ? 0 : +strength(nodes[i], i, nodes);\n      }\n    }\n\n    force.initialize = function(_) {\n      nodes = _;\n      initialize();\n    };\n\n    force.strength = function(_) {\n      return arguments.length ? (strength = typeof _ === \"function\" ? _ : constant$6(+_), initialize(), force) : strength;\n    };\n\n    force.y = function(_) {\n      return arguments.length ? (y = typeof _ === \"function\" ? _ : constant$6(+_), initialize(), force) : y;\n    };\n\n    return force;\n  }\n\n  function nopropagation() {\n    exports.event.stopImmediatePropagation();\n  }\n\n  function noevent() {\n    exports.event.preventDefault();\n    exports.event.stopImmediatePropagation();\n  }\n\n  function dragDisable(view) {\n    var root = view.document.documentElement,\n        selection = select(view).on(\"dragstart.drag\", noevent, true);\n    if (\"onselectstart\" in root) {\n      selection.on(\"selectstart.drag\", noevent, true);\n    } else {\n      root.__noselect = root.style.MozUserSelect;\n      root.style.MozUserSelect = \"none\";\n    }\n  }\n\n  function dragEnable(view, noclick) {\n    var root = view.document.documentElement,\n        selection = select(view).on(\"dragstart.drag\", null);\n    if (noclick) {\n      selection.on(\"click.drag\", noevent, true);\n      setTimeout(function() { selection.on(\"click.drag\", null); }, 0);\n    }\n    if (\"onselectstart\" in root) {\n      selection.on(\"selectstart.drag\", null);\n    } else {\n      root.style.MozUserSelect = root.__noselect;\n      delete root.__noselect;\n    }\n  }\n\n  function constant$7(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  function DragEvent(target, type, subject, id, active, x, y, dx, dy, dispatch) {\n    this.target = target;\n    this.type = type;\n    this.subject = subject;\n    this.identifier = id;\n    this.active = active;\n    this.x = x;\n    this.y = y;\n    this.dx = dx;\n    this.dy = dy;\n    this._ = dispatch;\n  }\n\n  DragEvent.prototype.on = function() {\n    var value = this._.on.apply(this._, arguments);\n    return value === this._ ? this : value;\n  };\n\n  // Ignore right-click, since that should open the context menu.\n  function defaultFilter() {\n    return !exports.event.button;\n  }\n\n  function defaultContainer() {\n    return this.parentNode;\n  }\n\n  function defaultSubject(d) {\n    return d == null ? {x: exports.event.x, y: exports.event.y} : d;\n  }\n\n  function drag() {\n    var filter = defaultFilter,\n        container = defaultContainer,\n        subject = defaultSubject,\n        gestures = {},\n        listeners = dispatch(\"start\", \"drag\", \"end\"),\n        active = 0,\n        mousemoving,\n        touchending;\n\n    function drag(selection) {\n      selection\n          .on(\"mousedown.drag\", mousedowned)\n          .on(\"touchstart.drag\", touchstarted)\n          .on(\"touchmove.drag\", touchmoved)\n          .on(\"touchend.drag touchcancel.drag\", touchended)\n          .style(\"-webkit-tap-highlight-color\", \"rgba(0,0,0,0)\");\n    }\n\n    function mousedowned() {\n      if (touchending || !filter.apply(this, arguments)) return;\n      var gesture = beforestart(\"mouse\", container.apply(this, arguments), mouse, this, arguments);\n      if (!gesture) return;\n      select(exports.event.view).on(\"mousemove.drag\", mousemoved, true).on(\"mouseup.drag\", mouseupped, true);\n      dragDisable(exports.event.view);\n      nopropagation();\n      mousemoving = false;\n      gesture(\"start\");\n    }\n\n    function mousemoved() {\n      noevent();\n      mousemoving = true;\n      gestures.mouse(\"drag\");\n    }\n\n    function mouseupped() {\n      select(exports.event.view).on(\"mousemove.drag mouseup.drag\", null);\n      dragEnable(exports.event.view, mousemoving);\n      noevent();\n      gestures.mouse(\"end\");\n    }\n\n    function touchstarted() {\n      if (!filter.apply(this, arguments)) return;\n      var touches = exports.event.changedTouches,\n          c = container.apply(this, arguments),\n          n = touches.length, i, gesture;\n\n      for (i = 0; i < n; ++i) {\n        if (gesture = beforestart(touches[i].identifier, c, touch, this, arguments)) {\n          nopropagation();\n          gesture(\"start\");\n        }\n      }\n    }\n\n    function touchmoved() {\n      var touches = exports.event.changedTouches,\n          n = touches.length, i, gesture;\n\n      for (i = 0; i < n; ++i) {\n        if (gesture = gestures[touches[i].identifier]) {\n          noevent();\n          gesture(\"drag\");\n        }\n      }\n    }\n\n    function touchended() {\n      var touches = exports.event.changedTouches,\n          n = touches.length, i, gesture;\n\n      if (touchending) clearTimeout(touchending);\n      touchending = setTimeout(function() { touchending = null; }, 500); // Ghost clicks are delayed!\n      for (i = 0; i < n; ++i) {\n        if (gesture = gestures[touches[i].identifier]) {\n          nopropagation();\n          gesture(\"end\");\n        }\n      }\n    }\n\n    function beforestart(id, container, point, that, args) {\n      var p = point(container, id), s, dx, dy,\n          sublisteners = listeners.copy();\n\n      if (!customEvent(new DragEvent(drag, \"beforestart\", s, id, active, p[0], p[1], 0, 0, sublisteners), function() {\n        if ((exports.event.subject = s = subject.apply(that, args)) == null) return false;\n        dx = s.x - p[0] || 0;\n        dy = s.y - p[1] || 0;\n        return true;\n      })) return;\n\n      return function gesture(type) {\n        var p0 = p, n;\n        switch (type) {\n          case \"start\": gestures[id] = gesture, n = active++; break;\n          case \"end\": delete gestures[id], --active; // nobreak\n          case \"drag\": p = point(container, id), n = active; break;\n        }\n        customEvent(new DragEvent(drag, type, s, id, n, p[0] + dx, p[1] + dy, p[0] - p0[0], p[1] - p0[1], sublisteners), sublisteners.apply, sublisteners, [type, that, args]);\n      };\n    }\n\n    drag.filter = function(_) {\n      return arguments.length ? (filter = typeof _ === \"function\" ? _ : constant$7(!!_), drag) : filter;\n    };\n\n    drag.container = function(_) {\n      return arguments.length ? (container = typeof _ === \"function\" ? _ : constant$7(_), drag) : container;\n    };\n\n    drag.subject = function(_) {\n      return arguments.length ? (subject = typeof _ === \"function\" ? _ : constant$7(_), drag) : subject;\n    };\n\n    drag.on = function() {\n      var value = listeners.on.apply(listeners, arguments);\n      return value === listeners ? drag : value;\n    };\n\n    return drag;\n  }\n\n  function constant$8(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  function x$4(d) {\n    return d[0];\n  }\n\n  function y$4(d) {\n    return d[1];\n  }\n\n  function RedBlackTree() {\n    this._ = null; // root node\n  }\n\n  function RedBlackNode(node) {\n    node.U = // parent node\n    node.C = // color - true for red, false for black\n    node.L = // left node\n    node.R = // right node\n    node.P = // previous node\n    node.N = null; // next node\n  }\n\n  RedBlackTree.prototype = {\n    constructor: RedBlackTree,\n\n    insert: function(after, node) {\n      var parent, grandpa, uncle;\n\n      if (after) {\n        node.P = after;\n        node.N = after.N;\n        if (after.N) after.N.P = node;\n        after.N = node;\n        if (after.R) {\n          after = after.R;\n          while (after.L) after = after.L;\n          after.L = node;\n        } else {\n          after.R = node;\n        }\n        parent = after;\n      } else if (this._) {\n        after = RedBlackFirst(this._);\n        node.P = null;\n        node.N = after;\n        after.P = after.L = node;\n        parent = after;\n      } else {\n        node.P = node.N = null;\n        this._ = node;\n        parent = null;\n      }\n      node.L = node.R = null;\n      node.U = parent;\n      node.C = true;\n\n      after = node;\n      while (parent && parent.C) {\n        grandpa = parent.U;\n        if (parent === grandpa.L) {\n          uncle = grandpa.R;\n          if (uncle && uncle.C) {\n            parent.C = uncle.C = false;\n            grandpa.C = true;\n            after = grandpa;\n          } else {\n            if (after === parent.R) {\n              RedBlackRotateLeft(this, parent);\n              after = parent;\n              parent = after.U;\n            }\n            parent.C = false;\n            grandpa.C = true;\n            RedBlackRotateRight(this, grandpa);\n          }\n        } else {\n          uncle = grandpa.L;\n          if (uncle && uncle.C) {\n            parent.C = uncle.C = false;\n            grandpa.C = true;\n            after = grandpa;\n          } else {\n            if (after === parent.L) {\n              RedBlackRotateRight(this, parent);\n              after = parent;\n              parent = after.U;\n            }\n            parent.C = false;\n            grandpa.C = true;\n            RedBlackRotateLeft(this, grandpa);\n          }\n        }\n        parent = after.U;\n      }\n      this._.C = false;\n    },\n\n    remove: function(node) {\n      if (node.N) node.N.P = node.P;\n      if (node.P) node.P.N = node.N;\n      node.N = node.P = null;\n\n      var parent = node.U,\n          sibling,\n          left = node.L,\n          right = node.R,\n          next,\n          red;\n\n      if (!left) next = right;\n      else if (!right) next = left;\n      else next = RedBlackFirst(right);\n\n      if (parent) {\n        if (parent.L === node) parent.L = next;\n        else parent.R = next;\n      } else {\n        this._ = next;\n      }\n\n      if (left && right) {\n        red = next.C;\n        next.C = node.C;\n        next.L = left;\n        left.U = next;\n        if (next !== right) {\n          parent = next.U;\n          next.U = node.U;\n          node = next.R;\n          parent.L = node;\n          next.R = right;\n          right.U = next;\n        } else {\n          next.U = parent;\n          parent = next;\n          node = next.R;\n        }\n      } else {\n        red = node.C;\n        node = next;\n      }\n\n      if (node) node.U = parent;\n      if (red) return;\n      if (node && node.C) { node.C = false; return; }\n\n      do {\n        if (node === this._) break;\n        if (node === parent.L) {\n          sibling = parent.R;\n          if (sibling.C) {\n            sibling.C = false;\n            parent.C = true;\n            RedBlackRotateLeft(this, parent);\n            sibling = parent.R;\n          }\n          if ((sibling.L && sibling.L.C)\n              || (sibling.R && sibling.R.C)) {\n            if (!sibling.R || !sibling.R.C) {\n              sibling.L.C = false;\n              sibling.C = true;\n              RedBlackRotateRight(this, sibling);\n              sibling = parent.R;\n            }\n            sibling.C = parent.C;\n            parent.C = sibling.R.C = false;\n            RedBlackRotateLeft(this, parent);\n            node = this._;\n            break;\n          }\n        } else {\n          sibling = parent.L;\n          if (sibling.C) {\n            sibling.C = false;\n            parent.C = true;\n            RedBlackRotateRight(this, parent);\n            sibling = parent.L;\n          }\n          if ((sibling.L && sibling.L.C)\n            || (sibling.R && sibling.R.C)) {\n            if (!sibling.L || !sibling.L.C) {\n              sibling.R.C = false;\n              sibling.C = true;\n              RedBlackRotateLeft(this, sibling);\n              sibling = parent.L;\n            }\n            sibling.C = parent.C;\n            parent.C = sibling.L.C = false;\n            RedBlackRotateRight(this, parent);\n            node = this._;\n            break;\n          }\n        }\n        sibling.C = true;\n        node = parent;\n        parent = parent.U;\n      } while (!node.C);\n\n      if (node) node.C = false;\n    }\n  };\n\n  function RedBlackRotateLeft(tree, node) {\n    var p = node,\n        q = node.R,\n        parent = p.U;\n\n    if (parent) {\n      if (parent.L === p) parent.L = q;\n      else parent.R = q;\n    } else {\n      tree._ = q;\n    }\n\n    q.U = parent;\n    p.U = q;\n    p.R = q.L;\n    if (p.R) p.R.U = p;\n    q.L = p;\n  }\n\n  function RedBlackRotateRight(tree, node) {\n    var p = node,\n        q = node.L,\n        parent = p.U;\n\n    if (parent) {\n      if (parent.L === p) parent.L = q;\n      else parent.R = q;\n    } else {\n      tree._ = q;\n    }\n\n    q.U = parent;\n    p.U = q;\n    p.L = q.R;\n    if (p.L) p.L.U = p;\n    q.R = p;\n  }\n\n  function RedBlackFirst(node) {\n    while (node.L) node = node.L;\n    return node;\n  }\n\n  function createEdge(left, right, v0, v1) {\n    var edge = [null, null],\n        index = edges.push(edge) - 1;\n    edge.left = left;\n    edge.right = right;\n    if (v0) setEdgeEnd(edge, left, right, v0);\n    if (v1) setEdgeEnd(edge, right, left, v1);\n    cells[left.index].halfedges.push(index);\n    cells[right.index].halfedges.push(index);\n    return edge;\n  }\n\n  function createBorderEdge(left, v0, v1) {\n    var edge = [v0, v1];\n    edge.left = left;\n    return edge;\n  }\n\n  function setEdgeEnd(edge, left, right, vertex) {\n    if (!edge[0] && !edge[1]) {\n      edge[0] = vertex;\n      edge.left = left;\n      edge.right = right;\n    } else if (edge.left === right) {\n      edge[1] = vertex;\n    } else {\n      edge[0] = vertex;\n    }\n  }\n\n  // Liang–Barsky line clipping.\n  function clipEdge(edge, x0, y0, x1, y1) {\n    var a = edge[0],\n        b = edge[1],\n        ax = a[0],\n        ay = a[1],\n        bx = b[0],\n        by = b[1],\n        t0 = 0,\n        t1 = 1,\n        dx = bx - ax,\n        dy = by - ay,\n        r;\n\n    r = x0 - ax;\n    if (!dx && r > 0) return;\n    r /= dx;\n    if (dx < 0) {\n      if (r < t0) return;\n      if (r < t1) t1 = r;\n    } else if (dx > 0) {\n      if (r > t1) return;\n      if (r > t0) t0 = r;\n    }\n\n    r = x1 - ax;\n    if (!dx && r < 0) return;\n    r /= dx;\n    if (dx < 0) {\n      if (r > t1) return;\n      if (r > t0) t0 = r;\n    } else if (dx > 0) {\n      if (r < t0) return;\n      if (r < t1) t1 = r;\n    }\n\n    r = y0 - ay;\n    if (!dy && r > 0) return;\n    r /= dy;\n    if (dy < 0) {\n      if (r < t0) return;\n      if (r < t1) t1 = r;\n    } else if (dy > 0) {\n      if (r > t1) return;\n      if (r > t0) t0 = r;\n    }\n\n    r = y1 - ay;\n    if (!dy && r < 0) return;\n    r /= dy;\n    if (dy < 0) {\n      if (r > t1) return;\n      if (r > t0) t0 = r;\n    } else if (dy > 0) {\n      if (r < t0) return;\n      if (r < t1) t1 = r;\n    }\n\n    if (!(t0 > 0) && !(t1 < 1)) return true; // TODO Better check?\n\n    if (t0 > 0) edge[0] = [ax + t0 * dx, ay + t0 * dy];\n    if (t1 < 1) edge[1] = [ax + t1 * dx, ay + t1 * dy];\n    return true;\n  }\n\n  function connectEdge(edge, x0, y0, x1, y1) {\n    var v1 = edge[1];\n    if (v1) return true;\n\n    var v0 = edge[0],\n        left = edge.left,\n        right = edge.right,\n        lx = left[0],\n        ly = left[1],\n        rx = right[0],\n        ry = right[1],\n        fx = (lx + rx) / 2,\n        fy = (ly + ry) / 2,\n        fm,\n        fb;\n\n    if (ry === ly) {\n      if (fx < x0 || fx >= x1) return;\n      if (lx > rx) {\n        if (!v0) v0 = [fx, y0];\n        else if (v0[1] >= y1) return;\n        v1 = [fx, y1];\n      } else {\n        if (!v0) v0 = [fx, y1];\n        else if (v0[1] < y0) return;\n        v1 = [fx, y0];\n      }\n    } else {\n      fm = (lx - rx) / (ry - ly);\n      fb = fy - fm * fx;\n      if (fm < -1 || fm > 1) {\n        if (lx > rx) {\n          if (!v0) v0 = [(y0 - fb) / fm, y0];\n          else if (v0[1] >= y1) return;\n          v1 = [(y1 - fb) / fm, y1];\n        } else {\n          if (!v0) v0 = [(y1 - fb) / fm, y1];\n          else if (v0[1] < y0) return;\n          v1 = [(y0 - fb) / fm, y0];\n        }\n      } else {\n        if (ly < ry) {\n          if (!v0) v0 = [x0, fm * x0 + fb];\n          else if (v0[0] >= x1) return;\n          v1 = [x1, fm * x1 + fb];\n        } else {\n          if (!v0) v0 = [x1, fm * x1 + fb];\n          else if (v0[0] < x0) return;\n          v1 = [x0, fm * x0 + fb];\n        }\n      }\n    }\n\n    edge[0] = v0;\n    edge[1] = v1;\n    return true;\n  }\n\n  function clipEdges(x0, y0, x1, y1) {\n    var i = edges.length,\n        edge;\n\n    while (i--) {\n      if (!connectEdge(edge = edges[i], x0, y0, x1, y1)\n          || !clipEdge(edge, x0, y0, x1, y1)\n          || !(Math.abs(edge[0][0] - edge[1][0]) > epsilon$3\n              || Math.abs(edge[0][1] - edge[1][1]) > epsilon$3)) {\n        delete edges[i];\n      }\n    }\n  }\n\n  function createCell(site) {\n    return cells[site.index] = {\n      site: site,\n      halfedges: []\n    };\n  }\n\n  function cellHalfedgeAngle(cell, edge) {\n    var site = cell.site,\n        va = edge.left,\n        vb = edge.right;\n    if (site === vb) vb = va, va = site;\n    if (vb) return Math.atan2(vb[1] - va[1], vb[0] - va[0]);\n    if (site === va) va = edge[1], vb = edge[0];\n    else va = edge[0], vb = edge[1];\n    return Math.atan2(va[0] - vb[0], vb[1] - va[1]);\n  }\n\n  function cellHalfedgeStart(cell, edge) {\n    return edge[+(edge.left !== cell.site)];\n  }\n\n  function cellHalfedgeEnd(cell, edge) {\n    return edge[+(edge.left === cell.site)];\n  }\n\n  function sortCellHalfedges() {\n    for (var i = 0, n = cells.length, cell, halfedges, j, m; i < n; ++i) {\n      if ((cell = cells[i]) && (m = (halfedges = cell.halfedges).length)) {\n        var index = new Array(m),\n            array = new Array(m);\n        for (j = 0; j < m; ++j) index[j] = j, array[j] = cellHalfedgeAngle(cell, edges[halfedges[j]]);\n        index.sort(function(i, j) { return array[j] - array[i]; });\n        for (j = 0; j < m; ++j) array[j] = halfedges[index[j]];\n        for (j = 0; j < m; ++j) halfedges[j] = array[j];\n      }\n    }\n  }\n\n  function clipCells(x0, y0, x1, y1) {\n    var nCells = cells.length,\n        iCell,\n        cell,\n        site,\n        iHalfedge,\n        halfedges,\n        nHalfedges,\n        start,\n        startX,\n        startY,\n        end,\n        endX,\n        endY,\n        cover = true;\n\n    for (iCell = 0; iCell < nCells; ++iCell) {\n      if (cell = cells[iCell]) {\n        site = cell.site;\n        halfedges = cell.halfedges;\n        iHalfedge = halfedges.length;\n\n        // Remove any dangling clipped edges.\n        while (iHalfedge--) {\n          if (!edges[halfedges[iHalfedge]]) {\n            halfedges.splice(iHalfedge, 1);\n          }\n        }\n\n        // Insert any border edges as necessary.\n        iHalfedge = 0, nHalfedges = halfedges.length;\n        while (iHalfedge < nHalfedges) {\n          end = cellHalfedgeEnd(cell, edges[halfedges[iHalfedge]]), endX = end[0], endY = end[1];\n          start = cellHalfedgeStart(cell, edges[halfedges[++iHalfedge % nHalfedges]]), startX = start[0], startY = start[1];\n          if (Math.abs(endX - startX) > epsilon$3 || Math.abs(endY - startY) > epsilon$3) {\n            halfedges.splice(iHalfedge, 0, edges.push(createBorderEdge(site, end,\n                Math.abs(endX - x0) < epsilon$3 && y1 - endY > epsilon$3 ? [x0, Math.abs(startX - x0) < epsilon$3 ? startY : y1]\n                : Math.abs(endY - y1) < epsilon$3 && x1 - endX > epsilon$3 ? [Math.abs(startY - y1) < epsilon$3 ? startX : x1, y1]\n                : Math.abs(endX - x1) < epsilon$3 && endY - y0 > epsilon$3 ? [x1, Math.abs(startX - x1) < epsilon$3 ? startY : y0]\n                : Math.abs(endY - y0) < epsilon$3 && endX - x0 > epsilon$3 ? [Math.abs(startY - y0) < epsilon$3 ? startX : x0, y0]\n                : null)) - 1);\n            ++nHalfedges;\n          }\n        }\n\n        if (nHalfedges) cover = false;\n      }\n    }\n\n    // If there weren’t any edges, have the closest site cover the extent.\n    // It doesn’t matter which corner of the extent we measure!\n    if (cover) {\n      var dx, dy, d2, dc = Infinity;\n\n      for (iCell = 0, cover = null; iCell < nCells; ++iCell) {\n        if (cell = cells[iCell]) {\n          site = cell.site;\n          dx = site[0] - x0;\n          dy = site[1] - y0;\n          d2 = dx * dx + dy * dy;\n          if (d2 < dc) dc = d2, cover = cell;\n        }\n      }\n\n      if (cover) {\n        var v00 = [x0, y0], v01 = [x0, y1], v11 = [x1, y1], v10 = [x1, y0];\n        cover.halfedges.push(\n          edges.push(createBorderEdge(site = cover.site, v00, v01)) - 1,\n          edges.push(createBorderEdge(site, v01, v11)) - 1,\n          edges.push(createBorderEdge(site, v11, v10)) - 1,\n          edges.push(createBorderEdge(site, v10, v00)) - 1\n        );\n      }\n    }\n\n    // Lastly delete any cells with no edges; these were entirely clipped.\n    for (iCell = 0; iCell < nCells; ++iCell) {\n      if (cell = cells[iCell]) {\n        if (!cell.halfedges.length) {\n          delete cells[iCell];\n        }\n      }\n    }\n  }\n\n  var circlePool = [];\n\n  var firstCircle;\n\n  function Circle() {\n    RedBlackNode(this);\n    this.x =\n    this.y =\n    this.arc =\n    this.site =\n    this.cy = null;\n  }\n\n  function attachCircle(arc) {\n    var lArc = arc.P,\n        rArc = arc.N;\n\n    if (!lArc || !rArc) return;\n\n    var lSite = lArc.site,\n        cSite = arc.site,\n        rSite = rArc.site;\n\n    if (lSite === rSite) return;\n\n    var bx = cSite[0],\n        by = cSite[1],\n        ax = lSite[0] - bx,\n        ay = lSite[1] - by,\n        cx = rSite[0] - bx,\n        cy = rSite[1] - by;\n\n    var d = 2 * (ax * cy - ay * cx);\n    if (d >= -epsilon2$1) return;\n\n    var ha = ax * ax + ay * ay,\n        hc = cx * cx + cy * cy,\n        x = (cy * ha - ay * hc) / d,\n        y = (ax * hc - cx * ha) / d;\n\n    var circle = circlePool.pop() || new Circle;\n    circle.arc = arc;\n    circle.site = cSite;\n    circle.x = x + bx;\n    circle.y = (circle.cy = y + by) + Math.sqrt(x * x + y * y); // y bottom\n\n    arc.circle = circle;\n\n    var before = null,\n        node = circles._;\n\n    while (node) {\n      if (circle.y < node.y || (circle.y === node.y && circle.x <= node.x)) {\n        if (node.L) node = node.L;\n        else { before = node.P; break; }\n      } else {\n        if (node.R) node = node.R;\n        else { before = node; break; }\n      }\n    }\n\n    circles.insert(before, circle);\n    if (!before) firstCircle = circle;\n  }\n\n  function detachCircle(arc) {\n    var circle = arc.circle;\n    if (circle) {\n      if (!circle.P) firstCircle = circle.N;\n      circles.remove(circle);\n      circlePool.push(circle);\n      RedBlackNode(circle);\n      arc.circle = null;\n    }\n  }\n\n  var beachPool = [];\n\n  function Beach() {\n    RedBlackNode(this);\n    this.edge =\n    this.site =\n    this.circle = null;\n  }\n\n  function createBeach(site) {\n    var beach = beachPool.pop() || new Beach;\n    beach.site = site;\n    return beach;\n  }\n\n  function detachBeach(beach) {\n    detachCircle(beach);\n    beaches.remove(beach);\n    beachPool.push(beach);\n    RedBlackNode(beach);\n  }\n\n  function removeBeach(beach) {\n    var circle = beach.circle,\n        x = circle.x,\n        y = circle.cy,\n        vertex = [x, y],\n        previous = beach.P,\n        next = beach.N,\n        disappearing = [beach];\n\n    detachBeach(beach);\n\n    var lArc = previous;\n    while (lArc.circle\n        && Math.abs(x - lArc.circle.x) < epsilon$3\n        && Math.abs(y - lArc.circle.cy) < epsilon$3) {\n      previous = lArc.P;\n      disappearing.unshift(lArc);\n      detachBeach(lArc);\n      lArc = previous;\n    }\n\n    disappearing.unshift(lArc);\n    detachCircle(lArc);\n\n    var rArc = next;\n    while (rArc.circle\n        && Math.abs(x - rArc.circle.x) < epsilon$3\n        && Math.abs(y - rArc.circle.cy) < epsilon$3) {\n      next = rArc.N;\n      disappearing.push(rArc);\n      detachBeach(rArc);\n      rArc = next;\n    }\n\n    disappearing.push(rArc);\n    detachCircle(rArc);\n\n    var nArcs = disappearing.length,\n        iArc;\n    for (iArc = 1; iArc < nArcs; ++iArc) {\n      rArc = disappearing[iArc];\n      lArc = disappearing[iArc - 1];\n      setEdgeEnd(rArc.edge, lArc.site, rArc.site, vertex);\n    }\n\n    lArc = disappearing[0];\n    rArc = disappearing[nArcs - 1];\n    rArc.edge = createEdge(lArc.site, rArc.site, null, vertex);\n\n    attachCircle(lArc);\n    attachCircle(rArc);\n  }\n\n  function addBeach(site) {\n    var x = site[0],\n        directrix = site[1],\n        lArc,\n        rArc,\n        dxl,\n        dxr,\n        node = beaches._;\n\n    while (node) {\n      dxl = leftBreakPoint(node, directrix) - x;\n      if (dxl > epsilon$3) node = node.L; else {\n        dxr = x - rightBreakPoint(node, directrix);\n        if (dxr > epsilon$3) {\n          if (!node.R) {\n            lArc = node;\n            break;\n          }\n          node = node.R;\n        } else {\n          if (dxl > -epsilon$3) {\n            lArc = node.P;\n            rArc = node;\n          } else if (dxr > -epsilon$3) {\n            lArc = node;\n            rArc = node.N;\n          } else {\n            lArc = rArc = node;\n          }\n          break;\n        }\n      }\n    }\n\n    createCell(site);\n    var newArc = createBeach(site);\n    beaches.insert(lArc, newArc);\n\n    if (!lArc && !rArc) return;\n\n    if (lArc === rArc) {\n      detachCircle(lArc);\n      rArc = createBeach(lArc.site);\n      beaches.insert(newArc, rArc);\n      newArc.edge = rArc.edge = createEdge(lArc.site, newArc.site);\n      attachCircle(lArc);\n      attachCircle(rArc);\n      return;\n    }\n\n    if (!rArc) { // && lArc\n      newArc.edge = createEdge(lArc.site, newArc.site);\n      return;\n    }\n\n    // else lArc !== rArc\n    detachCircle(lArc);\n    detachCircle(rArc);\n\n    var lSite = lArc.site,\n        ax = lSite[0],\n        ay = lSite[1],\n        bx = site[0] - ax,\n        by = site[1] - ay,\n        rSite = rArc.site,\n        cx = rSite[0] - ax,\n        cy = rSite[1] - ay,\n        d = 2 * (bx * cy - by * cx),\n        hb = bx * bx + by * by,\n        hc = cx * cx + cy * cy,\n        vertex = [(cy * hb - by * hc) / d + ax, (bx * hc - cx * hb) / d + ay];\n\n    setEdgeEnd(rArc.edge, lSite, rSite, vertex);\n    newArc.edge = createEdge(lSite, site, null, vertex);\n    rArc.edge = createEdge(site, rSite, null, vertex);\n    attachCircle(lArc);\n    attachCircle(rArc);\n  }\n\n  function leftBreakPoint(arc, directrix) {\n    var site = arc.site,\n        rfocx = site[0],\n        rfocy = site[1],\n        pby2 = rfocy - directrix;\n\n    if (!pby2) return rfocx;\n\n    var lArc = arc.P;\n    if (!lArc) return -Infinity;\n\n    site = lArc.site;\n    var lfocx = site[0],\n        lfocy = site[1],\n        plby2 = lfocy - directrix;\n\n    if (!plby2) return lfocx;\n\n    var hl = lfocx - rfocx,\n        aby2 = 1 / pby2 - 1 / plby2,\n        b = hl / plby2;\n\n    if (aby2) return (-b + Math.sqrt(b * b - 2 * aby2 * (hl * hl / (-2 * plby2) - lfocy + plby2 / 2 + rfocy - pby2 / 2))) / aby2 + rfocx;\n\n    return (rfocx + lfocx) / 2;\n  }\n\n  function rightBreakPoint(arc, directrix) {\n    var rArc = arc.N;\n    if (rArc) return leftBreakPoint(rArc, directrix);\n    var site = arc.site;\n    return site[1] === directrix ? site[0] : Infinity;\n  }\n\n  var epsilon$3 = 1e-6;\n  var epsilon2$1 = 1e-12;\n  var beaches;\n  var cells;\n  var circles;\n  var edges;\n\n  function triangleArea(a, b, c) {\n    return (a[0] - c[0]) * (b[1] - a[1]) - (a[0] - b[0]) * (c[1] - a[1]);\n  }\n\n  function lexicographic(a, b) {\n    return b[1] - a[1]\n        || b[0] - a[0];\n  }\n\n  function Diagram(sites, extent) {\n    var site = sites.sort(lexicographic).pop(),\n        x,\n        y,\n        circle;\n\n    edges = [];\n    cells = new Array(sites.length);\n    beaches = new RedBlackTree;\n    circles = new RedBlackTree;\n\n    while (true) {\n      circle = firstCircle;\n      if (site && (!circle || site[1] < circle.y || (site[1] === circle.y && site[0] < circle.x))) {\n        if (site[0] !== x || site[1] !== y) {\n          addBeach(site);\n          x = site[0], y = site[1];\n        }\n        site = sites.pop();\n      } else if (circle) {\n        removeBeach(circle.arc);\n      } else {\n        break;\n      }\n    }\n\n    sortCellHalfedges();\n\n    if (extent) {\n      var x0 = +extent[0][0],\n          y0 = +extent[0][1],\n          x1 = +extent[1][0],\n          y1 = +extent[1][1];\n      clipEdges(x0, y0, x1, y1);\n      clipCells(x0, y0, x1, y1);\n    }\n\n    this.edges = edges;\n    this.cells = cells;\n\n    beaches =\n    circles =\n    edges =\n    cells = null;\n  }\n\n  Diagram.prototype = {\n    constructor: Diagram,\n\n    polygons: function() {\n      var edges = this.edges;\n\n      return this.cells.map(function(cell) {\n        var polygon = cell.halfedges.map(function(i) { return cellHalfedgeStart(cell, edges[i]); });\n        polygon.data = cell.site.data;\n        return polygon;\n      });\n    },\n\n    triangles: function() {\n      var triangles = [],\n          edges = this.edges;\n\n      this.cells.forEach(function(cell, i) {\n        var site = cell.site,\n            halfedges = cell.halfedges,\n            j = -1,\n            m = halfedges.length,\n            s0,\n            e1 = edges[halfedges[m - 1]],\n            s1 = e1.left === site ? e1.right : e1.left;\n\n        while (++j < m) {\n          s0 = s1;\n          e1 = edges[halfedges[j]];\n          s1 = e1.left === site ? e1.right : e1.left;\n          if (i < s0.index && i < s1.index && triangleArea(site, s0, s1) < 0) {\n            triangles.push([site.data, s0.data, s1.data]);\n          }\n        }\n      });\n\n      return triangles;\n    },\n\n    links: function() {\n      return this.edges.filter(function(edge) {\n        return edge.right;\n      }).map(function(edge) {\n        return {\n          source: edge.left.data,\n          target: edge.right.data\n        };\n      });\n    }\n  }\n\n  function voronoi() {\n    var x = x$4,\n        y = y$4,\n        extent = null;\n\n    function voronoi(data) {\n      return new Diagram(data.map(function(d, i) {\n        var s = [Math.round(x(d, i, data) / epsilon$3) * epsilon$3, Math.round(y(d, i, data) / epsilon$3) * epsilon$3];\n        s.index = i;\n        s.data = d;\n        return s;\n      }), extent);\n    }\n\n    voronoi.polygons = function(data) {\n      return voronoi(data).polygons();\n    };\n\n    voronoi.links = function(data) {\n      return voronoi(data).links();\n    };\n\n    voronoi.triangles = function(data) {\n      return voronoi(data).triangles();\n    };\n\n    voronoi.x = function(_) {\n      return arguments.length ? (x = typeof _ === \"function\" ? _ : constant$8(+_), voronoi) : x;\n    };\n\n    voronoi.y = function(_) {\n      return arguments.length ? (y = typeof _ === \"function\" ? _ : constant$8(+_), voronoi) : y;\n    };\n\n    voronoi.extent = function(_) {\n      return arguments.length ? (extent = _ == null ? null : [[+_[0][0], +_[0][1]], [+_[1][0], +_[1][1]]], voronoi) : extent && [[extent[0][0], extent[0][1]], [extent[1][0], extent[1][1]]];\n    };\n\n    voronoi.size = function(_) {\n      return arguments.length ? (extent = _ == null ? null : [[0, 0], [+_[0], +_[1]]], voronoi) : extent && [extent[1][0], extent[1][1]];\n    };\n\n    return voronoi;\n  }\n\n  function constant$9(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  function ZoomEvent(target, type, transform) {\n    this.target = target;\n    this.type = type;\n    this.transform = transform;\n  }\n\n  function Transform(k, x, y) {\n    this.k = k;\n    this.x = x;\n    this.y = y;\n  }\n\n  Transform.prototype = {\n    constructor: Transform,\n    scale: function(k) {\n      return k === 1 ? this : new Transform(this.k * k, this.x, this.y);\n    },\n    translate: function(x, y) {\n      return x === 0 & y === 0 ? this : new Transform(this.k, this.x + this.k * x, this.y + this.k * y);\n    },\n    apply: function(point) {\n      return [point[0] * this.k + this.x, point[1] * this.k + this.y];\n    },\n    applyX: function(x) {\n      return x * this.k + this.x;\n    },\n    applyY: function(y) {\n      return y * this.k + this.y;\n    },\n    invert: function(location) {\n      return [(location[0] - this.x) / this.k, (location[1] - this.y) / this.k];\n    },\n    invertX: function(x) {\n      return (x - this.x) / this.k;\n    },\n    invertY: function(y) {\n      return (y - this.y) / this.k;\n    },\n    rescaleX: function(x) {\n      return x.copy().domain(x.range().map(this.invertX, this).map(x.invert, x));\n    },\n    rescaleY: function(y) {\n      return y.copy().domain(y.range().map(this.invertY, this).map(y.invert, y));\n    },\n    toString: function() {\n      return \"translate(\" + this.x + \",\" + this.y + \") scale(\" + this.k + \")\";\n    }\n  };\n\n  var identity$6 = new Transform(1, 0, 0);\n\n  transform.prototype = Transform.prototype;\n\n  function transform(node) {\n    return node.__zoom || identity$6;\n  }\n\n  function nopropagation$1() {\n    exports.event.stopImmediatePropagation();\n  }\n\n  function noevent$1() {\n    exports.event.preventDefault();\n    exports.event.stopImmediatePropagation();\n  }\n\n  // Ignore right-click, since that should open the context menu.\n  function defaultFilter$1() {\n    return !exports.event.button;\n  }\n\n  function defaultExtent() {\n    var e = this, w, h;\n    if (e instanceof SVGElement) {\n      e = e.ownerSVGElement || e;\n      w = e.width.baseVal.value;\n      h = e.height.baseVal.value;\n    } else {\n      w = e.clientWidth;\n      h = e.clientHeight;\n    }\n    return [[0, 0], [w, h]];\n  }\n\n  function defaultTransform() {\n    return this.__zoom || identity$6;\n  }\n\n  function zoom() {\n    var filter = defaultFilter$1,\n        extent = defaultExtent,\n        k0 = 0,\n        k1 = Infinity,\n        x0 = -k1,\n        x1 = k1,\n        y0 = x0,\n        y1 = x1,\n        duration = 250,\n        gestures = [],\n        listeners = dispatch(\"start\", \"zoom\", \"end\"),\n        mousemoving,\n        mousePoint,\n        mouseLocation,\n        touchstarting,\n        touchending,\n        touchDelay = 500,\n        wheelTimer,\n        wheelDelay = 150;\n\n    function zoom(selection) {\n      selection\n          .on(\"wheel.zoom\", wheeled)\n          .on(\"mousedown.zoom\", mousedowned)\n          .on(\"dblclick.zoom\", dblclicked)\n          .on(\"touchstart.zoom\", touchstarted)\n          .on(\"touchmove.zoom\", touchmoved)\n          .on(\"touchend.zoom touchcancel.zoom\", touchended)\n          .style(\"-webkit-tap-highlight-color\", \"rgba(0,0,0,0)\")\n          .property(\"__zoom\", defaultTransform);\n    }\n\n    zoom.transform = function(collection, transform) {\n      var selection = collection.selection ? collection.selection() : collection;\n      selection.property(\"__zoom\", defaultTransform);\n      if (collection !== selection) {\n        schedule(collection, transform);\n      } else {\n        selection.interrupt().each(function() {\n          gesture(this, arguments)\n              .start()\n              .zoom(null, typeof transform === \"function\" ? transform.apply(this, arguments) : transform)\n              .end();\n        });\n      }\n    };\n\n    zoom.scaleBy = function(selection, k) {\n      zoom.scaleTo(selection, function() {\n        var k0 = this.__zoom.k,\n            k1 = typeof k === \"function\" ? k.apply(this, arguments) : k;\n        return k0 * k1;\n      });\n    };\n\n    zoom.scaleTo = function(selection, k) {\n      zoom.transform(selection, function() {\n        var e = extent.apply(this, arguments),\n            t0 = this.__zoom,\n            p0 = centroid(e),\n            p1 = t0.invert(p0),\n            k1 = typeof k === \"function\" ? k.apply(this, arguments) : k;\n        return constrain(translate(scale(t0, k1), p0, p1), e);\n      });\n    };\n\n    zoom.translateBy = function(selection, x, y) {\n      zoom.transform(selection, function() {\n        return constrain(this.__zoom.translate(\n          typeof x === \"function\" ? x.apply(this, arguments) : x,\n          typeof y === \"function\" ? y.apply(this, arguments) : y\n        ), extent.apply(this, arguments));\n      });\n    };\n\n    function scale(transform, k) {\n      k = Math.max(k0, Math.min(k1, k));\n      return k === transform.k ? transform : new Transform(k, transform.x, transform.y);\n    }\n\n    function translate(transform, p0, p1) {\n      var x = p0[0] - p1[0] * transform.k, y = p0[1] - p1[1] * transform.k;\n      return x === transform.x && y === transform.y ? transform : new Transform(transform.k, x, y);\n    }\n\n    function constrain(transform, extent) {\n      var dx = Math.min(0, transform.invertX(extent[0][0]) - x0) || Math.max(0, transform.invertX(extent[1][0]) - x1),\n          dy = Math.min(0, transform.invertY(extent[0][1]) - y0) || Math.max(0, transform.invertY(extent[1][1]) - y1);\n      return dx || dy ? transform.translate(dx, dy) : transform;\n    }\n\n    function centroid(extent) {\n      return [(+extent[0][0] + +extent[1][0]) / 2, (+extent[0][1] + +extent[1][1]) / 2];\n    }\n\n    function schedule(transition, transform, center) {\n      transition\n          .on(\"start.zoom\", function() { gesture(this, arguments).start(); })\n          .on(\"interrupt.zoom end.zoom\", function() { gesture(this, arguments).end(); })\n          .tween(\"zoom\", function() {\n            var that = this,\n                args = arguments,\n                g = gesture(that, args),\n                e = extent.apply(that, args),\n                p = center || centroid(e),\n                w = Math.max(e[1][0] - e[0][0], e[1][1] - e[0][1]),\n                a = that.__zoom,\n                b = typeof transform === \"function\" ? transform.apply(that, args) : transform,\n                i = interpolateZoom(a.invert(p).concat(w / a.k), b.invert(p).concat(w / b.k));\n            return function(t) {\n              if (t === 1) t = b; // Avoid rounding error on end.\n              else { var l = i(t), k = w / l[2]; t = new Transform(k, p[0] - l[0] * k, p[1] - l[1] * k); }\n              g.zoom(null, t);\n            };\n          });\n    }\n\n    function gesture(that, args) {\n      for (var i = 0, n = gestures.length, g; i < n; ++i) {\n        if ((g = gestures[i]).that === that) {\n          return g;\n        }\n      }\n      return new Gesture(that, args);\n    }\n\n    function Gesture(that, args) {\n      this.that = that;\n      this.args = args;\n      this.index = -1;\n      this.active = 0;\n    }\n\n    Gesture.prototype = {\n      start: function() {\n        if (++this.active === 1) {\n          this.index = gestures.push(this) - 1;\n          this.emit(\"start\");\n        }\n        return this;\n      },\n      zoom: function(key, transform) {\n        if (mousePoint && key !== \"mouse\") mouseLocation = transform.invert(mousePoint);\n        if (this.touch0 && key !== \"touch\") this.touch0[1] = transform.invert(this.touch0[0]);\n        if (this.touch1 && key !== \"touch\") this.touch1[1] = transform.invert(this.touch1[0]);\n        this.that.__zoom = transform;\n        this.emit(\"zoom\");\n        return this;\n      },\n      end: function() {\n        if (--this.active === 0) {\n          gestures.splice(this.index, 1);\n          mousePoint = mouseLocation = null;\n          this.index = -1;\n          this.emit(\"end\");\n        }\n        return this;\n      },\n      emit: function(type) {\n        customEvent(new ZoomEvent(zoom, type, this.that.__zoom), listeners.apply, listeners, [type, this.that, this.args]);\n      }\n    };\n\n    function wheeled() {\n      if (!filter.apply(this, arguments)) return;\n      var g = gesture(this, arguments),\n          t = this.__zoom,\n          k = Math.max(k0, Math.min(k1, t.k * Math.pow(2, -exports.event.deltaY * (exports.event.deltaMode ? 120 : 1) / 500)));\n\n      // If the mouse is in the same location as before, reuse it.\n      // If there were recent wheel events, reset the wheel idle timeout.\n      if (wheelTimer) {\n        var point = mouse(this);\n        if (mousePoint[0] !== point[0] || mousePoint[1] !== point[1]) {\n          mouseLocation = t.invert(mousePoint = point);\n        }\n        clearTimeout(wheelTimer);\n      }\n\n      // If this wheel event won’t trigger a transform change, ignore it.\n      else if (t.k === k) return;\n\n      // Otherwise, capture the mouse point and location at the start.\n      else {\n        g.extent = extent.apply(this, arguments);\n        mouseLocation = t.invert(mousePoint = mouse(this));\n        interrupt(this);\n        g.start();\n      }\n\n      noevent$1();\n      wheelTimer = setTimeout(wheelidled, wheelDelay);\n      g.zoom(\"mouse\", constrain(translate(scale(t, k), mousePoint, mouseLocation), g.extent));\n\n      function wheelidled() {\n        wheelTimer = null;\n        g.end();\n      }\n    }\n\n    function mousedowned() {\n      if (touchending || !filter.apply(this, arguments)) return;\n      var g = gesture(this, arguments),\n          v = select(exports.event.view).on(\"mousemove.zoom\", mousemoved, true).on(\"mouseup.zoom\", mouseupped, true);\n\n      dragDisable(exports.event.view);\n      nopropagation$1();\n      mousemoving = false;\n      g.extent = extent.apply(this, arguments);\n      mouseLocation = this.__zoom.invert(mousePoint = mouse(this));\n      interrupt(this);\n      g.start();\n\n      function mousemoved() {\n        noevent$1();\n        mousemoving = true;\n        g.zoom(\"mouse\", constrain(translate(g.that.__zoom, mousePoint = mouse(g.that), mouseLocation), g.extent));\n      }\n\n      function mouseupped() {\n        v.on(\"mousemove.zoom mouseup.zoom\", null);\n        dragEnable(exports.event.view, mousemoving);\n        noevent$1();\n        g.end();\n      }\n    }\n\n    function dblclicked() {\n      if (!filter.apply(this, arguments)) return;\n      var t0 = this.__zoom,\n          p0 = mouse(this),\n          p1 = t0.invert(p0),\n          k1 = t0.k * (exports.event.shiftKey ? 0.5 : 2),\n          t1 = constrain(translate(scale(t0, k1), p0, p1), extent.apply(this, arguments));\n\n      noevent$1();\n      if (duration > 0) select(this).transition().duration(duration).call(schedule, t1, p0);\n      else select(this).call(zoom.transform, t1);\n    }\n\n    function touchstarted() {\n      if (!filter.apply(this, arguments)) return;\n      var g = gesture(this, arguments),\n          touches = exports.event.changedTouches,\n          n = touches.length, i, t, p;\n\n      nopropagation$1();\n      for (i = 0; i < n; ++i) {\n        t = touches[i], p = touch(this, touches, t.identifier);\n        p = [p, this.__zoom.invert(p), t.identifier];\n        if (!g.touch0) g.touch0 = p;\n        else if (!g.touch1) g.touch1 = p;\n      }\n      if (touchstarting) {\n        touchstarting = clearTimeout(touchstarting);\n        if (!g.touch1) return g.end(), dblclicked.apply(this, arguments);\n      }\n      if (exports.event.touches.length === n) {\n        touchstarting = setTimeout(function() { touchstarting = null; }, touchDelay);\n        interrupt(this);\n        g.extent = extent.apply(this, arguments);\n        g.start();\n      }\n    }\n\n    function touchmoved() {\n      var g = gesture(this, arguments),\n          touches = exports.event.changedTouches,\n          n = touches.length, i, t, p, l;\n\n      noevent$1();\n      if (touchstarting) touchstarting = clearTimeout(touchstarting);\n      for (i = 0; i < n; ++i) {\n        t = touches[i], p = touch(this, touches, t.identifier);\n        if (g.touch0 && g.touch0[2] === t.identifier) g.touch0[0] = p;\n        else if (g.touch1 && g.touch1[2] === t.identifier) g.touch1[0] = p;\n      }\n      t = g.that.__zoom;\n      if (g.touch1) {\n        var p0 = g.touch0[0], l0 = g.touch0[1],\n            p1 = g.touch1[0], l1 = g.touch1[1],\n            dp = (dp = p1[0] - p0[0]) * dp + (dp = p1[1] - p0[1]) * dp,\n            dl = (dl = l1[0] - l0[0]) * dl + (dl = l1[1] - l0[1]) * dl;\n        t = scale(t, Math.sqrt(dp / dl));\n        p = [(p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2];\n        l = [(l0[0] + l1[0]) / 2, (l0[1] + l1[1]) / 2];\n      }\n      else if (g.touch0) p = g.touch0[0], l = g.touch0[1];\n      else return;\n      g.zoom(\"touch\", constrain(translate(t, p, l), g.extent));\n    }\n\n    function touchended() {\n      var g = gesture(this, arguments),\n          touches = exports.event.changedTouches,\n          n = touches.length, i, t;\n\n      nopropagation$1();\n      if (touchending) clearTimeout(touchending);\n      touchending = setTimeout(function() { touchending = null; }, touchDelay);\n      for (i = 0; i < n; ++i) {\n        t = touches[i];\n        if (g.touch0 && g.touch0[2] === t.identifier) delete g.touch0;\n        else if (g.touch1 && g.touch1[2] === t.identifier) delete g.touch1;\n      }\n      if (g.touch1 && !g.touch0) g.touch0 = g.touch1, delete g.touch1;\n      if (!g.touch0) g.end();\n    }\n\n    zoom.filter = function(_) {\n      return arguments.length ? (filter = typeof _ === \"function\" ? _ : constant$9(!!_), zoom) : filter;\n    };\n\n    zoom.extent = function(_) {\n      return arguments.length ? (extent = typeof _ === \"function\" ? _ : constant$9([[+_[0][0], +_[0][1]], [+_[1][0], +_[1][1]]]), zoom) : extent;\n    };\n\n    zoom.scaleExtent = function(_) {\n      return arguments.length ? (k0 = +_[0], k1 = +_[1], zoom) : [k0, k1];\n    };\n\n    zoom.translateExtent = function(_) {\n      return arguments.length ? (x0 = +_[0][0], x1 = +_[1][0], y0 = +_[0][1], y1 = +_[1][1], zoom) : [[x0, y0], [x1, y1]];\n    };\n\n    zoom.duration = function(_) {\n      return arguments.length ? (duration = +_, zoom) : duration;\n    };\n\n    zoom.on = function() {\n      var value = listeners.on.apply(listeners, arguments);\n      return value === listeners ? zoom : value;\n    };\n\n    return zoom;\n  }\n\n  function constant$10(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  function BrushEvent(target, type, selection) {\n    this.target = target;\n    this.type = type;\n    this.selection = selection;\n  }\n\n  function nopropagation$2() {\n    exports.event.stopImmediatePropagation();\n  }\n\n  function noevent$2() {\n    exports.event.preventDefault();\n    exports.event.stopImmediatePropagation();\n  }\n\n  var MODE_DRAG = {name: \"drag\"};\n  var MODE_SPACE = {name: \"space\"};\n  var MODE_HANDLE = {name: \"handle\"};\n  var MODE_CENTER = {name: \"center\"};\n  var X = {\n    name: \"x\",\n    handles: [\"e\", \"w\"].map(type$1),\n    input: function(x, e) { return x && [[x[0], e[0][1]], [x[1], e[1][1]]]; },\n    output: function(xy) { return xy && [xy[0][0], xy[1][0]]; }\n  };\n\n  var Y = {\n    name: \"y\",\n    handles: [\"n\", \"s\"].map(type$1),\n    input: function(y, e) { return y && [[e[0][0], y[0]], [e[1][0], y[1]]]; },\n    output: function(xy) { return xy && [xy[0][1], xy[1][1]]; }\n  };\n\n  var XY = {\n    name: \"xy\",\n    handles: [\"n\", \"e\", \"s\", \"w\", \"nw\", \"ne\", \"se\", \"sw\"].map(type$1),\n    input: function(xy) { return xy; },\n    output: function(xy) { return xy; }\n  };\n\n  var cursors = {\n    overlay: \"crosshair\",\n    selection: \"move\",\n    n: \"ns-resize\",\n    e: \"ew-resize\",\n    s: \"ns-resize\",\n    w: \"ew-resize\",\n    nw: \"nwse-resize\",\n    ne: \"nesw-resize\",\n    se: \"nwse-resize\",\n    sw: \"nesw-resize\"\n  };\n\n  var flipX = {\n    e: \"w\",\n    w: \"e\",\n    nw: \"ne\",\n    ne: \"nw\",\n    se: \"sw\",\n    sw: \"se\"\n  };\n\n  var flipY = {\n    n: \"s\",\n    s: \"n\",\n    nw: \"sw\",\n    ne: \"se\",\n    se: \"ne\",\n    sw: \"nw\"\n  };\n\n  var signsX = {\n    overlay: +1,\n    selection: +1,\n    n: null,\n    e: +1,\n    s: null,\n    w: -1,\n    nw: -1,\n    ne: +1,\n    se: +1,\n    sw: -1\n  };\n\n  var signsY = {\n    overlay: +1,\n    selection: +1,\n    n: -1,\n    e: null,\n    s: +1,\n    w: null,\n    nw: -1,\n    ne: -1,\n    se: +1,\n    sw: +1\n  };\n\n  function type$1(t) {\n    return {type: t};\n  }\n\n  // Ignore right-click, since that should open the context menu.\n  function defaultFilter$2() {\n    return !exports.event.button;\n  }\n\n  function defaultExtent$1() {\n    var svg = this.ownerSVGElement || this;\n    return [[0, 0], [svg.width.baseVal.value, svg.height.baseVal.value]];\n  }\n\n  // Like d3.local, but with the name “__brush” rather than auto-generated.\n  function local$1(node) {\n    while (!node.__brush) if (!(node = node.parentNode)) return;\n    return node.__brush;\n  }\n\n  function empty$1(extent) {\n    return extent[0][0] === extent[1][0]\n        || extent[0][1] === extent[1][1];\n  }\n\n  function brushSelection(node) {\n    var state = node.__brush;\n    return state ? state.dim.output(state.selection) : null;\n  }\n\n  function brushX() {\n    return brush$1(X);\n  }\n\n  function brushY() {\n    return brush$1(Y);\n  }\n\n  function brush() {\n    return brush$1(XY);\n  }\n\n  function brush$1(dim) {\n    var extent = defaultExtent$1,\n        filter = defaultFilter$2,\n        listeners = dispatch(brush, \"start\", \"brush\", \"end\"),\n        handleSize = 6,\n        touchending;\n\n    function brush(group) {\n      var overlay = group\n          .property(\"__brush\", initialize)\n        .selectAll(\".overlay\")\n        .data([type$1(\"overlay\")]);\n\n      overlay.enter().append(\"rect\")\n          .attr(\"class\", \"overlay\")\n          .attr(\"pointer-events\", \"all\")\n          .attr(\"cursor\", cursors.overlay)\n        .merge(overlay)\n          .each(function() {\n            var extent = local$1(this).extent;\n            select(this)\n                .attr(\"x\", extent[0][0])\n                .attr(\"y\", extent[0][1])\n                .attr(\"width\", extent[1][0] - extent[0][0])\n                .attr(\"height\", extent[1][1] - extent[0][1]);\n          });\n\n      group.selectAll(\".selection\")\n        .data([type$1(\"selection\")])\n        .enter().append(\"rect\")\n          .attr(\"class\", \"selection\")\n          .attr(\"cursor\", cursors.selection)\n          .attr(\"fill\", \"#777\")\n          .attr(\"fill-opacity\", 0.3)\n          .attr(\"stroke\", \"#fff\")\n          .attr(\"shape-rendering\", \"crispEdges\");\n\n      var handle = group.selectAll(\".handle\")\n        .data(dim.handles, function(d) { return d.type; });\n\n      handle.exit().remove();\n\n      handle.enter().append(\"rect\")\n          .attr(\"class\", function(d) { return \"handle handle--\" + d.type; })\n          .attr(\"cursor\", function(d) { return cursors[d.type]; });\n\n      group\n          .each(redraw)\n          .attr(\"fill\", \"none\")\n          .attr(\"pointer-events\", \"all\")\n          .style(\"-webkit-tap-highlight-color\", \"rgba(0,0,0,0)\")\n          .on(\"mousedown.brush touchstart.brush\", started);\n    }\n\n    brush.move = function(group, selection) {\n      if (group.selection) {\n        group\n            .on(\"start.brush\", function() { emitter(this, arguments).beforestart().start(); })\n            .on(\"interrupt.brush end.brush\", function() { emitter(this, arguments).end(); })\n            .tween(\"brush\", function() {\n              var that = this,\n                  state = that.__brush,\n                  emit = emitter(that, arguments),\n                  selection0 = state.selection,\n                  selection1 = dim.input(typeof selection === \"function\" ? selection.apply(this, arguments) : selection, state.extent),\n                  i = interpolate(selection0, selection1);\n\n              function tween(t) {\n                state.selection = t === 1 && empty$1(selection1) ? null : i(t);\n                redraw.call(that);\n                emit.brush();\n              }\n\n              return selection0 && selection1 ? tween : tween(1);\n            });\n      } else {\n        group\n            .each(function() {\n              var that = this,\n                  args = arguments,\n                  state = that.__brush,\n                  selection1 = dim.input(typeof selection === \"function\" ? selection.apply(that, args) : selection, state.extent),\n                  emit = emitter(that, args).beforestart();\n\n              interrupt(that);\n              state.selection = selection1 == null || empty$1(selection1) ? null : selection1;\n              redraw.call(that);\n              emit.start().brush().end();\n            });\n      }\n    };\n\n    function redraw() {\n      var group = select(this),\n          selection = local$1(this).selection;\n\n      if (selection) {\n        group.selectAll(\".selection\")\n            .style(\"display\", null)\n            .attr(\"x\", selection[0][0])\n            .attr(\"y\", selection[0][1])\n            .attr(\"width\", selection[1][0] - selection[0][0])\n            .attr(\"height\", selection[1][1] - selection[0][1]);\n\n        group.selectAll(\".handle\")\n            .style(\"display\", null)\n            .attr(\"x\", function(d) { return d.type[d.type.length - 1] === \"e\" ? selection[1][0] - handleSize / 2 : selection[0][0] - handleSize / 2; })\n            .attr(\"y\", function(d) { return d.type[0] === \"s\" ? selection[1][1] - handleSize / 2 : selection[0][1] - handleSize / 2; })\n            .attr(\"width\", function(d) { return d.type === \"n\" || d.type === \"s\" ? selection[1][0] - selection[0][0] + handleSize : handleSize; })\n            .attr(\"height\", function(d) { return d.type === \"e\" || d.type === \"w\" ? selection[1][1] - selection[0][1] + handleSize : handleSize; });\n      }\n\n      else {\n        group.selectAll(\".selection,.handle\")\n            .style(\"display\", \"none\")\n            .attr(\"x\", null)\n            .attr(\"y\", null)\n            .attr(\"width\", null)\n            .attr(\"height\", null);\n      }\n    }\n\n    function emitter(that, args) {\n      return that.__brush.emitter || new Emitter(that, args);\n    }\n\n    function Emitter(that, args) {\n      this.that = that;\n      this.args = args;\n      this.state = that.__brush;\n      this.active = 0;\n    }\n\n    Emitter.prototype = {\n      beforestart: function() {\n        if (++this.active === 1) this.state.emitter = this, this.starting = true;\n        return this;\n      },\n      start: function() {\n        if (this.starting) this.starting = false, this.emit(\"start\");\n        return this;\n      },\n      brush: function() {\n        this.emit(\"brush\");\n        return this;\n      },\n      end: function() {\n        if (--this.active === 0) delete this.state.emitter, this.emit(\"end\");\n        return this;\n      },\n      emit: function(type) {\n        customEvent(new BrushEvent(brush, type, dim.output(this.state.selection)), listeners.apply, listeners, [type, this.that, this.args]);\n      }\n    };\n\n    function started() {\n      if (exports.event.touches) { if (exports.event.changedTouches.length < exports.event.touches.length) return noevent$2(); }\n      else if (touchending) return;\n      if (!filter.apply(this, arguments)) return;\n\n      var that = this,\n          type = exports.event.target.__data__.type,\n          mode = (exports.event.metaKey ? type = \"overlay\" : type) === \"selection\" ? MODE_DRAG : (exports.event.altKey ? MODE_CENTER : MODE_HANDLE),\n          signX = dim === Y ? null : signsX[type],\n          signY = dim === X ? null : signsY[type],\n          state = local$1(that),\n          extent = state.extent,\n          selection = state.selection,\n          W = extent[0][0], w0, w1,\n          N = extent[0][1], n0, n1,\n          E = extent[1][0], e0, e1,\n          S = extent[1][1], s0, s1,\n          dx,\n          dy,\n          moving,\n          shifting = signX && signY && exports.event.shiftKey,\n          lockX,\n          lockY,\n          point0 = mouse(that),\n          point = point0,\n          emit = emitter(that, arguments).beforestart();\n\n      if (type === \"overlay\") {\n        state.selection = selection = [\n          [w0 = dim === Y ? W : point0[0], n0 = dim === X ? N : point0[1]],\n          [e0 = dim === Y ? E : w0, s0 = dim === X ? S : n0]\n        ];\n      } else {\n        w0 = selection[0][0];\n        n0 = selection[0][1];\n        e0 = selection[1][0];\n        s0 = selection[1][1];\n      }\n\n      w1 = w0;\n      n1 = n0;\n      e1 = e0;\n      s1 = s0;\n\n      var group = select(that)\n          .attr(\"pointer-events\", \"none\");\n\n      var overlay = group.selectAll(\".overlay\")\n          .attr(\"cursor\", cursors[type]);\n\n      if (exports.event.touches) {\n        group\n            .on(\"touchmove.brush\", moved, true)\n            .on(\"touchend.brush touchcancel.brush\", ended, true);\n      } else {\n        var view = select(exports.event.view)\n            .on(\"keydown.brush\", keydowned, true)\n            .on(\"keyup.brush\", keyupped, true)\n            .on(\"mousemove.brush\", moved, true)\n            .on(\"mouseup.brush\", ended, true);\n\n        dragDisable(exports.event.view);\n      }\n\n      nopropagation$2();\n      interrupt(that);\n      redraw.call(that);\n      emit.start();\n\n      function moved() {\n        var point1 = mouse(that);\n        if (shifting && !lockX && !lockY) {\n          if (Math.abs(point1[0] - point[0]) > Math.abs(point1[1] - point[1])) lockY = true;\n          else lockX = true;\n        }\n        point = point1;\n        moving = true;\n        noevent$2();\n        move();\n      }\n\n      function move() {\n        var t;\n\n        dx = point[0] - point0[0];\n        dy = point[1] - point0[1];\n\n        switch (mode) {\n          case MODE_SPACE:\n          case MODE_DRAG: {\n            if (signX) dx = Math.max(W - w0, Math.min(E - e0, dx)), w1 = w0 + dx, e1 = e0 + dx;\n            if (signY) dy = Math.max(N - n0, Math.min(S - s0, dy)), n1 = n0 + dy, s1 = s0 + dy;\n            break;\n          }\n          case MODE_HANDLE: {\n            if (signX < 0) dx = Math.max(W - w0, Math.min(E - w0, dx)), w1 = w0 + dx, e1 = e0;\n            else if (signX > 0) dx = Math.max(W - e0, Math.min(E - e0, dx)), w1 = w0, e1 = e0 + dx;\n            if (signY < 0) dy = Math.max(N - n0, Math.min(S - n0, dy)), n1 = n0 + dy, s1 = s0;\n            else if (signY > 0) dy = Math.max(N - s0, Math.min(S - s0, dy)), n1 = n0, s1 = s0 + dy;\n            break;\n          }\n          case MODE_CENTER: {\n            if (signX) w1 = Math.max(W, Math.min(E, w0 - dx * signX)), e1 = Math.max(W, Math.min(E, e0 + dx * signX));\n            if (signY) n1 = Math.max(N, Math.min(S, n0 - dy * signY)), s1 = Math.max(N, Math.min(S, s0 + dy * signY));\n            break;\n          }\n        }\n\n        if (e1 < w1) {\n          signX *= -1;\n          t = w0, w0 = e0, e0 = t;\n          t = w1, w1 = e1, e1 = t;\n          if (type in flipX) overlay.attr(\"cursor\", cursors[type = flipX[type]]);\n        }\n\n        if (s1 < n1) {\n          signY *= -1;\n          t = n0, n0 = s0, s0 = t;\n          t = n1, n1 = s1, s1 = t;\n          if (type in flipY) overlay.attr(\"cursor\", cursors[type = flipY[type]]);\n        }\n\n        selection = state.selection; // May be set by brush.move!\n\n        if (lockX) w1 = selection[0][0], e1 = selection[1][0];\n        if (lockY) n1 = selection[0][1], s1 = selection[1][1];\n\n        if (selection[0][0] !== w1\n            || selection[0][1] !== n1\n            || selection[1][0] !== e1\n            || selection[1][1] !== s1) {\n          state.selection = [[w1, n1], [e1, s1]];\n          redraw.call(that);\n          emit.brush();\n        }\n      }\n\n      function ended() {\n        nopropagation$2();\n        if (exports.event.touches) {\n          if (exports.event.touches.length) return;\n          if (touchending) clearTimeout(touchending);\n          touchending = setTimeout(function() { touchending = null; }, 500); // Ghost clicks are delayed!\n          group.on(\"touchmove.brush touchend.brush touchcancel.brush\", null);\n        } else {\n          dragEnable(exports.event.view, moving);\n          view.on(\"keydown.brush keyup.brush mousemove.brush mouseup.brush\", null);\n        }\n        group.attr(\"pointer-events\", \"all\");\n        overlay.attr(\"cursor\", cursors.overlay);\n        if (empty$1(selection)) state.selection = null, redraw.call(that);\n        emit.end();\n      }\n\n      function keydowned() {\n        switch (exports.event.keyCode) {\n          case 16: { // SHIFT\n            shifting = signX && signY;\n            break;\n          }\n          case 18: { // ALT\n            if (mode === MODE_HANDLE) {\n              if (signX) e0 = e1 - dx * signX, w0 = w1 + dx * signX;\n              if (signY) s0 = s1 - dy * signY, n0 = n1 + dy * signY;\n              mode = MODE_CENTER;\n              move();\n            }\n            break;\n          }\n          case 32: { // SPACE; takes priority over ALT\n            if (mode === MODE_HANDLE || mode === MODE_CENTER) {\n              if (signX < 0) e0 = e1 - dx; else if (signX > 0) w0 = w1 - dx;\n              if (signY < 0) s0 = s1 - dy; else if (signY > 0) n0 = n1 - dy;\n              mode = MODE_SPACE;\n              overlay.attr(\"cursor\", cursors.selection);\n              move();\n            }\n            break;\n          }\n          default: return;\n        }\n        noevent$2();\n      }\n\n      function keyupped() {\n        switch (exports.event.keyCode) {\n          case 16: { // SHIFT\n            if (shifting) {\n              lockX = lockY = shifting = false;\n              move();\n            }\n            break;\n          }\n          case 18: { // ALT\n            if (mode === MODE_CENTER) {\n              if (signX < 0) e0 = e1; else if (signX > 0) w0 = w1;\n              if (signY < 0) s0 = s1; else if (signY > 0) n0 = n1;\n              mode = MODE_HANDLE;\n              move();\n            }\n            break;\n          }\n          case 32: { // SPACE\n            if (mode === MODE_SPACE) {\n              if (exports.event.altKey) {\n                if (signX) e0 = e1 - dx * signX, w0 = w1 + dx * signX;\n                if (signY) s0 = s1 - dy * signY, n0 = n1 + dy * signY;\n                mode = MODE_CENTER;\n              } else {\n                if (signX < 0) e0 = e1; else if (signX > 0) w0 = w1;\n                if (signY < 0) s0 = s1; else if (signY > 0) n0 = n1;\n                mode = MODE_HANDLE;\n              }\n              overlay.attr(\"cursor\", cursors[type]);\n              move();\n            }\n            break;\n          }\n          default: return;\n        }\n        noevent$2();\n      }\n    }\n\n    function initialize() {\n      var state = this.__brush || {selection: null};\n      state.extent = extent.apply(this, arguments);\n      state.dim = dim;\n      return state;\n    }\n\n    brush.extent = function(_) {\n      return arguments.length ? (extent = typeof _ === \"function\" ? _ : constant$10([[+_[0][0], +_[0][1]], [+_[1][0], +_[1][1]]]), brush) : extent;\n    };\n\n    brush.filter = function(_) {\n      return arguments.length ? (filter = typeof _ === \"function\" ? _ : constant$10(!!_), brush) : filter;\n    };\n\n    brush.handleSize = function(_) {\n      return arguments.length ? (handleSize = +_, brush) : handleSize;\n    };\n\n    brush.on = function() {\n      var value = listeners.on.apply(listeners, arguments);\n      return value === listeners ? brush : value;\n    };\n\n    return brush;\n  }\n\n  var cos = Math.cos;\n  var sin = Math.sin;\n  var pi$3 = Math.PI;\n  var halfPi$2 = pi$3 / 2;\n  var tau$3 = pi$3 * 2;\n  var max$1 = Math.max;\n\n  function compareValue(compare) {\n    return function(a, b) {\n      return compare(\n        a.source.value + a.target.value,\n        b.source.value + b.target.value\n      );\n    };\n  }\n\n  function chord() {\n    var padAngle = 0,\n        sortGroups = null,\n        sortSubgroups = null,\n        sortChords = null;\n\n    function chord(matrix) {\n      var n = matrix.length,\n          groupSums = [],\n          groupIndex = range(n),\n          subgroupIndex = [],\n          chords = [],\n          groups = chords.groups = new Array(n),\n          subgroups = new Array(n * n),\n          k,\n          x,\n          x0,\n          dx,\n          i,\n          j;\n\n      // Compute the sum.\n      k = 0, i = -1; while (++i < n) {\n        x = 0, j = -1; while (++j < n) {\n          x += matrix[i][j];\n        }\n        groupSums.push(x);\n        subgroupIndex.push(range(n));\n        k += x;\n      }\n\n      // Sort groups…\n      if (sortGroups) groupIndex.sort(function(a, b) {\n        return sortGroups(groupSums[a], groupSums[b]);\n      });\n\n      // Sort subgroups…\n      if (sortSubgroups) subgroupIndex.forEach(function(d, i) {\n        d.sort(function(a, b) {\n          return sortSubgroups(matrix[i][a], matrix[i][b]);\n        });\n      });\n\n      // Convert the sum to scaling factor for [0, 2pi].\n      // TODO Allow start and end angle to be specified?\n      // TODO Allow padding to be specified as percentage?\n      k = max$1(0, tau$3 - padAngle * n) / k;\n      dx = k ? padAngle : tau$3 / n;\n\n      // Compute the start and end angle for each group and subgroup.\n      // Note: Opera has a bug reordering object literal properties!\n      x = 0, i = -1; while (++i < n) {\n        x0 = x, j = -1; while (++j < n) {\n          var di = groupIndex[i],\n              dj = subgroupIndex[di][j],\n              v = matrix[di][dj],\n              a0 = x,\n              a1 = x += v * k;\n          subgroups[dj * n + di] = {\n            index: di,\n            subindex: dj,\n            startAngle: a0,\n            endAngle: a1,\n            value: v\n          };\n        }\n        groups[di] = {\n          index: di,\n          startAngle: x0,\n          endAngle: x,\n          value: groupSums[di]\n        };\n        x += dx;\n      }\n\n      // Generate chords for each (non-empty) subgroup-subgroup link.\n      i = -1; while (++i < n) {\n        j = i - 1; while (++j < n) {\n          var source = subgroups[j * n + i],\n              target = subgroups[i * n + j];\n          if (source.value || target.value) {\n            chords.push(source.value < target.value\n                ? {source: target, target: source}\n                : {source: source, target: target});\n          }\n        }\n      }\n\n      return sortChords ? chords.sort(sortChords) : chords;\n    }\n\n    chord.padAngle = function(_) {\n      return arguments.length ? (padAngle = max$1(0, _), chord) : padAngle;\n    };\n\n    chord.sortGroups = function(_) {\n      return arguments.length ? (sortGroups = _, chord) : sortGroups;\n    };\n\n    chord.sortSubgroups = function(_) {\n      return arguments.length ? (sortSubgroups = _, chord) : sortSubgroups;\n    };\n\n    chord.sortChords = function(_) {\n      return arguments.length ? (_ == null ? sortChords = null : (sortChords = compareValue(_))._ = _, chord) : sortChords && sortChords._;\n    };\n\n    return chord;\n  }\n\n  var slice$5 = Array.prototype.slice;\n\n  function constant$11(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  function defaultSource(d) {\n    return d.source;\n  }\n\n  function defaultTarget(d) {\n    return d.target;\n  }\n\n  function defaultRadius$1(d) {\n    return d.radius;\n  }\n\n  function defaultStartAngle(d) {\n    return d.startAngle;\n  }\n\n  function defaultEndAngle(d) {\n    return d.endAngle;\n  }\n\n  function ribbon() {\n    var source = defaultSource,\n        target = defaultTarget,\n        radius = defaultRadius$1,\n        startAngle = defaultStartAngle,\n        endAngle = defaultEndAngle,\n        context = null;\n\n    function ribbon() {\n      var buffer,\n          argv = slice$5.call(arguments),\n          s = source.apply(this, argv),\n          t = target.apply(this, argv),\n          sr = +radius.apply(this, (argv[0] = s, argv)),\n          sa0 = startAngle.apply(this, argv) - halfPi$2,\n          sa1 = endAngle.apply(this, argv) - halfPi$2,\n          sx0 = sr * cos(sa0),\n          sy0 = sr * sin(sa0),\n          tr = +radius.apply(this, (argv[0] = t, argv)),\n          ta0 = startAngle.apply(this, argv) - halfPi$2,\n          ta1 = endAngle.apply(this, argv) - halfPi$2;\n\n      if (!context) context = buffer = path();\n\n      context.moveTo(sx0, sy0);\n      context.arc(0, 0, sr, sa0, sa1);\n      if (sa0 !== ta0 || sa1 !== ta1) { // TODO sr !== tr?\n        context.quadraticCurveTo(0, 0, tr * cos(ta0), tr * sin(ta0));\n        context.arc(0, 0, tr, ta0, ta1);\n      }\n      context.quadraticCurveTo(0, 0, sx0, sy0);\n      context.closePath();\n\n      if (buffer) return context = null, buffer + \"\" || null;\n    }\n\n    ribbon.radius = function(_) {\n      return arguments.length ? (radius = typeof _ === \"function\" ? _ : constant$11(+_), ribbon) : radius;\n    };\n\n    ribbon.startAngle = function(_) {\n      return arguments.length ? (startAngle = typeof _ === \"function\" ? _ : constant$11(+_), ribbon) : startAngle;\n    };\n\n    ribbon.endAngle = function(_) {\n      return arguments.length ? (endAngle = typeof _ === \"function\" ? _ : constant$11(+_), ribbon) : endAngle;\n    };\n\n    ribbon.source = function(_) {\n      return arguments.length ? (source = _, ribbon) : source;\n    };\n\n    ribbon.target = function(_) {\n      return arguments.length ? (target = _, ribbon) : target;\n    };\n\n    ribbon.context = function(_) {\n      return arguments.length ? ((context = _ == null ? null : _), ribbon) : context;\n    };\n\n    return ribbon;\n  }\n\n  // Adds floating point numbers with twice the normal precision.\n  // Reference: J. R. Shewchuk, Adaptive Precision Floating-Point Arithmetic and\n  // Fast Robust Geometric Predicates, Discrete & Computational Geometry 18(3)\n  // 305–363 (1997).\n  // Code adapted from GeographicLib by Charles F. F. Karney,\n  // http://geographiclib.sourceforge.net/\n\n  function adder() {\n    return new Adder;\n  }\n\n  function Adder() {\n    this.reset();\n  }\n\n  Adder.prototype = {\n    constructor: Adder,\n    reset: function() {\n      this.s = // rounded value\n      this.t = 0; // exact error\n    },\n    add: function(y) {\n      add$1(temp, y, this.t);\n      add$1(this, temp.s, this.s);\n      if (this.s) this.t += temp.t;\n      else this.s = temp.t;\n    },\n    valueOf: function() {\n      return this.s;\n    }\n  };\n\n  var temp = new Adder;\n\n  function add$1(adder, a, b) {\n    var x = adder.s = a + b,\n        bv = x - a,\n        av = x - bv;\n    adder.t = (a - av) + (b - bv);\n  }\n\n  var epsilon$4 = 1e-6;\n  var epsilon2$2 = 1e-12;\n  var pi$4 = Math.PI;\n  var halfPi$3 = pi$4 / 2;\n  var quarterPi = pi$4 / 4;\n  var tau$4 = pi$4 * 2;\n\n  var degrees$1 = 180 / pi$4;\n  var radians = pi$4 / 180;\n\n  var abs = Math.abs;\n  var atan = Math.atan;\n  var atan2 = Math.atan2;\n  var cos$1 = Math.cos;\n  var ceil = Math.ceil;\n  var exp = Math.exp;\n  var log$1 = Math.log;\n  var pow$1 = Math.pow;\n  var sin$1 = Math.sin;\n  var sign$1 = Math.sign || function(x) { return x > 0 ? 1 : x < 0 ? -1 : 0; };\n  var sqrt$1 = Math.sqrt;\n  var tan = Math.tan;\n\n  function acos(x) {\n    return x > 1 ? 0 : x < -1 ? pi$4 : Math.acos(x);\n  }\n\n  function asin$1(x) {\n    return x > 1 ? halfPi$3 : x < -1 ? -halfPi$3 : Math.asin(x);\n  }\n\n  function haversin(x) {\n    return (x = sin$1(x / 2)) * x;\n  }\n\n  function noop$2() {}\n\n  function streamGeometry(geometry, stream) {\n    if (geometry && streamGeometryType.hasOwnProperty(geometry.type)) {\n      streamGeometryType[geometry.type](geometry, stream);\n    }\n  }\n\n  var streamObjectType = {\n    Feature: function(feature, stream) {\n      streamGeometry(feature.geometry, stream);\n    },\n    FeatureCollection: function(object, stream) {\n      var features = object.features, i = -1, n = features.length;\n      while (++i < n) streamGeometry(features[i].geometry, stream);\n    }\n  };\n\n  var streamGeometryType = {\n    Sphere: function(object, stream) {\n      stream.sphere();\n    },\n    Point: function(object, stream) {\n      object = object.coordinates;\n      stream.point(object[0], object[1], object[2]);\n    },\n    MultiPoint: function(object, stream) {\n      var coordinates = object.coordinates, i = -1, n = coordinates.length;\n      while (++i < n) object = coordinates[i], stream.point(object[0], object[1], object[2]);\n    },\n    LineString: function(object, stream) {\n      streamLine(object.coordinates, stream, 0);\n    },\n    MultiLineString: function(object, stream) {\n      var coordinates = object.coordinates, i = -1, n = coordinates.length;\n      while (++i < n) streamLine(coordinates[i], stream, 0);\n    },\n    Polygon: function(object, stream) {\n      streamPolygon(object.coordinates, stream);\n    },\n    MultiPolygon: function(object, stream) {\n      var coordinates = object.coordinates, i = -1, n = coordinates.length;\n      while (++i < n) streamPolygon(coordinates[i], stream);\n    },\n    GeometryCollection: function(object, stream) {\n      var geometries = object.geometries, i = -1, n = geometries.length;\n      while (++i < n) streamGeometry(geometries[i], stream);\n    }\n  };\n\n  function streamLine(coordinates, stream, closed) {\n    var i = -1, n = coordinates.length - closed, coordinate;\n    stream.lineStart();\n    while (++i < n) coordinate = coordinates[i], stream.point(coordinate[0], coordinate[1], coordinate[2]);\n    stream.lineEnd();\n  }\n\n  function streamPolygon(coordinates, stream) {\n    var i = -1, n = coordinates.length;\n    stream.polygonStart();\n    while (++i < n) streamLine(coordinates[i], stream, 1);\n    stream.polygonEnd();\n  }\n\n  function stream(object, stream) {\n    if (object && streamObjectType.hasOwnProperty(object.type)) {\n      streamObjectType[object.type](object, stream);\n    } else {\n      streamGeometry(object, stream);\n    }\n  }\n\n  var areaRingSum;\n\n  var areaSum;\n  var lambda00;\n  var phi00;\n  var lambda0;\n  var cosPhi0;\n  var sinPhi0;\n  var areaStream = {\n    point: noop$2,\n    lineStart: noop$2,\n    lineEnd: noop$2,\n    polygonStart: function() {\n      areaRingSum.reset();\n      areaStream.lineStart = areaRingStart;\n      areaStream.lineEnd = areaRingEnd;\n    },\n    polygonEnd: function() {\n      var areaRing = +areaRingSum;\n      areaSum.add(areaRing < 0 ? tau$4 + areaRing : areaRing);\n      this.lineStart = this.lineEnd = this.point = noop$2;\n    },\n    sphere: function() {\n      areaSum.add(tau$4);\n    }\n  };\n\n  function areaRingStart() {\n    areaStream.point = areaPointFirst;\n  }\n\n  function areaRingEnd() {\n    areaPoint(lambda00, phi00);\n  }\n\n  function areaPointFirst(lambda, phi) {\n    areaStream.point = areaPoint;\n    lambda00 = lambda, phi00 = phi;\n    lambda *= radians, phi *= radians;\n    lambda0 = lambda, cosPhi0 = cos$1(phi = phi / 2 + quarterPi), sinPhi0 = sin$1(phi);\n  }\n\n  function areaPoint(lambda, phi) {\n    lambda *= radians, phi *= radians;\n    phi = phi / 2 + quarterPi; // half the angular distance from south pole\n\n    // Spherical excess E for a spherical triangle with vertices: south pole,\n    // previous point, current point.  Uses a formula derived from Cagnoli’s\n    // theorem.  See Todhunter, Spherical Trig. (1871), Sec. 103, Eq. (2).\n    var dLambda = lambda - lambda0,\n        sdLambda = dLambda >= 0 ? 1 : -1,\n        adLambda = sdLambda * dLambda,\n        cosPhi = cos$1(phi),\n        sinPhi = sin$1(phi),\n        k = sinPhi0 * sinPhi,\n        u = cosPhi0 * cosPhi + k * cos$1(adLambda),\n        v = k * sdLambda * sin$1(adLambda);\n    areaRingSum.add(atan2(v, u));\n\n    // Advance the previous points.\n    lambda0 = lambda, cosPhi0 = cosPhi, sinPhi0 = sinPhi;\n  }\n\n  function area$2(object) {\n    if (areaSum) areaSum.reset();\n    else areaSum = adder(), areaRingSum = adder();\n    stream(object, areaStream);\n    return areaSum * 2;\n  }\n\n  function spherical(cartesian) {\n    return [atan2(cartesian[1], cartesian[0]), asin$1(cartesian[2])];\n  }\n\n  function cartesian(spherical) {\n    var lambda = spherical[0], phi = spherical[1], cosPhi = cos$1(phi);\n    return [cosPhi * cos$1(lambda), cosPhi * sin$1(lambda), sin$1(phi)];\n  }\n\n  function cartesianDot(a, b) {\n    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];\n  }\n\n  function cartesianCross(a, b) {\n    return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];\n  }\n\n  // TODO return a\n  function cartesianAddInPlace(a, b) {\n    a[0] += b[0], a[1] += b[1], a[2] += b[2];\n  }\n\n  function cartesianScale(vector, k) {\n    return [vector[0] * k, vector[1] * k, vector[2] * k];\n  }\n\n  // TODO return d\n  function cartesianNormalizeInPlace(d) {\n    var l = sqrt$1(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);\n    d[0] /= l, d[1] /= l, d[2] /= l;\n  }\n\nvar   lambda0$1;\n  var phi0;\n  var lambda1;\n  var phi1;\n  var lambda2;\nvar   lambda00$1;\nvar   phi00$1;\n  var p0;\n  var deltaSum;\n  var ranges;\nvar   range$1;\n  var boundsStream = {\n    point: boundsPoint,\n    lineStart: boundsLineStart,\n    lineEnd: boundsLineEnd,\n    polygonStart: function() {\n      boundsStream.point = boundsRingPoint;\n      boundsStream.lineStart = boundsRingStart;\n      boundsStream.lineEnd = boundsRingEnd;\n      deltaSum.reset();\n      areaStream.polygonStart();\n    },\n    polygonEnd: function() {\n      areaStream.polygonEnd();\n      boundsStream.point = boundsPoint;\n      boundsStream.lineStart = boundsLineStart;\n      boundsStream.lineEnd = boundsLineEnd;\n      if (areaRingSum < 0) lambda0$1 = -(lambda1 = 180), phi0 = -(phi1 = 90);\n      else if (deltaSum > epsilon$4) phi1 = 90;\n      else if (deltaSum < -epsilon$4) phi0 = -90;\n      range$1[0] = lambda0$1, range$1[1] = lambda1;\n    }\n  };\n\n  function boundsPoint(lambda, phi) {\n    ranges.push(range$1 = [lambda0$1 = lambda, lambda1 = lambda]);\n    if (phi < phi0) phi0 = phi;\n    if (phi > phi1) phi1 = phi;\n  }\n\n  function linePoint(lambda, phi) {\n    var p = cartesian([lambda * radians, phi * radians]);\n    if (p0) {\n      var normal = cartesianCross(p0, p),\n          equatorial = [normal[1], -normal[0], 0],\n          inflection = cartesianCross(equatorial, normal);\n      cartesianNormalizeInPlace(inflection);\n      inflection = spherical(inflection);\n      var delta = lambda - lambda2,\n          sign = delta > 0 ? 1 : -1,\n          lambdai = inflection[0] * degrees$1 * sign,\n          phii,\n          antimeridian = abs(delta) > 180;\n      if (antimeridian ^ (sign * lambda2 < lambdai && lambdai < sign * lambda)) {\n        phii = inflection[1] * degrees$1;\n        if (phii > phi1) phi1 = phii;\n      } else if (lambdai = (lambdai + 360) % 360 - 180, antimeridian ^ (sign * lambda2 < lambdai && lambdai < sign * lambda)) {\n        phii = -inflection[1] * degrees$1;\n        if (phii < phi0) phi0 = phii;\n      } else {\n        if (phi < phi0) phi0 = phi;\n        if (phi > phi1) phi1 = phi;\n      }\n      if (antimeridian) {\n        if (lambda < lambda2) {\n          if (angle(lambda0$1, lambda) > angle(lambda0$1, lambda1)) lambda1 = lambda;\n        } else {\n          if (angle(lambda, lambda1) > angle(lambda0$1, lambda1)) lambda0$1 = lambda;\n        }\n      } else {\n        if (lambda1 >= lambda0$1) {\n          if (lambda < lambda0$1) lambda0$1 = lambda;\n          if (lambda > lambda1) lambda1 = lambda;\n        } else {\n          if (lambda > lambda2) {\n            if (angle(lambda0$1, lambda) > angle(lambda0$1, lambda1)) lambda1 = lambda;\n          } else {\n            if (angle(lambda, lambda1) > angle(lambda0$1, lambda1)) lambda0$1 = lambda;\n          }\n        }\n      }\n    } else {\n      boundsPoint(lambda, phi);\n    }\n    p0 = p, lambda2 = lambda;\n  }\n\n  function boundsLineStart() {\n    boundsStream.point = linePoint;\n  }\n\n  function boundsLineEnd() {\n    range$1[0] = lambda0$1, range$1[1] = lambda1;\n    boundsStream.point = boundsPoint;\n    p0 = null;\n  }\n\n  function boundsRingPoint(lambda, phi) {\n    if (p0) {\n      var delta = lambda - lambda2;\n      deltaSum.add(abs(delta) > 180 ? delta + (delta > 0 ? 360 : -360) : delta);\n    } else {\n      lambda00$1 = lambda, phi00$1 = phi;\n    }\n    areaStream.point(lambda, phi);\n    linePoint(lambda, phi);\n  }\n\n  function boundsRingStart() {\n    areaStream.lineStart();\n  }\n\n  function boundsRingEnd() {\n    boundsRingPoint(lambda00$1, phi00$1);\n    areaStream.lineEnd();\n    if (abs(deltaSum) > epsilon$4) lambda0$1 = -(lambda1 = 180);\n    range$1[0] = lambda0$1, range$1[1] = lambda1;\n    p0 = null;\n  }\n\n  // Finds the left-right distance between two longitudes.\n  // This is almost the same as (lambda1 - lambda0 + 360°) % 360°, except that we want\n  // the distance between ±180° to be 360°.\n  function angle(lambda0, lambda1) {\n    return (lambda1 -= lambda0) < 0 ? lambda1 + 360 : lambda1;\n  }\n\n  function rangeCompare(a, b) {\n    return a[0] - b[0];\n  }\n\n  function rangeContains(range, x) {\n    return range[0] <= range[1] ? range[0] <= x && x <= range[1] : x < range[0] || range[1] < x;\n  }\n\n  function bounds(feature) {\n    var i, n, a, b, merged, deltaMax, delta;\n\n    if (deltaSum) deltaSum.reset();\n    else deltaSum = adder();\n    phi1 = lambda1 = -(lambda0$1 = phi0 = Infinity);\n    ranges = [];\n    stream(feature, boundsStream);\n\n    // First, sort ranges by their minimum longitudes.\n    if (n = ranges.length) {\n      ranges.sort(rangeCompare);\n\n      // Then, merge any ranges that overlap.\n      for (i = 1, a = ranges[0], merged = [a]; i < n; ++i) {\n        b = ranges[i];\n        if (rangeContains(a, b[0]) || rangeContains(a, b[1])) {\n          if (angle(a[0], b[1]) > angle(a[0], a[1])) a[1] = b[1];\n          if (angle(b[0], a[1]) > angle(a[0], a[1])) a[0] = b[0];\n        } else {\n          merged.push(a = b);\n        }\n      }\n\n      // Finally, find the largest gap between the merged ranges.\n      // The final bounding box will be the inverse of this gap.\n      for (deltaMax = -Infinity, n = merged.length - 1, i = 0, a = merged[n]; i <= n; a = b, ++i) {\n        b = merged[i];\n        if ((delta = angle(a[1], b[0])) > deltaMax) deltaMax = delta, lambda0$1 = b[0], lambda1 = a[1];\n      }\n    }\n\n    ranges = range$1 = null;\n\n    return lambda0$1 === Infinity || phi0 === Infinity\n        ? [[NaN, NaN], [NaN, NaN]]\n        : [[lambda0$1, phi0], [lambda1, phi1]];\n  }\n\n  var W0;\n  var W1;\n  var X0;\n  var Y0;\n  var Z0;\n  var X1;\n  var Y1;\n  var Z1;\n  var X2;\n  var Y2;\n  var Z2;\nvar   lambda00$2;\nvar   phi00$2;\n  var x0;\n  var y0;\n  var z0;\n  // previous point\n\n  var centroidStream = {\n    sphere: noop$2,\n    point: centroidPoint,\n    lineStart: centroidLineStart,\n    lineEnd: centroidLineEnd,\n    polygonStart: function() {\n      centroidStream.lineStart = centroidRingStart;\n      centroidStream.lineEnd = centroidRingEnd;\n    },\n    polygonEnd: function() {\n      centroidStream.lineStart = centroidLineStart;\n      centroidStream.lineEnd = centroidLineEnd;\n    }\n  };\n\n  // Arithmetic mean of Cartesian vectors.\n  function centroidPoint(lambda, phi) {\n    lambda *= radians, phi *= radians;\n    var cosPhi = cos$1(phi);\n    centroidPointCartesian(cosPhi * cos$1(lambda), cosPhi * sin$1(lambda), sin$1(phi));\n  }\n\n  function centroidPointCartesian(x, y, z) {\n    ++W0;\n    X0 += (x - X0) / W0;\n    Y0 += (y - Y0) / W0;\n    Z0 += (z - Z0) / W0;\n  }\n\n  function centroidLineStart() {\n    centroidStream.point = centroidLinePointFirst;\n  }\n\n  function centroidLinePointFirst(lambda, phi) {\n    lambda *= radians, phi *= radians;\n    var cosPhi = cos$1(phi);\n    x0 = cosPhi * cos$1(lambda);\n    y0 = cosPhi * sin$1(lambda);\n    z0 = sin$1(phi);\n    centroidStream.point = centroidLinePoint;\n    centroidPointCartesian(x0, y0, z0);\n  }\n\n  function centroidLinePoint(lambda, phi) {\n    lambda *= radians, phi *= radians;\n    var cosPhi = cos$1(phi),\n        x = cosPhi * cos$1(lambda),\n        y = cosPhi * sin$1(lambda),\n        z = sin$1(phi),\n        w = atan2(sqrt$1((w = y0 * z - z0 * y) * w + (w = z0 * x - x0 * z) * w + (w = x0 * y - y0 * x) * w), x0 * x + y0 * y + z0 * z);\n    W1 += w;\n    X1 += w * (x0 + (x0 = x));\n    Y1 += w * (y0 + (y0 = y));\n    Z1 += w * (z0 + (z0 = z));\n    centroidPointCartesian(x0, y0, z0);\n  }\n\n  function centroidLineEnd() {\n    centroidStream.point = centroidPoint;\n  }\n\n  // See J. E. Brock, The Inertia Tensor for a Spherical Triangle,\n  // J. Applied Mechanics 42, 239 (1975).\n  function centroidRingStart() {\n    centroidStream.point = centroidRingPointFirst;\n  }\n\n  function centroidRingEnd() {\n    centroidRingPoint(lambda00$2, phi00$2);\n    centroidStream.point = centroidPoint;\n  }\n\n  function centroidRingPointFirst(lambda, phi) {\n    lambda00$2 = lambda, phi00$2 = phi;\n    lambda *= radians, phi *= radians;\n    centroidStream.point = centroidRingPoint;\n    var cosPhi = cos$1(phi);\n    x0 = cosPhi * cos$1(lambda);\n    y0 = cosPhi * sin$1(lambda);\n    z0 = sin$1(phi);\n    centroidPointCartesian(x0, y0, z0);\n  }\n\n  function centroidRingPoint(lambda, phi) {\n    lambda *= radians, phi *= radians;\n    var cosPhi = cos$1(phi),\n        x = cosPhi * cos$1(lambda),\n        y = cosPhi * sin$1(lambda),\n        z = sin$1(phi),\n        cx = y0 * z - z0 * y,\n        cy = z0 * x - x0 * z,\n        cz = x0 * y - y0 * x,\n        m = sqrt$1(cx * cx + cy * cy + cz * cz),\n        u = x0 * x + y0 * y + z0 * z,\n        v = m && -acos(u) / m, // area weight\n        w = atan2(m, u); // line weight\n    X2 += v * cx;\n    Y2 += v * cy;\n    Z2 += v * cz;\n    W1 += w;\n    X1 += w * (x0 + (x0 = x));\n    Y1 += w * (y0 + (y0 = y));\n    Z1 += w * (z0 + (z0 = z));\n    centroidPointCartesian(x0, y0, z0);\n  }\n\n  function centroid$1(object) {\n    W0 = W1 =\n    X0 = Y0 = Z0 =\n    X1 = Y1 = Z1 =\n    X2 = Y2 = Z2 = 0;\n    stream(object, centroidStream);\n\n    var x = X2,\n        y = Y2,\n        z = Z2,\n        m = x * x + y * y + z * z;\n\n    // If the area-weighted ccentroid is undefined, fall back to length-weighted ccentroid.\n    if (m < epsilon2$2) {\n      x = X1, y = Y1, z = Z1;\n      // If the feature has zero length, fall back to arithmetic mean of point vectors.\n      if (W1 < epsilon$4) x = X0, y = Y0, z = Z0;\n      m = x * x + y * y + z * z;\n      // If the feature still has an undefined ccentroid, then return.\n      if (m < epsilon2$2) return [NaN, NaN];\n    }\n\n    return [atan2(y, x) * degrees$1, asin$1(z / sqrt$1(m)) * degrees$1];\n  }\n\n  function constant$12(x) {\n    return function() {\n      return x;\n    };\n  }\n\n  function compose(a, b) {\n\n    function compose(x, y) {\n      return x = a(x, y), b(x[0], x[1]);\n    }\n\n    if (a.invert && b.invert) compose.invert = function(x, y) {\n      return x = b.invert(x, y), x && a.invert(x[0], x[1]);\n    };\n\n    return compose;\n  }\n\n  function rotationIdentity(lambda, phi) {\n    return [lambda > pi$4 ? lambda - tau$4 : lambda < -pi$4 ? lambda + tau$4 : lambda, phi];\n  }\n\n  rotationIdentity.invert = rotationIdentity;\n\n  function rotateRadians(deltaLambda, deltaPhi, deltaGamma) {\n    return (deltaLambda %= tau$4) ? (deltaPhi || deltaGamma ? compose(rotationLambda(deltaLambda), rotationPhiGamma(deltaPhi, deltaGamma))\n      : rotationLambda(deltaLambda))\n      : (deltaPhi || deltaGamma ? rotationPhiGamma(deltaPhi, deltaGamma)\n      : rotationIdentity);\n  }\n\n  function forwardRotationLambda(deltaLambda) {\n    return function(lambda, phi) {\n      return lambda += deltaLambda, [lambda > pi$4 ? lambda - tau$4 : lambda < -pi$4 ? lambda + tau$4 : lambda, phi];\n    };\n  }\n\n  function rotationLambda(deltaLambda) {\n    var rotation = forwardRotationLambda(deltaLambda);\n    rotation.invert = forwardRotationLambda(-deltaLambda);\n    return rotation;\n  }\n\n  function rotationPhiGamma(deltaPhi, deltaGamma) {\n    var cosDeltaPhi = cos$1(deltaPhi),\n        sinDeltaPhi = sin$1(deltaPhi),\n        cosDeltaGamma = cos$1(deltaGamma),\n        sinDeltaGamma = sin$1(deltaGamma);\n\n    function rotation(lambda, phi) {\n      var cosPhi = cos$1(phi),\n          x = cos$1(lambda) * cosPhi,\n          y = sin$1(lambda) * cosPhi,\n          z = sin$1(phi),\n          k = z * cosDeltaPhi + x * sinDeltaPhi;\n      return [\n        atan2(y * cosDeltaGamma - k * sinDeltaGamma, x * cosDeltaPhi - z * sinDeltaPhi),\n        asin$1(k * cosDeltaGamma + y * sinDeltaGamma)\n      ];\n    }\n\n    rotation.invert = function(lambda, phi) {\n      var cosPhi = cos$1(phi),\n          x = cos$1(lambda) * cosPhi,\n          y = sin$1(lambda) * cosPhi,\n          z = sin$1(phi),\n          k = z * cosDeltaGamma - y * sinDeltaGamma;\n      return [\n        atan2(y * cosDeltaGamma + z * sinDeltaGamma, x * cosDeltaPhi + k * sinDeltaPhi),\n        asin$1(k * cosDeltaPhi - x * sinDeltaPhi)\n      ];\n    };\n\n    return rotation;\n  }\n\n  function rotation(rotate) {\n    rotate = rotateRadians(rotate[0] * radians, rotate[1] * radians, rotate.length > 2 ? rotate[2] * radians : 0);\n\n    function forward(coordinates) {\n      coordinates = rotate(coordinates[0] * radians, coordinates[1] * radians);\n      return coordinates[0] *= degrees$1, coordinates[1] *= degrees$1, coordinates;\n    }\n\n    forward.invert = function(coordinates) {\n      coordinates = rotate.invert(coordinates[0] * radians, coordinates[1] * radians);\n      return coordinates[0] *= degrees$1, coordinates[1] *= degrees$1, coordinates;\n    };\n\n    return forward;\n  }\n\n  // Generates a circle centered at [0°, 0°], with a given radius and precision.\n  function circleStream(stream, radius, delta, direction, t0, t1) {\n    if (!delta) return;\n    var cosRadius = cos$1(radius),\n        sinRadius = sin$1(radius),\n        step = direction * delta;\n    if (t0 == null) {\n      t0 = radius + direction * tau$4;\n      t1 = radius - step / 2;\n    } else {\n      t0 = circleRadius(cosRadius, t0);\n      t1 = circleRadius(cosRadius, t1);\n      if (direction > 0 ? t0 < t1 : t0 > t1) t0 += direction * tau$4;\n    }\n    for (var point, t = t0; direction > 0 ? t > t1 : t < t1; t -= step) {\n      point = spherical([cosRadius, -sinRadius * cos$1(t), -sinRadius * sin$1(t)]);\n      stream.point(point[0], point[1]);\n    }\n  }\n\n  // Returns the signed angle of a cartesian point relative to [cosRadius, 0, 0].\n  function circleRadius(cosRadius, point) {\n    point = cartesian(point), point[0] -= cosRadius;\n    cartesianNormalizeInPlace(point);\n    var radius = acos(-point[1]);\n    return ((-point[2] < 0 ? -radius : radius) + tau$4 - epsilon$4) % tau$4;\n  }\n\n  function circle$1() {\n    var center = constant$12([0, 0]),\n        radius = constant$12(90),\n        precision = constant$12(6),\n        ring,\n        rotate,\n        stream = {point: point};\n\n    function point(x, y) {\n      ring.push(x = rotate(x, y));\n      x[0] *= degrees$1, x[1] *= degrees$1;\n    }\n\n    function circle() {\n      var c = center.apply(this, arguments),\n          r = radius.apply(this, arguments) * radians,\n          p = precision.apply(this, arguments) * radians;\n      ring = [];\n      rotate = rotateRadians(-c[0] * radians, -c[1] * radians, 0).invert;\n      circleStream(stream, r, p, 1);\n      c = {type: \"Polygon\", coordinates: [ring]};\n      ring = rotate = null;\n      return c;\n    }\n\n    circle.center = function(_) {\n      return arguments.length ? (center = typeof _ === \"function\" ? _ : constant$12([+_[0], +_[1]]), circle) : center;\n    };\n\n    circle.radius = function(_) {\n      return arguments.length ? (radius = typeof _ === \"function\" ? _ : constant$12(+_), circle) : radius;\n    };\n\n    circle.precision = function(_) {\n      return arguments.length ? (precision = typeof _ === \"function\" ? _ : constant$12(+_), circle) : precision;\n    };\n\n    return circle;\n  }\n\n  function clipBuffer() {\n    var lines = [],\n        line;\n    return {\n      point: function(x, y) {\n        line.push([x, y]);\n      },\n      lineStart: function() {\n        lines.push(line = []);\n      },\n      lineEnd: noop$2,\n      rejoin: function() {\n        if (lines.length > 1) lines.push(lines.pop().concat(lines.shift()));\n      },\n      result: function() {\n        var result = lines;\n        lines = [];\n        line = null;\n        return result;\n      }\n    };\n  }\n\n  function clipLine(a, b, x0, y0, x1, y1) {\n    var ax = a[0],\n        ay = a[1],\n        bx = b[0],\n        by = b[1],\n        t0 = 0,\n        t1 = 1,\n        dx = bx - ax,\n        dy = by - ay,\n        r;\n\n    r = x0 - ax;\n    if (!dx && r > 0) return;\n    r /= dx;\n    if (dx < 0) {\n      if (r < t0) return;\n      if (r < t1) t1 = r;\n    } else if (dx > 0) {\n      if (r > t1) return;\n      if (r > t0) t0 = r;\n    }\n\n    r = x1 - ax;\n    if (!dx && r < 0) return;\n    r /= dx;\n    if (dx < 0) {\n      if (r > t1) return;\n      if (r > t0) t0 = r;\n    } else if (dx > 0) {\n      if (r < t0) return;\n      if (r < t1) t1 = r;\n    }\n\n    r = y0 - ay;\n    if (!dy && r > 0) return;\n    r /= dy;\n    if (dy < 0) {\n      if (r < t0) return;\n      if (r < t1) t1 = r;\n    } else if (dy > 0) {\n      if (r > t1) return;\n      if (r > t0) t0 = r;\n    }\n\n    r = y1 - ay;\n    if (!dy && r < 0) return;\n    r /= dy;\n    if (dy < 0) {\n      if (r > t1) return;\n      if (r > t0) t0 = r;\n    } else if (dy > 0) {\n      if (r < t0) return;\n      if (r < t1) t1 = r;\n    }\n\n    if (t0 > 0) a[0] = ax + t0 * dx, a[1] = ay + t0 * dy;\n    if (t1 < 1) b[0] = ax + t1 * dx, b[1] = ay + t1 * dy;\n    return true;\n  }\n\n  function pointEqual(a, b) {\n    return abs(a[0] - b[0]) < epsilon$4 && abs(a[1] - b[1]) < epsilon$4;\n  }\n\n  function Intersection(point, points, other, entry) {\n    this.x = point;\n    this.z = points;\n    this.o = other; // another intersection\n    this.e = entry; // is an entry?\n    this.v = false; // visited\n    this.n = this.p = null; // next & previous\n  }\n\n  // A generalized polygon clipping algorithm: given a polygon that has been cut\n  // into its visible line segments, and rejoins the segments by interpolating\n  // along the clip edge.\n  function clipPolygon(segments, compareIntersection, startInside, interpolate, stream) {\n    var subject = [],\n        clip = [],\n        i,\n        n;\n\n    segments.forEach(function(segment) {\n      if ((n = segment.length - 1) <= 0) return;\n      var n, p0 = segment[0], p1 = segment[n], x;\n\n      // If the first and last points of a segment are coincident, then treat as a\n      // closed ring. TODO if all rings are closed, then the winding order of the\n      // exterior ring should be checked.\n      if (pointEqual(p0, p1)) {\n        stream.lineStart();\n        for (i = 0; i < n; ++i) stream.point((p0 = segment[i])[0], p0[1]);\n        stream.lineEnd();\n        return;\n      }\n\n      subject.push(x = new Intersection(p0, segment, null, true));\n      clip.push(x.o = new Intersection(p0, null, x, false));\n      subject.push(x = new Intersection(p1, segment, null, false));\n      clip.push(x.o = new Intersection(p1, null, x, true));\n    });\n\n    if (!subject.length) return;\n\n    clip.sort(compareIntersection);\n    link$1(subject);\n    link$1(clip);\n\n    for (i = 0, n = clip.length; i < n; ++i) {\n      clip[i].e = startInside = !startInside;\n    }\n\n    var start = subject[0],\n        points,\n        point;\n\n    while (1) {\n      // Find first unvisited intersection.\n      var current = start,\n          isSubject = true;\n      while (current.v) if ((current = current.n) === start) return;\n      points = current.z;\n      stream.lineStart();\n      do {\n        current.v = current.o.v = true;\n        if (current.e) {\n          if (isSubject) {\n            for (i = 0, n = points.length; i < n; ++i) stream.point((point = points[i])[0], point[1]);\n          } else {\n            interpolate(current.x, current.n.x, 1, stream);\n          }\n          current = current.n;\n        } else {\n          if (isSubject) {\n            points = current.p.z;\n            for (i = points.length - 1; i >= 0; --i) stream.point((point = points[i])[0], point[1]);\n          } else {\n            interpolate(current.x, current.p.x, -1, stream);\n          }\n          current = current.p;\n        }\n        current = current.o;\n        points = current.z;\n        isSubject = !isSubject;\n      } while (!current.v);\n      stream.lineEnd();\n    }\n  }\n\n  function link$1(array) {\n    if (!(n = array.length)) return;\n    var n,\n        i = 0,\n        a = array[0],\n        b;\n    while (++i < n) {\n      a.n = b = array[i];\n      b.p = a;\n      a = b;\n    }\n    a.n = b = array[0];\n    b.p = a;\n  }\n\n  var clipMax = 1e9;\n  var clipMin = -clipMax;\n  // TODO Use d3-polygon’s polygonContains here for the ring check?\n  // TODO Eliminate duplicate buffering in clipBuffer and polygon.push?\n\n  function clipExtent(x0, y0, x1, y1) {\n\n    function visible(x, y) {\n      return x0 <= x && x <= x1 && y0 <= y && y <= y1;\n    }\n\n    function interpolate(from, to, direction, stream) {\n      var a = 0, a1 = 0;\n      if (from == null\n          || (a = corner(from, direction)) !== (a1 = corner(to, direction))\n          || comparePoint(from, to) < 0 ^ direction > 0) {\n        do stream.point(a === 0 || a === 3 ? x0 : x1, a > 1 ? y1 : y0);\n        while ((a = (a + direction + 4) % 4) !== a1);\n      } else {\n        stream.point(to[0], to[1]);\n      }\n    }\n\n    function corner(p, direction) {\n      return abs(p[0] - x0) < epsilon$4 ? direction > 0 ? 0 : 3\n          : abs(p[0] - x1) < epsilon$4 ? direction > 0 ? 2 : 1\n          : abs(p[1] - y0) < epsilon$4 ? direction > 0 ? 1 : 0\n          : direction > 0 ? 3 : 2; // abs(p[1] - y1) < epsilon\n    }\n\n    function compareIntersection(a, b) {\n      return comparePoint(a.x, b.x);\n    }\n\n    function comparePoint(a, b) {\n      var ca = corner(a, 1),\n          cb = corner(b, 1);\n      return ca !== cb ? ca - cb\n          : ca === 0 ? b[1] - a[1]\n          : ca === 1 ? a[0] - b[0]\n          : ca === 2 ? a[1] - b[1]\n          : b[0] - a[0];\n    }\n\n    return function(stream) {\n      var activeStream = stream,\n          bufferStream = clipBuffer(),\n          segments,\n          polygon,\n          ring,\n          x__, y__, v__, // first point\n          x_, y_, v_, // previous point\n          first,\n          clean;\n\n      var clipStream = {\n        point: point,\n        lineStart: lineStart,\n        lineEnd: lineEnd,\n        polygonStart: polygonStart,\n        polygonEnd: polygonEnd\n      };\n\n      function point(x, y) {\n        if (visible(x, y)) activeStream.point(x, y);\n      }\n\n      function polygonInside() {\n        var winding = 0;\n\n        for (var i = 0, n = polygon.length; i < n; ++i) {\n          for (var ring = polygon[i], j = 1, m = ring.length, point = ring[0], a0, a1, b0 = point[0], b1 = point[1]; j < m; ++j) {\n            a0 = b0, a1 = b1, point = ring[j], b0 = point[0], b1 = point[1];\n            if (a1 <= y1) { if (b1 > y1 && (b0 - a0) * (y1 - a1) > (b1 - a1) * (x0 - a0)) ++winding; }\n            else { if (b1 <= y1 && (b0 - a0) * (y1 - a1) < (b1 - a1) * (x0 - a0)) --winding; }\n          }\n        }\n\n        return winding;\n      }\n\n      // Buffer geometry within a polygon and then clip it en masse.\n      function polygonStart() {\n        activeStream = bufferStream, segments = [], polygon = [], clean = true;\n      }\n\n      function polygonEnd() {\n        var startInside = polygonInside(),\n            cleanInside = clean && startInside,\n            visible = (segments = merge(segments)).length;\n        if (cleanInside || visible) {\n          stream.polygonStart();\n          if (cleanInside) {\n            stream.lineStart();\n            interpolate(null, null, 1, stream);\n            stream.lineEnd();\n          }\n          if (visible) {\n            clipPolygon(segments, compareIntersection, startInside, interpolate, stream);\n          }\n          stream.polygonEnd();\n        }\n        activeStream = stream, segments = polygon = ring = null;\n      }\n\n      function lineStart() {\n        clipStream.point = linePoint;\n        if (polygon) polygon.push(ring = []);\n        first = true;\n        v_ = false;\n        x_ = y_ = NaN;\n      }\n\n      // TODO rather than special-case polygons, simply handle them separately.\n      // Ideally, coincident intersection points should be jittered to avoid\n      // clipping issues.\n      function lineEnd() {\n        if (segments) {\n          linePoint(x__, y__);\n          if (v__ && v_) bufferStream.rejoin();\n          segments.push(bufferStream.result());\n        }\n        clipStream.point = point;\n        if (v_) activeStream.lineEnd();\n      }\n\n      function linePoint(x, y) {\n        var v = visible(x, y);\n        if (polygon) ring.push([x, y]);\n        if (first) {\n          x__ = x, y__ = y, v__ = v;\n          first = false;\n          if (v) {\n            activeStream.lineStart();\n            activeStream.point(x, y);\n          }\n        } else {\n          if (v && v_) activeStream.point(x, y);\n          else {\n            var a = [x_ = Math.max(clipMin, Math.min(clipMax, x_)), y_ = Math.max(clipMin, Math.min(clipMax, y_))],\n                b = [x = Math.max(clipMin, Math.min(clipMax, x)), y = Math.max(clipMin, Math.min(clipMax, y))];\n            if (clipLine(a, b, x0, y0, x1, y1)) {\n              if (!v_) {\n                activeStream.lineStart();\n                activeStream.point(a[0], a[1]);\n              }\n              activeStream.point(b[0], b[1]);\n              if (!v) activeStream.lineEnd();\n              clean = false;\n            } else if (v) {\n              activeStream.lineStart();\n              activeStream.point(x, y);\n              clean = false;\n            }\n          }\n        }\n        x_ = x, y_ = y, v_ = v;\n      }\n\n      return clipStream;\n    };\n  }\n\n  function extent$1() {\n    var x0 = 0,\n        y0 = 0,\n        x1 = 960,\n        y1 = 500,\n        cache,\n        cacheStream,\n        clip;\n\n    return clip = {\n      stream: function(stream) {\n        return cache && cacheStream === stream ? cache : cache = clipExtent(x0, y0, x1, y1)(cacheStream = stream);\n      },\n      extent: function(_) {\n        return arguments.length ? (x0 = +_[0][0], y0 = +_[0][1], x1 = +_[1][0], y1 = +_[1][1], cache = cacheStream = null, clip) : [[x0, y0], [x1, y1]];\n      }\n    };\n  }\n\n  var lengthSum;\nvar   lambda0$2;\nvar   sinPhi0$1;\nvar   cosPhi0$1;\n  var lengthStream = {\n    sphere: noop$2,\n    point: noop$2,\n    lineStart: lengthLineStart,\n    lineEnd: noop$2,\n    polygonStart: noop$2,\n    polygonEnd: noop$2\n  };\n\n  function lengthLineStart() {\n    lengthStream.point = lengthPointFirst;\n    lengthStream.lineEnd = lengthLineEnd;\n  }\n\n  function lengthLineEnd() {\n    lengthStream.point = lengthStream.lineEnd = noop$2;\n  }\n\n  function lengthPointFirst(lambda, phi) {\n    lambda *= radians, phi *= radians;\n    lambda0$2 = lambda, sinPhi0$1 = sin$1(phi), cosPhi0$1 = cos$1(phi);\n    lengthStream.point = lengthPoint;\n  }\n\n  function lengthPoint(lambda, phi) {\n    lambda *= radians, phi *= radians;\n    var sinPhi = sin$1(phi),\n        cosPhi = cos$1(phi),\n        delta = abs(lambda - lambda0$2),\n        cosDelta = cos$1(delta),\n        sinDelta = sin$1(delta),\n        x = cosPhi * sinDelta,\n        y = cosPhi0$1 * sinPhi - sinPhi0$1 * cosPhi * cosDelta,\n        z = sinPhi0$1 * sinPhi + cosPhi0$1 * cosPhi * cosDelta;\n    lengthSum.add(atan2(sqrt$1(x * x + y * y), z));\n    lambda0$2 = lambda, sinPhi0$1 = sinPhi, cosPhi0$1 = cosPhi;\n  }\n\n  function length$2(object) {\n    if (lengthSum) lengthSum.reset();\n    else lengthSum = adder();\n    stream(object, lengthStream);\n    return +lengthSum;\n  }\n\n  var coordinates = [null, null];\nvar   object$1 = {type: \"LineString\", coordinates: coordinates};\n  function distance(a, b) {\n    coordinates[0] = a;\n    coordinates[1] = b;\n    return length$2(object$1);\n  }\n\n  function graticuleX(y0, y1, dy) {\n    var y = range(y0, y1 - epsilon$4, dy).concat(y1);\n    return function(x) { return y.map(function(y) { return [x, y]; }); };\n  }\n\n  function graticuleY(x0, x1, dx) {\n    var x = range(x0, x1 - epsilon$4, dx).concat(x1);\n    return function(y) { return x.map(function(x) { return [x, y]; }); };\n  }\n\n  function graticule() {\n    var x1, x0, X1, X0,\n        y1, y0, Y1, Y0,\n        dx = 10, dy = dx, DX = 90, DY = 360,\n        x, y, X, Y,\n        precision = 2.5;\n\n    function graticule() {\n      return {type: \"MultiLineString\", coordinates: lines()};\n    }\n\n    function lines() {\n      return range(ceil(X0 / DX) * DX, X1, DX).map(X)\n          .concat(range(ceil(Y0 / DY) * DY, Y1, DY).map(Y))\n          .concat(range(ceil(x0 / dx) * dx, x1, dx).filter(function(x) { return abs(x % DX) > epsilon$4; }).map(x))\n          .concat(range(ceil(y0 / dy) * dy, y1, dy).filter(function(y) { return abs(y % DY) > epsilon$4; }).map(y));\n    }\n\n    graticule.lines = function() {\n      return lines().map(function(coordinates) { return {type: \"LineString\", coordinates: coordinates}; });\n    };\n\n    graticule.outline = function() {\n      return {\n        type: \"Polygon\",\n        coordinates: [\n          X(X0).concat(\n          Y(Y1).slice(1),\n          X(X1).reverse().slice(1),\n          Y(Y0).reverse().slice(1))\n        ]\n      };\n    };\n\n    graticule.extent = function(_) {\n      if (!arguments.length) return graticule.extentMinor();\n      return graticule.extentMajor(_).extentMinor(_);\n    };\n\n    graticule.extentMajor = function(_) {\n      if (!arguments.length) return [[X0, Y0], [X1, Y1]];\n      X0 = +_[0][0], X1 = +_[1][0];\n      Y0 = +_[0][1], Y1 = +_[1][1];\n      if (X0 > X1) _ = X0, X0 = X1, X1 = _;\n      if (Y0 > Y1) _ = Y0, Y0 = Y1, Y1 = _;\n      return graticule.precision(precision);\n    };\n\n    graticule.extentMinor = function(_) {\n      if (!arguments.length) return [[x0, y0], [x1, y1]];\n      x0 = +_[0][0], x1 = +_[1][0];\n      y0 = +_[0][1], y1 = +_[1][1];\n      if (x0 > x1) _ = x0, x0 = x1, x1 = _;\n      if (y0 > y1) _ = y0, y0 = y1, y1 = _;\n      return graticule.precision(precision);\n    };\n\n    graticule.step = function(_) {\n      if (!arguments.length) return graticule.stepMinor();\n      return graticule.stepMajor(_).stepMinor(_);\n    };\n\n    graticule.stepMajor = function(_) {\n      if (!arguments.length) return [DX, DY];\n      DX = +_[0], DY = +_[1];\n      return graticule;\n    };\n\n    graticule.stepMinor = function(_) {\n      if (!arguments.length) return [dx, dy];\n      dx = +_[0], dy = +_[1];\n      return graticule;\n    };\n\n    graticule.precision = function(_) {\n      if (!arguments.length) return precision;\n      precision = +_;\n      x = graticuleX(y0, y1, 90);\n      y = graticuleY(x0, x1, precision);\n      X = graticuleX(Y0, Y1, 90);\n      Y = graticuleY(X0, X1, precision);\n      return graticule;\n    };\n\n    return graticule\n        .extentMajor([[-180, -90 + epsilon$4], [180, 90 - epsilon$4]])\n        .extentMinor([[-180, -80 - epsilon$4], [180, 80 + epsilon$4]]);\n  }\n\n  function interpolate$2(a, b) {\n    var x0 = a[0] * radians,\n        y0 = a[1] * radians,\n        x1 = b[0] * radians,\n        y1 = b[1] * radians,\n        cy0 = cos$1(y0),\n        sy0 = sin$1(y0),\n        cy1 = cos$1(y1),\n        sy1 = sin$1(y1),\n        kx0 = cy0 * cos$1(x0),\n        ky0 = cy0 * sin$1(x0),\n        kx1 = cy1 * cos$1(x1),\n        ky1 = cy1 * sin$1(x1),\n        d = 2 * asin$1(sqrt$1(haversin(y1 - y0) + cy0 * cy1 * haversin(x1 - x0))),\n        k = sin$1(d);\n\n    var interpolate = d ? function(t) {\n      var B = sin$1(t *= d) / k,\n          A = sin$1(d - t) / k,\n          x = A * kx0 + B * kx1,\n          y = A * ky0 + B * ky1,\n          z = A * sy0 + B * sy1;\n      return [\n        atan2(y, x) * degrees$1,\n        atan2(z, sqrt$1(x * x + y * y)) * degrees$1\n      ];\n    } : function() {\n      return [x0 * degrees$1, y0 * degrees$1];\n    };\n\n    interpolate.distance = d;\n\n    return interpolate;\n  }\n\n  function identity$7(x) {\n    return x;\n  }\n\nvar   areaSum$1 = adder();\nvar   areaRingSum$1 = adder();\n  var x00;\n  var y00;\nvar   x0$1;\nvar   y0$1;\n  var areaStream$1 = {\n    point: noop$2,\n    lineStart: noop$2,\n    lineEnd: noop$2,\n    polygonStart: function() {\n      areaStream$1.lineStart = areaRingStart$1;\n      areaStream$1.lineEnd = areaRingEnd$1;\n    },\n    polygonEnd: function() {\n      areaStream$1.lineStart = areaStream$1.lineEnd = areaStream$1.point = noop$2;\n      areaSum$1.add(abs(areaRingSum$1));\n      areaRingSum$1.reset();\n    },\n    result: function() {\n      var area = areaSum$1 / 2;\n      areaSum$1.reset();\n      return area;\n    }\n  };\n\n  function areaRingStart$1() {\n    areaStream$1.point = areaPointFirst$1;\n  }\n\n  function areaPointFirst$1(x, y) {\n    areaStream$1.point = areaPoint$1;\n    x00 = x0$1 = x, y00 = y0$1 = y;\n  }\n\n  function areaPoint$1(x, y) {\n    areaRingSum$1.add(y0$1 * x - x0$1 * y);\n    x0$1 = x, y0$1 = y;\n  }\n\n  function areaRingEnd$1() {\n    areaPoint$1(x00, y00);\n  }\n\nvar   x0$2 = Infinity;\nvar   y0$2 = x0$2;\n  var x1 = -x0$2;\n  var y1 = x1;\n  var boundsStream$1 = {\n    point: boundsPoint$1,\n    lineStart: noop$2,\n    lineEnd: noop$2,\n    polygonStart: noop$2,\n    polygonEnd: noop$2,\n    result: function() {\n      var bounds = [[x0$2, y0$2], [x1, y1]];\n      x1 = y1 = -(y0$2 = x0$2 = Infinity);\n      return bounds;\n    }\n  };\n\n  function boundsPoint$1(x, y) {\n    if (x < x0$2) x0$2 = x;\n    if (x > x1) x1 = x;\n    if (y < y0$2) y0$2 = y;\n    if (y > y1) y1 = y;\n  }\n\nvar   X0$1 = 0;\nvar   Y0$1 = 0;\nvar   Z0$1 = 0;\nvar   X1$1 = 0;\nvar   Y1$1 = 0;\nvar   Z1$1 = 0;\nvar   X2$1 = 0;\nvar   Y2$1 = 0;\nvar   Z2$1 = 0;\nvar   x00$1;\nvar   y00$1;\nvar   x0$3;\nvar   y0$3;\n  var centroidStream$1 = {\n    point: centroidPoint$1,\n    lineStart: centroidLineStart$1,\n    lineEnd: centroidLineEnd$1,\n    polygonStart: function() {\n      centroidStream$1.lineStart = centroidRingStart$1;\n      centroidStream$1.lineEnd = centroidRingEnd$1;\n    },\n    polygonEnd: function() {\n      centroidStream$1.point = centroidPoint$1;\n      centroidStream$1.lineStart = centroidLineStart$1;\n      centroidStream$1.lineEnd = centroidLineEnd$1;\n    },\n    result: function() {\n      var centroid = Z2$1 ? [X2$1 / Z2$1, Y2$1 / Z2$1]\n          : Z1$1 ? [X1$1 / Z1$1, Y1$1 / Z1$1]\n          : Z0$1 ? [X0$1 / Z0$1, Y0$1 / Z0$1]\n          : [NaN, NaN];\n      X0$1 = Y0$1 = Z0$1 =\n      X1$1 = Y1$1 = Z1$1 =\n      X2$1 = Y2$1 = Z2$1 = 0;\n      return centroid;\n    }\n  };\n\n  function centroidPoint$1(x, y) {\n    X0$1 += x;\n    Y0$1 += y;\n    ++Z0$1;\n  }\n\n  function centroidLineStart$1() {\n    centroidStream$1.point = centroidPointFirstLine;\n  }\n\n  function centroidPointFirstLine(x, y) {\n    centroidStream$1.point = centroidPointLine;\n    centroidPoint$1(x0$3 = x, y0$3 = y);\n  }\n\n  function centroidPointLine(x, y) {\n    var dx = x - x0$3, dy = y - y0$3, z = sqrt$1(dx * dx + dy * dy);\n    X1$1 += z * (x0$3 + x) / 2;\n    Y1$1 += z * (y0$3 + y) / 2;\n    Z1$1 += z;\n    centroidPoint$1(x0$3 = x, y0$3 = y);\n  }\n\n  function centroidLineEnd$1() {\n    centroidStream$1.point = centroidPoint$1;\n  }\n\n  function centroidRingStart$1() {\n    centroidStream$1.point = centroidPointFirstRing;\n  }\n\n  function centroidRingEnd$1() {\n    centroidPointRing(x00$1, y00$1);\n  }\n\n  function centroidPointFirstRing(x, y) {\n    centroidStream$1.point = centroidPointRing;\n    centroidPoint$1(x00$1 = x0$3 = x, y00$1 = y0$3 = y);\n  }\n\n  function centroidPointRing(x, y) {\n    var dx = x - x0$3,\n        dy = y - y0$3,\n        z = sqrt$1(dx * dx + dy * dy);\n\n    X1$1 += z * (x0$3 + x) / 2;\n    Y1$1 += z * (y0$3 + y) / 2;\n    Z1$1 += z;\n\n    z = y0$3 * x - x0$3 * y;\n    X2$1 += z * (x0$3 + x);\n    Y2$1 += z * (y0$3 + y);\n    Z2$1 += z * 3;\n    centroidPoint$1(x0$3 = x, y0$3 = y);\n  }\n\n  function PathContext(context) {\n    var pointRadius = 4.5;\n\n    var stream = {\n      point: point,\n\n      // While inside a line, override point to moveTo then lineTo.\n      lineStart: function() { stream.point = pointLineStart; },\n      lineEnd: lineEnd,\n\n      // While inside a polygon, override lineEnd to closePath.\n      polygonStart: function() { stream.lineEnd = lineEndPolygon; },\n      polygonEnd: function() { stream.lineEnd = lineEnd; stream.point = point; },\n\n      pointRadius: function(_) {\n        pointRadius = _;\n        return stream;\n      },\n\n      result: noop$2\n    };\n\n    function point(x, y) {\n      context.moveTo(x + pointRadius, y);\n      context.arc(x, y, pointRadius, 0, tau$4);\n    }\n\n    function pointLineStart(x, y) {\n      context.moveTo(x, y);\n      stream.point = pointLine;\n    }\n\n    function pointLine(x, y) {\n      context.lineTo(x, y);\n    }\n\n    function lineEnd() {\n      stream.point = point;\n    }\n\n    function lineEndPolygon() {\n      context.closePath();\n    }\n\n    return stream;\n  }\n\n  function PathString() {\n    var pointCircle = circle$2(4.5),\n        string = [];\n\n    var stream = {\n      point: point,\n      lineStart: lineStart,\n      lineEnd: lineEnd,\n      polygonStart: function() {\n        stream.lineEnd = lineEndPolygon;\n      },\n      polygonEnd: function() {\n        stream.lineEnd = lineEnd;\n        stream.point = point;\n      },\n      pointRadius: function(_) {\n        pointCircle = circle$2(_);\n        return stream;\n      },\n      result: function() {\n        if (string.length) {\n          var result = string.join(\"\");\n          string = [];\n          return result;\n        }\n      }\n    };\n\n    function point(x, y) {\n      string.push(\"M\", x, \",\", y, pointCircle);\n    }\n\n    function pointLineStart(x, y) {\n      string.push(\"M\", x, \",\", y);\n      stream.point = pointLine;\n    }\n\n    function pointLine(x, y) {\n      string.push(\"L\", x, \",\", y);\n    }\n\n    function lineStart() {\n      stream.point = pointLineStart;\n    }\n\n    function lineEnd() {\n      stream.point = point;\n    }\n\n    function lineEndPolygon() {\n      string.push(\"Z\");\n    }\n\n    return stream;\n  }\n\n  function circle$2(radius) {\n    return \"m0,\" + radius\n        + \"a\" + radius + \",\" + radius + \" 0 1,1 0,\" + -2 * radius\n        + \"a\" + radius + \",\" + radius + \" 0 1,1 0,\" + 2 * radius\n        + \"z\";\n  }\n\n  function index$3() {\n    var pointRadius = 4.5,\n        projection,\n        projectionStream,\n        context,\n        contextStream;\n\n    function path(object) {\n      if (object) {\n        if (typeof pointRadius === \"function\") contextStream.pointRadius(+pointRadius.apply(this, arguments));\n        stream(object, projectionStream(contextStream));\n      }\n      return contextStream.result();\n    }\n\n    path.area = function(object) {\n      stream(object, projectionStream(areaStream$1));\n      return areaStream$1.result();\n    };\n\n    path.bounds = function(object) {\n      stream(object, projectionStream(boundsStream$1));\n      return boundsStream$1.result();\n    };\n\n    path.centroid = function(object) {\n      stream(object, projectionStream(centroidStream$1));\n      return centroidStream$1.result();\n    };\n\n    path.projection = function(_) {\n      return arguments.length ? (projectionStream = (projection = _) == null ? identity$7 : _.stream, path) : projection;\n    };\n\n    path.context = function(_) {\n      if (!arguments.length) return context;\n      contextStream = (context = _) == null ? new PathString : new PathContext(_);\n      if (typeof pointRadius !== \"function\") contextStream.pointRadius(pointRadius);\n      return path;\n    };\n\n    path.pointRadius = function(_) {\n      if (!arguments.length) return pointRadius;\n      pointRadius = typeof _ === \"function\" ? _ : (contextStream.pointRadius(+_), +_);\n      return path;\n    };\n\n    return path.projection(null).context(null);\n  }\n\n  var sum$2 = adder();\n\n  function polygonContains(polygon, point) {\n    var lambda = point[0],\n        phi = point[1],\n        normal = [sin$1(lambda), -cos$1(lambda), 0],\n        angle = 0,\n        winding = 0;\n\n    for (var i = 0, n = polygon.length; i < n; ++i) {\n      if (!(m = (ring = polygon[i]).length)) continue;\n      var ring,\n          m,\n          point0 = ring[m - 1],\n          lambda0 = point0[0],\n          phi0 = point0[1] / 2 + quarterPi,\n          sinPhi0 = sin$1(phi0),\n          cosPhi0 = cos$1(phi0);\n\n      for (var j = 0; j < m; ++j, lambda0 = lambda1, sinPhi0 = sinPhi1, cosPhi0 = cosPhi1, point0 = point1) {\n        var point1 = ring[j],\n            lambda1 = point1[0],\n            phi1 = point1[1] / 2 + quarterPi,\n            sinPhi1 = sin$1(phi1),\n            cosPhi1 = cos$1(phi1),\n            delta = lambda1 - lambda0,\n            sign = delta >= 0 ? 1 : -1,\n            absDelta = sign * delta,\n            antimeridian = absDelta > pi$4,\n            k = sinPhi0 * sinPhi1;\n\n        sum$2.add(atan2(k * sign * sin$1(absDelta), cosPhi0 * cosPhi1 + k * cos$1(absDelta)));\n        angle += antimeridian ? delta + sign * tau$4 : delta;\n\n        // Are the longitudes either side of the point’s meridian (lambda),\n        // and are the latitudes smaller than the parallel (phi)?\n        if (antimeridian ^ lambda0 >= lambda ^ lambda1 >= lambda) {\n          var arc = cartesianCross(cartesian(point0), cartesian(point1));\n          cartesianNormalizeInPlace(arc);\n          var intersection = cartesianCross(normal, arc);\n          cartesianNormalizeInPlace(intersection);\n          var phiArc = (antimeridian ^ delta >= 0 ? -1 : 1) * asin$1(intersection[2]);\n          if (phi > phiArc || phi === phiArc && (arc[0] || arc[1])) {\n            winding += antimeridian ^ delta >= 0 ? 1 : -1;\n          }\n        }\n      }\n    }\n\n    // First, determine whether the South pole is inside or outside:\n    //\n    // It is inside if:\n    // * the polygon winds around it in a clockwise direction.\n    // * the polygon does not (cumulatively) wind around it, but has a negative\n    //   (counter-clockwise) area.\n    //\n    // Second, count the (signed) number of times a segment crosses a lambda\n    // from the point to the South pole.  If it is zero, then the point is the\n    // same side as the South pole.\n\n    var contains = (angle < -epsilon$4 || angle < epsilon$4 && sum$2 < -epsilon$4) ^ (winding & 1);\n    sum$2.reset();\n    return contains;\n  }\n\n  function clip(pointVisible, clipLine, interpolate, start) {\n    return function(rotate, sink) {\n      var line = clipLine(sink),\n          rotatedStart = rotate.invert(start[0], start[1]),\n          ringBuffer = clipBuffer(),\n          ringSink = clipLine(ringBuffer),\n          polygonStarted = false,\n          polygon,\n          segments,\n          ring;\n\n      var clip = {\n        point: point,\n        lineStart: lineStart,\n        lineEnd: lineEnd,\n        polygonStart: function() {\n          clip.point = pointRing;\n          clip.lineStart = ringStart;\n          clip.lineEnd = ringEnd;\n          segments = [];\n          polygon = [];\n        },\n        polygonEnd: function() {\n          clip.point = point;\n          clip.lineStart = lineStart;\n          clip.lineEnd = lineEnd;\n          segments = merge(segments);\n          var startInside = polygonContains(polygon, rotatedStart);\n          if (segments.length) {\n            if (!polygonStarted) sink.polygonStart(), polygonStarted = true;\n            clipPolygon(segments, compareIntersection, startInside, interpolate, sink);\n          } else if (startInside) {\n            if (!polygonStarted) sink.polygonStart(), polygonStarted = true;\n            sink.lineStart();\n            interpolate(null, null, 1, sink);\n            sink.lineEnd();\n          }\n          if (polygonStarted) sink.polygonEnd(), polygonStarted = false;\n          segments = polygon = null;\n        },\n        sphere: function() {\n          sink.polygonStart();\n          sink.lineStart();\n          interpolate(null, null, 1, sink);\n          sink.lineEnd();\n          sink.polygonEnd();\n        }\n      };\n\n      function point(lambda, phi) {\n        var point = rotate(lambda, phi);\n        if (pointVisible(lambda = point[0], phi = point[1])) sink.point(lambda, phi);\n      }\n\n      function pointLine(lambda, phi) {\n        var point = rotate(lambda, phi);\n        line.point(point[0], point[1]);\n      }\n\n      function lineStart() {\n        clip.point = pointLine;\n        line.lineStart();\n      }\n\n      function lineEnd() {\n        clip.point = point;\n        line.lineEnd();\n      }\n\n      function pointRing(lambda, phi) {\n        ring.push([lambda, phi]);\n        var point = rotate(lambda, phi);\n        ringSink.point(point[0], point[1]);\n      }\n\n      function ringStart() {\n        ringSink.lineStart();\n        ring = [];\n      }\n\n      function ringEnd() {\n        pointRing(ring[0][0], ring[0][1]);\n        ringSink.lineEnd();\n\n        var clean = ringSink.clean(),\n            ringSegments = ringBuffer.result(),\n            i, n = ringSegments.length, m,\n            segment,\n            point;\n\n        ring.pop();\n        polygon.push(ring);\n        ring = null;\n\n        if (!n) return;\n\n        // No intersections.\n        if (clean & 1) {\n          segment = ringSegments[0];\n          if ((m = segment.length - 1) > 0) {\n            if (!polygonStarted) sink.polygonStart(), polygonStarted = true;\n            sink.lineStart();\n            for (i = 0; i < m; ++i) sink.point((point = segment[i])[0], point[1]);\n            sink.lineEnd();\n          }\n          return;\n        }\n\n        // Rejoin connected segments.\n        // TODO reuse ringBuffer.rejoin()?\n        if (n > 1 && clean & 2) ringSegments.push(ringSegments.pop().concat(ringSegments.shift()));\n\n        segments.push(ringSegments.filter(validSegment));\n      }\n\n      return clip;\n    };\n  }\n\n  function validSegment(segment) {\n    return segment.length > 1;\n  }\n\n  // Intersections are sorted along the clip edge. For both antimeridian cutting\n  // and circle clipping, the same comparison is used.\n  function compareIntersection(a, b) {\n    return ((a = a.x)[0] < 0 ? a[1] - halfPi$3 - epsilon$4 : halfPi$3 - a[1])\n         - ((b = b.x)[0] < 0 ? b[1] - halfPi$3 - epsilon$4 : halfPi$3 - b[1]);\n  }\n\n  var clipAntimeridian = clip(\n    function() { return true; },\n    clipAntimeridianLine,\n    clipAntimeridianInterpolate,\n    [-pi$4, -halfPi$3]\n  );\n\n  // Takes a line and cuts into visible segments. Return values: 0 - there were\n  // intersections or the line was empty; 1 - no intersections; 2 - there were\n  // intersections, and the first and last segments should be rejoined.\n  function clipAntimeridianLine(stream) {\n    var lambda0 = NaN,\n        phi0 = NaN,\n        sign0 = NaN,\n        clean; // no intersections\n\n    return {\n      lineStart: function() {\n        stream.lineStart();\n        clean = 1;\n      },\n      point: function(lambda1, phi1) {\n        var sign1 = lambda1 > 0 ? pi$4 : -pi$4,\n            delta = abs(lambda1 - lambda0);\n        if (abs(delta - pi$4) < epsilon$4) { // line crosses a pole\n          stream.point(lambda0, phi0 = (phi0 + phi1) / 2 > 0 ? halfPi$3 : -halfPi$3);\n          stream.point(sign0, phi0);\n          stream.lineEnd();\n          stream.lineStart();\n          stream.point(sign1, phi0);\n          stream.point(lambda1, phi0);\n          clean = 0;\n        } else if (sign0 !== sign1 && delta >= pi$4) { // line crosses antimeridian\n          if (abs(lambda0 - sign0) < epsilon$4) lambda0 -= sign0 * epsilon$4; // handle degeneracies\n          if (abs(lambda1 - sign1) < epsilon$4) lambda1 -= sign1 * epsilon$4;\n          phi0 = clipAntimeridianIntersect(lambda0, phi0, lambda1, phi1);\n          stream.point(sign0, phi0);\n          stream.lineEnd();\n          stream.lineStart();\n          stream.point(sign1, phi0);\n          clean = 0;\n        }\n        stream.point(lambda0 = lambda1, phi0 = phi1);\n        sign0 = sign1;\n      },\n      lineEnd: function() {\n        stream.lineEnd();\n        lambda0 = phi0 = NaN;\n      },\n      clean: function() {\n        return 2 - clean; // if intersections, rejoin first and last segments\n      }\n    };\n  }\n\n  function clipAntimeridianIntersect(lambda0, phi0, lambda1, phi1) {\n    var cosPhi0,\n        cosPhi1,\n        sinLambda0Lambda1 = sin$1(lambda0 - lambda1);\n    return abs(sinLambda0Lambda1) > epsilon$4\n        ? atan((sin$1(phi0) * (cosPhi1 = cos$1(phi1)) * sin$1(lambda1)\n            - sin$1(phi1) * (cosPhi0 = cos$1(phi0)) * sin$1(lambda0))\n            / (cosPhi0 * cosPhi1 * sinLambda0Lambda1))\n        : (phi0 + phi1) / 2;\n  }\n\n  function clipAntimeridianInterpolate(from, to, direction, stream) {\n    var phi;\n    if (from == null) {\n      phi = direction * halfPi$3;\n      stream.point(-pi$4, phi);\n      stream.point(0, phi);\n      stream.point(pi$4, phi);\n      stream.point(pi$4, 0);\n      stream.point(pi$4, -phi);\n      stream.point(0, -phi);\n      stream.point(-pi$4, -phi);\n      stream.point(-pi$4, 0);\n      stream.point(-pi$4, phi);\n    } else if (abs(from[0] - to[0]) > epsilon$4) {\n      var lambda = from[0] < to[0] ? pi$4 : -pi$4;\n      phi = direction * lambda / 2;\n      stream.point(-lambda, phi);\n      stream.point(0, phi);\n      stream.point(lambda, phi);\n    } else {\n      stream.point(to[0], to[1]);\n    }\n  }\n\n  function clipCircle(radius, delta) {\n    var cr = cos$1(radius),\n        smallRadius = cr > 0,\n        notHemisphere = abs(cr) > epsilon$4; // TODO optimise for this common case\n\n    function interpolate(from, to, direction, stream) {\n      circleStream(stream, radius, delta, direction, from, to);\n    }\n\n    function visible(lambda, phi) {\n      return cos$1(lambda) * cos$1(phi) > cr;\n    }\n\n    // Takes a line and cuts into visible segments. Return values used for polygon\n    // clipping: 0 - there were intersections or the line was empty; 1 - no\n    // intersections 2 - there were intersections, and the first and last segments\n    // should be rejoined.\n    function clipLine(stream) {\n      var point0, // previous point\n          c0, // code for previous point\n          v0, // visibility of previous point\n          v00, // visibility of first point\n          clean; // no intersections\n      return {\n        lineStart: function() {\n          v00 = v0 = false;\n          clean = 1;\n        },\n        point: function(lambda, phi) {\n          var point1 = [lambda, phi],\n              point2,\n              v = visible(lambda, phi),\n              c = smallRadius\n                ? v ? 0 : code(lambda, phi)\n                : v ? code(lambda + (lambda < 0 ? pi$4 : -pi$4), phi) : 0;\n          if (!point0 && (v00 = v0 = v)) stream.lineStart();\n          // Handle degeneracies.\n          // TODO ignore if not clipping polygons.\n          if (v !== v0) {\n            point2 = intersect(point0, point1);\n            if (pointEqual(point0, point2) || pointEqual(point1, point2)) {\n              point1[0] += epsilon$4;\n              point1[1] += epsilon$4;\n              v = visible(point1[0], point1[1]);\n            }\n          }\n          if (v !== v0) {\n            clean = 0;\n            if (v) {\n              // outside going in\n              stream.lineStart();\n              point2 = intersect(point1, point0);\n              stream.point(point2[0], point2[1]);\n            } else {\n              // inside going out\n              point2 = intersect(point0, point1);\n              stream.point(point2[0], point2[1]);\n              stream.lineEnd();\n            }\n            point0 = point2;\n          } else if (notHemisphere && point0 && smallRadius ^ v) {\n            var t;\n            // If the codes for two points are different, or are both zero,\n            // and there this segment intersects with the small circle.\n            if (!(c & c0) && (t = intersect(point1, point0, true))) {\n              clean = 0;\n              if (smallRadius) {\n                stream.lineStart();\n                stream.point(t[0][0], t[0][1]);\n                stream.point(t[1][0], t[1][1]);\n                stream.lineEnd();\n              } else {\n                stream.point(t[1][0], t[1][1]);\n                stream.lineEnd();\n                stream.lineStart();\n                stream.point(t[0][0], t[0][1]);\n              }\n            }\n          }\n          if (v && (!point0 || !pointEqual(point0, point1))) {\n            stream.point(point1[0], point1[1]);\n          }\n          point0 = point1, v0 = v, c0 = c;\n        },\n        lineEnd: function() {\n          if (v0) stream.lineEnd();\n          point0 = null;\n        },\n        // Rejoin first and last segments if there were intersections and the first\n        // and last points were visible.\n        clean: function() {\n          return clean | ((v00 && v0) << 1);\n        }\n      };\n    }\n\n    // Intersects the great circle between a and b with the clip circle.\n    function intersect(a, b, two) {\n      var pa = cartesian(a),\n          pb = cartesian(b);\n\n      // We have two planes, n1.p = d1 and n2.p = d2.\n      // Find intersection line p(t) = c1 n1 + c2 n2 + t (n1 ⨯ n2).\n      var n1 = [1, 0, 0], // normal\n          n2 = cartesianCross(pa, pb),\n          n2n2 = cartesianDot(n2, n2),\n          n1n2 = n2[0], // cartesianDot(n1, n2),\n          determinant = n2n2 - n1n2 * n1n2;\n\n      // Two polar points.\n      if (!determinant) return !two && a;\n\n      var c1 =  cr * n2n2 / determinant,\n          c2 = -cr * n1n2 / determinant,\n          n1xn2 = cartesianCross(n1, n2),\n          A = cartesianScale(n1, c1),\n          B = cartesianScale(n2, c2);\n      cartesianAddInPlace(A, B);\n\n      // Solve |p(t)|^2 = 1.\n      var u = n1xn2,\n          w = cartesianDot(A, u),\n          uu = cartesianDot(u, u),\n          t2 = w * w - uu * (cartesianDot(A, A) - 1);\n\n      if (t2 < 0) return;\n\n      var t = sqrt$1(t2),\n          q = cartesianScale(u, (-w - t) / uu);\n      cartesianAddInPlace(q, A);\n      q = spherical(q);\n\n      if (!two) return q;\n\n      // Two intersection points.\n      var lambda0 = a[0],\n          lambda1 = b[0],\n          phi0 = a[1],\n          phi1 = b[1],\n          z;\n\n      if (lambda1 < lambda0) z = lambda0, lambda0 = lambda1, lambda1 = z;\n\n      var delta = lambda1 - lambda0,\n          polar = abs(delta - pi$4) < epsilon$4,\n          meridian = polar || delta < epsilon$4;\n\n      if (!polar && phi1 < phi0) z = phi0, phi0 = phi1, phi1 = z;\n\n      // Check that the first point is between a and b.\n      if (meridian\n          ? polar\n            ? phi0 + phi1 > 0 ^ q[1] < (abs(q[0] - lambda0) < epsilon$4 ? phi0 : phi1)\n            : phi0 <= q[1] && q[1] <= phi1\n          : delta > pi$4 ^ (lambda0 <= q[0] && q[0] <= lambda1)) {\n        var q1 = cartesianScale(u, (-w + t) / uu);\n        cartesianAddInPlace(q1, A);\n        return [q, spherical(q1)];\n      }\n    }\n\n    // Generates a 4-bit vector representing the location of a point relative to\n    // the small circle's bounding box.\n    function code(lambda, phi) {\n      var r = smallRadius ? radius : pi$4 - radius,\n          code = 0;\n      if (lambda < -r) code |= 1; // left\n      else if (lambda > r) code |= 2; // right\n      if (phi < -r) code |= 4; // below\n      else if (phi > r) code |= 8; // above\n      return code;\n    }\n\n    return clip(visible, clipLine, interpolate, smallRadius ? [0, -radius] : [-pi$4, radius - pi$4]);\n  }\n\n  function transform$1(prototype) {\n    return {\n      stream: transform$2(prototype)\n    };\n  }\n\n  function transform$2(prototype) {\n    function T() {}\n    var p = T.prototype = Object.create(Transform$1.prototype);\n    for (var k in prototype) p[k] = prototype[k];\n    return function(stream) {\n      var t = new T;\n      t.stream = stream;\n      return t;\n    };\n  }\n\n  function Transform$1() {}\n\n  Transform$1.prototype = {\n    point: function(x, y) { this.stream.point(x, y); },\n    sphere: function() { this.stream.sphere(); },\n    lineStart: function() { this.stream.lineStart(); },\n    lineEnd: function() { this.stream.lineEnd(); },\n    polygonStart: function() { this.stream.polygonStart(); },\n    polygonEnd: function() { this.stream.polygonEnd(); }\n  };\n\n  var maxDepth = 16;\n  var cosMinDistance = cos$1(30 * radians);\n  // cos(minimum angular distance)\n\n  function resample(project, delta2) {\n    return +delta2 ? resample$1(project, delta2) : resampleNone(project);\n  }\n\n  function resampleNone(project) {\n    return transform$2({\n      point: function(x, y) {\n        x = project(x, y);\n        this.stream.point(x[0], x[1]);\n      }\n    });\n  }\n\n  function resample$1(project, delta2) {\n\n    function resampleLineTo(x0, y0, lambda0, a0, b0, c0, x1, y1, lambda1, a1, b1, c1, depth, stream) {\n      var dx = x1 - x0,\n          dy = y1 - y0,\n          d2 = dx * dx + dy * dy;\n      if (d2 > 4 * delta2 && depth--) {\n        var a = a0 + a1,\n            b = b0 + b1,\n            c = c0 + c1,\n            m = sqrt$1(a * a + b * b + c * c),\n            phi2 = asin$1(c /= m),\n            lambda2 = abs(abs(c) - 1) < epsilon$4 || abs(lambda0 - lambda1) < epsilon$4 ? (lambda0 + lambda1) / 2 : atan2(b, a),\n            p = project(lambda2, phi2),\n            x2 = p[0],\n            y2 = p[1],\n            dx2 = x2 - x0,\n            dy2 = y2 - y0,\n            dz = dy * dx2 - dx * dy2;\n        if (dz * dz / d2 > delta2 // perpendicular projected distance\n            || abs((dx * dx2 + dy * dy2) / d2 - 0.5) > 0.3 // midpoint close to an end\n            || a0 * a1 + b0 * b1 + c0 * c1 < cosMinDistance) { // angular distance\n          resampleLineTo(x0, y0, lambda0, a0, b0, c0, x2, y2, lambda2, a /= m, b /= m, c, depth, stream);\n          stream.point(x2, y2);\n          resampleLineTo(x2, y2, lambda2, a, b, c, x1, y1, lambda1, a1, b1, c1, depth, stream);\n        }\n      }\n    }\n    return function(stream) {\n      var lambda00, x00, y00, a00, b00, c00, // first point\n          lambda0, x0, y0, a0, b0, c0; // previous point\n\n      var resampleStream = {\n        point: point,\n        lineStart: lineStart,\n        lineEnd: lineEnd,\n        polygonStart: function() { stream.polygonStart(); resampleStream.lineStart = ringStart; },\n        polygonEnd: function() { stream.polygonEnd(); resampleStream.lineStart = lineStart; }\n      };\n\n      function point(x, y) {\n        x = project(x, y);\n        stream.point(x[0], x[1]);\n      }\n\n      function lineStart() {\n        x0 = NaN;\n        resampleStream.point = linePoint;\n        stream.lineStart();\n      }\n\n      function linePoint(lambda, phi) {\n        var c = cartesian([lambda, phi]), p = project(lambda, phi);\n        resampleLineTo(x0, y0, lambda0, a0, b0, c0, x0 = p[0], y0 = p[1], lambda0 = lambda, a0 = c[0], b0 = c[1], c0 = c[2], maxDepth, stream);\n        stream.point(x0, y0);\n      }\n\n      function lineEnd() {\n        resampleStream.point = point;\n        stream.lineEnd();\n      }\n\n      function ringStart() {\n        lineStart();\n        resampleStream.point = ringPoint;\n        resampleStream.lineEnd = ringEnd;\n      }\n\n      function ringPoint(lambda, phi) {\n        linePoint(lambda00 = lambda, phi), x00 = x0, y00 = y0, a00 = a0, b00 = b0, c00 = c0;\n        resampleStream.point = linePoint;\n      }\n\n      function ringEnd() {\n        resampleLineTo(x0, y0, lambda0, a0, b0, c0, x00, y00, lambda00, a00, b00, c00, maxDepth, stream);\n        resampleStream.lineEnd = lineEnd;\n        lineEnd();\n      }\n\n      return resampleStream;\n    };\n  }\n\n  var transformRadians = transform$2({\n    point: function(x, y) {\n      this.stream.point(x * radians, y * radians);\n    }\n  });\n\n  function projection(project) {\n    return projectionMutator(function() { return project; })();\n  }\n\n  function projectionMutator(projectAt) {\n    var project,\n        k = 150, // scale\n        x = 480, y = 250, // translate\n        dx, dy, lambda = 0, phi = 0, // center\n        deltaLambda = 0, deltaPhi = 0, deltaGamma = 0, rotate, projectRotate, // rotate\n        theta = null, preclip = clipAntimeridian, // clip angle\n        x0 = null, y0, x1, y1, postclip = identity$7, // clip extent\n        delta2 = 0.5, projectResample = resample(projectTransform, delta2), // precision\n        cache,\n        cacheStream;\n\n    function projection(point) {\n      point = projectRotate(point[0] * radians, point[1] * radians);\n      return [point[0] * k + dx, dy - point[1] * k];\n    }\n\n    function invert(point) {\n      point = projectRotate.invert((point[0] - dx) / k, (dy - point[1]) / k);\n      return point && [point[0] * degrees$1, point[1] * degrees$1];\n    }\n\n    function projectTransform(x, y) {\n      return x = project(x, y), [x[0] * k + dx, dy - x[1] * k];\n    }\n\n    projection.stream = function(stream) {\n      return cache && cacheStream === stream ? cache : cache = transformRadians(preclip(rotate, projectResample(postclip(cacheStream = stream))));\n    };\n\n    projection.clipAngle = function(_) {\n      return arguments.length ? (preclip = +_ ? clipCircle(theta = _ * radians, 6 * radians) : (theta = null, clipAntimeridian), reset()) : theta * degrees$1;\n    };\n\n    projection.clipExtent = function(_) {\n      return arguments.length ? (postclip = _ == null ? (x0 = y0 = x1 = y1 = null, identity$7) : clipExtent(x0 = +_[0][0], y0 = +_[0][1], x1 = +_[1][0], y1 = +_[1][1]), reset()) : x0 == null ? null : [[x0, y0], [x1, y1]];\n    };\n\n    projection.scale = function(_) {\n      return arguments.length ? (k = +_, recenter()) : k;\n    };\n\n    projection.translate = function(_) {\n      return arguments.length ? (x = +_[0], y = +_[1], recenter()) : [x, y];\n    };\n\n    projection.center = function(_) {\n      return arguments.length ? (lambda = _[0] % 360 * radians, phi = _[1] % 360 * radians, recenter()) : [lambda * degrees$1, phi * degrees$1];\n    };\n\n    projection.rotate = function(_) {\n      return arguments.length ? (deltaLambda = _[0] % 360 * radians, deltaPhi = _[1] % 360 * radians, deltaGamma = _.length > 2 ? _[2] % 360 * radians : 0, recenter()) : [deltaLambda * degrees$1, deltaPhi * degrees$1, deltaGamma * degrees$1];\n    };\n\n    projection.precision = function(_) {\n      return arguments.length ? (projectResample = resample(projectTransform, delta2 = _ * _), reset()) : sqrt$1(delta2);\n    };\n\n    function recenter() {\n      projectRotate = compose(rotate = rotateRadians(deltaLambda, deltaPhi, deltaGamma), project);\n      var center = project(lambda, phi);\n      dx = x - center[0] * k;\n      dy = y + center[1] * k;\n      return reset();\n    }\n\n    function reset() {\n      cache = cacheStream = null;\n      return projection;\n    }\n\n    return function() {\n      project = projectAt.apply(this, arguments);\n      projection.invert = project.invert && invert;\n      return recenter();\n    };\n  }\n\n  function conicProjection(projectAt) {\n    var phi0 = 0,\n        phi1 = pi$4 / 3,\n        m = projectionMutator(projectAt),\n        p = m(phi0, phi1);\n\n    p.parallels = function(_) {\n      return arguments.length ? m(phi0 = _[0] * radians, phi1 = _[1] * radians) : [phi0 * degrees$1, phi1 * degrees$1];\n    };\n\n    return p;\n  }\n\n  function conicEqualAreaRaw(y0, y1) {\n    var sy0 = sin$1(y0),\n        n = (sy0 + sin$1(y1)) / 2,\n        c = 1 + sy0 * (2 * n - sy0),\n        r0 = sqrt$1(c) / n;\n\n    function project(x, y) {\n      var r = sqrt$1(c - 2 * n * sin$1(y)) / n;\n      return [r * sin$1(x *= n), r0 - r * cos$1(x)];\n    }\n\n    project.invert = function(x, y) {\n      var r0y = r0 - y;\n      return [atan2(x, r0y) / n, asin$1((c - (x * x + r0y * r0y) * n * n) / (2 * n))];\n    };\n\n    return project;\n  }\n\n  function conicEqualArea() {\n    return conicProjection(conicEqualAreaRaw)\n        .scale(151)\n        .translate([480, 347]);\n  }\n\n  function albers() {\n    return conicEqualArea()\n        .parallels([29.5, 45.5])\n        .scale(1070)\n        .translate([480, 250])\n        .rotate([96, 0])\n        .center([-0.6, 38.7]);\n  }\n\n  // The projections must have mutually exclusive clip regions on the sphere,\n  // as this will avoid emitting interleaving lines and polygons.\n  function multiplex(streams) {\n    var n = streams.length;\n    return {\n      point: function(x, y) { var i = -1; while (++i < n) streams[i].point(x, y); },\n      sphere: function() { var i = -1; while (++i < n) streams[i].sphere(); },\n      lineStart: function() { var i = -1; while (++i < n) streams[i].lineStart(); },\n      lineEnd: function() { var i = -1; while (++i < n) streams[i].lineEnd(); },\n      polygonStart: function() { var i = -1; while (++i < n) streams[i].polygonStart(); },\n      polygonEnd: function() { var i = -1; while (++i < n) streams[i].polygonEnd(); }\n    };\n  }\n\n  // A composite projection for the United States, configured by default for\n  // 960×500. Also works quite well at 960×600 with scale 1285. The set of\n  // standard parallels for each region comes from USGS, which is published here:\n  // http://egsc.usgs.gov/isb/pubs/MapProjections/projections.html#albers\n  function albersUsa() {\n    var cache,\n        cacheStream,\n        lower48 = albers(), lower48Point,\n        alaska = conicEqualArea().rotate([154, 0]).center([-2, 58.5]).parallels([55, 65]), alaskaPoint, // EPSG:3338\n        hawaii = conicEqualArea().rotate([157, 0]).center([-3, 19.9]).parallels([8, 18]), hawaiiPoint, // ESRI:102007\n        point, pointStream = {point: function(x, y) { point = [x, y]; }};\n\n    function albersUsa(coordinates) {\n      var x = coordinates[0], y = coordinates[1];\n      return point = null,\n          (lower48Point.point(x, y), point)\n          || (alaskaPoint.point(x, y), point)\n          || (hawaiiPoint.point(x, y), point);\n    }\n\n    albersUsa.invert = function(coordinates) {\n      var k = lower48.scale(),\n          t = lower48.translate(),\n          x = (coordinates[0] - t[0]) / k,\n          y = (coordinates[1] - t[1]) / k;\n      return (y >= 0.120 && y < 0.234 && x >= -0.425 && x < -0.214 ? alaska\n          : y >= 0.166 && y < 0.234 && x >= -0.214 && x < -0.115 ? hawaii\n          : lower48).invert(coordinates);\n    };\n\n    albersUsa.stream = function(stream) {\n      return cache && cacheStream === stream ? cache : cache = multiplex([lower48.stream(cacheStream = stream), alaska.stream(stream), hawaii.stream(stream)]);\n    };\n\n    albersUsa.precision = function(_) {\n      if (!arguments.length) return lower48.precision();\n      lower48.precision(_), alaska.precision(_), hawaii.precision(_);\n      return albersUsa;\n    };\n\n    albersUsa.scale = function(_) {\n      if (!arguments.length) return lower48.scale();\n      lower48.scale(_), alaska.scale(_ * 0.35), hawaii.scale(_);\n      return albersUsa.translate(lower48.translate());\n    };\n\n    albersUsa.translate = function(_) {\n      if (!arguments.length) return lower48.translate();\n      var k = lower48.scale(), x = +_[0], y = +_[1];\n\n      lower48Point = lower48\n          .translate(_)\n          .clipExtent([[x - 0.455 * k, y - 0.238 * k], [x + 0.455 * k, y + 0.238 * k]])\n          .stream(pointStream);\n\n      alaskaPoint = alaska\n          .translate([x - 0.307 * k, y + 0.201 * k])\n          .clipExtent([[x - 0.425 * k + epsilon$4, y + 0.120 * k + epsilon$4], [x - 0.214 * k - epsilon$4, y + 0.234 * k - epsilon$4]])\n          .stream(pointStream);\n\n      hawaiiPoint = hawaii\n          .translate([x - 0.205 * k, y + 0.212 * k])\n          .clipExtent([[x - 0.214 * k + epsilon$4, y + 0.166 * k + epsilon$4], [x - 0.115 * k - epsilon$4, y + 0.234 * k - epsilon$4]])\n          .stream(pointStream);\n\n      return albersUsa;\n    };\n\n    return albersUsa.scale(1070);\n  }\n\n  function azimuthalRaw(scale) {\n    return function(x, y) {\n      var cx = cos$1(x),\n          cy = cos$1(y),\n          k = scale(cx * cy);\n      return [\n        k * cy * sin$1(x),\n        k * sin$1(y)\n      ];\n    }\n  }\n\n  function azimuthalInvert(angle) {\n    return function(x, y) {\n      var z = sqrt$1(x * x + y * y),\n          c = angle(z),\n          sc = sin$1(c),\n          cc = cos$1(c);\n      return [\n        atan2(x * sc, z * cc),\n        asin$1(z && y * sc / z)\n      ];\n    }\n  }\n\n  var azimuthalEqualAreaRaw = azimuthalRaw(function(cxcy) {\n    return sqrt$1(2 / (1 + cxcy));\n  });\n\n  azimuthalEqualAreaRaw.invert = azimuthalInvert(function(z) {\n    return 2 * asin$1(z / 2);\n  });\n\n  function azimuthalEqualArea() {\n    return projection(azimuthalEqualAreaRaw)\n        .scale(120)\n        .clipAngle(180 - 1e-3);\n  }\n\n  var azimuthalEquidistantRaw = azimuthalRaw(function(c) {\n    return (c = acos(c)) && c / sin$1(c);\n  });\n\n  azimuthalEquidistantRaw.invert = azimuthalInvert(function(z) {\n    return z;\n  });\n\n  function azimuthalEquidistant() {\n    return projection(azimuthalEquidistantRaw)\n        .scale(480 / tau$4)\n        .clipAngle(180 - 1e-3);\n  }\n\n  function mercatorRaw(lambda, phi) {\n    return [lambda, log$1(tan((halfPi$3 + phi) / 2))];\n  }\n\n  mercatorRaw.invert = function(x, y) {\n    return [x, 2 * atan(exp(y)) - halfPi$3];\n  };\n\n  function mercator() {\n    return mercatorProjection(mercatorRaw);\n  }\n\n  function mercatorProjection(project) {\n    var m = projection(project),\n        scale = m.scale,\n        translate = m.translate,\n        clipExtent = m.clipExtent,\n        clipAuto;\n\n    m.scale = function(_) {\n      return arguments.length ? (scale(_), clipAuto && m.clipExtent(null), m) : scale();\n    };\n\n    m.translate = function(_) {\n      return arguments.length ? (translate(_), clipAuto && m.clipExtent(null), m) : translate();\n    };\n\n    m.clipExtent = function(_) {\n      if (!arguments.length) return clipAuto ? null : clipExtent();\n      if (clipAuto = _ == null) {\n        var k = pi$4 * scale(), t = translate();\n        _ = [[t[0] - k, t[1] - k], [t[0] + k, t[1] + k]];\n      }\n      clipExtent(_);\n      return m;\n    };\n\n    return m.clipExtent(null).scale(961 / tau$4);\n  }\n\n  function tany(y) {\n    return tan((halfPi$3 + y) / 2);\n  }\n\n  function conicConformalRaw(y0, y1) {\n    var cy0 = cos$1(y0),\n        n = y0 === y1 ? sin$1(y0) : log$1(cy0 / cos$1(y1)) / log$1(tany(y1) / tany(y0)),\n        f = cy0 * pow$1(tany(y0), n) / n;\n\n    if (!n) return mercatorRaw;\n\n    function project(x, y) {\n      if (f > 0) { if (y < -halfPi$3 + epsilon$4) y = -halfPi$3 + epsilon$4; }\n      else { if (y > halfPi$3 - epsilon$4) y = halfPi$3 - epsilon$4; }\n      var r = f / pow$1(tany(y), n);\n      return [r * sin$1(n * x), f - r * cos$1(n * x)];\n    }\n\n    project.invert = function(x, y) {\n      var fy = f - y, r = sign$1(n) * sqrt$1(x * x + fy * fy);\n      return [atan2(x, fy) / n, 2 * atan(pow$1(f / r, 1 / n)) - halfPi$3];\n    };\n\n    return project;\n  }\n\n  function conicConformal() {\n    return conicProjection(conicConformalRaw);\n  }\n\n  function equirectangularRaw(lambda, phi) {\n    return [lambda, phi];\n  }\n\n  equirectangularRaw.invert = equirectangularRaw;\n\n  function equirectangular() {\n    return projection(equirectangularRaw).scale(480 / pi$4);\n  }\n\n  function conicEquidistantRaw(y0, y1) {\n    var cy0 = cos$1(y0),\n        n = y0 === y1 ? sin$1(y0) : (cy0 - cos$1(y1)) / (y1 - y0),\n        g = cy0 / n + y0;\n\n    if (abs(n) < epsilon$4) return equirectangularRaw;\n\n    function project(x, y) {\n      var gy = g - y, nx = n * x;\n      return [gy * sin$1(nx), g - gy * cos$1(nx)];\n    }\n\n    project.invert = function(x, y) {\n      var gy = g - y;\n      return [atan2(x, gy) / n, g - sign$1(n) * sqrt$1(x * x + gy * gy)];\n    };\n\n    return project;\n  }\n\n  function conicEquidistant() {\n    return conicProjection(conicEquidistantRaw)\n        .scale(128)\n        .translate([480, 280]);\n  }\n\n  function gnomonicRaw(x, y) {\n    var cy = cos$1(y), k = cos$1(x) * cy;\n    return [cy * sin$1(x) / k, sin$1(y) / k];\n  }\n\n  gnomonicRaw.invert = azimuthalInvert(atan);\n\n  function gnomonic() {\n    return projection(gnomonicRaw)\n        .scale(139)\n        .clipAngle(60);\n  }\n\n  function orthographicRaw(x, y) {\n    return [cos$1(y) * sin$1(x), sin$1(y)];\n  }\n\n  orthographicRaw.invert = azimuthalInvert(asin$1);\n\n  function orthographic() {\n    return projection(orthographicRaw)\n        .scale(240)\n        .clipAngle(90 + epsilon$4);\n  }\n\n  function stereographicRaw(x, y) {\n    var cy = cos$1(y), k = 1 + cos$1(x) * cy;\n    return [cy * sin$1(x) / k, sin$1(y) / k];\n  }\n\n  stereographicRaw.invert = azimuthalInvert(function(z) {\n    return 2 + atan(z);\n  });\n\n  function stereographic() {\n    return projection(stereographicRaw)\n        .scale(240)\n        .clipAngle(142);\n  }\n\n  function transverseMercatorRaw(lambda, phi) {\n    return [log$1(tan((halfPi$3 + phi) / 2)), -lambda];\n  }\n\n  transverseMercatorRaw.invert = function(x, y) {\n    return [-y, 2 * atan(exp(x)) - halfPi$3];\n  };\n\n  function transverseMercator() {\n    var m = mercatorProjection(transverseMercatorRaw),\n        center = m.center,\n        rotate = m.rotate;\n\n    m.center = function(_) {\n      return arguments.length ? center([-_[1], _[0]]) : (_ = center(), [_[1], -_[0]]);\n    };\n\n    m.rotate = function(_) {\n      return arguments.length ? rotate([_[0], _[1], _.length > 2 ? _[2] + 90 : 90]) : (_ = rotate(), [_[0], _[1], _[2] - 90]);\n    };\n\n    return rotate([0, 0, 90]);\n  }\n\n  exports.version = version;\n  exports.bisect = bisectRight;\n  exports.bisectRight = bisectRight;\n  exports.bisectLeft = bisectLeft;\n  exports.ascending = ascending;\n  exports.bisector = bisector;\n  exports.descending = descending;\n  exports.deviation = deviation;\n  exports.extent = extent;\n  exports.histogram = histogram;\n  exports.thresholdFreedmanDiaconis = freedmanDiaconis;\n  exports.thresholdScott = scott;\n  exports.thresholdSturges = sturges;\n  exports.max = max;\n  exports.mean = mean;\n  exports.median = median;\n  exports.merge = merge;\n  exports.min = min;\n  exports.pairs = pairs;\n  exports.permute = permute;\n  exports.quantile = threshold;\n  exports.range = range;\n  exports.scan = scan;\n  exports.shuffle = shuffle;\n  exports.sum = sum;\n  exports.ticks = ticks;\n  exports.tickStep = tickStep;\n  exports.transpose = transpose;\n  exports.variance = variance;\n  exports.zip = zip;\n  exports.entries = entries;\n  exports.keys = keys;\n  exports.values = values;\n  exports.map = map$1;\n  exports.set = set;\n  exports.nest = nest;\n  exports.randomUniform = uniform;\n  exports.randomNormal = normal;\n  exports.randomLogNormal = logNormal;\n  exports.randomBates = bates;\n  exports.randomIrwinHall = irwinHall;\n  exports.randomExponential = exponential;\n  exports.easeLinear = linear;\n  exports.easeQuad = quadInOut;\n  exports.easeQuadIn = quadIn;\n  exports.easeQuadOut = quadOut;\n  exports.easeQuadInOut = quadInOut;\n  exports.easeCubic = easeCubicInOut;\n  exports.easeCubicIn = cubicIn;\n  exports.easeCubicOut = cubicOut;\n  exports.easeCubicInOut = easeCubicInOut;\n  exports.easePoly = polyInOut;\n  exports.easePolyIn = polyIn;\n  exports.easePolyOut = polyOut;\n  exports.easePolyInOut = polyInOut;\n  exports.easeSin = sinInOut;\n  exports.easeSinIn = sinIn;\n  exports.easeSinOut = sinOut;\n  exports.easeSinInOut = sinInOut;\n  exports.easeExp = expInOut;\n  exports.easeExpIn = expIn;\n  exports.easeExpOut = expOut;\n  exports.easeExpInOut = expInOut;\n  exports.easeCircle = circleInOut;\n  exports.easeCircleIn = circleIn;\n  exports.easeCircleOut = circleOut;\n  exports.easeCircleInOut = circleInOut;\n  exports.easeBounce = bounceOut;\n  exports.easeBounceIn = bounceIn;\n  exports.easeBounceOut = bounceOut;\n  exports.easeBounceInOut = bounceInOut;\n  exports.easeBack = backInOut;\n  exports.easeBackIn = backIn;\n  exports.easeBackOut = backOut;\n  exports.easeBackInOut = backInOut;\n  exports.easeElastic = elasticOut;\n  exports.easeElasticIn = elasticIn;\n  exports.easeElasticOut = elasticOut;\n  exports.easeElasticInOut = elasticInOut;\n  exports.polygonArea = area;\n  exports.polygonCentroid = centroid;\n  exports.polygonHull = hull;\n  exports.polygonContains = contains;\n  exports.polygonLength = length$1;\n  exports.path = path;\n  exports.quadtree = quadtree;\n  exports.queue = queue;\n  exports.arc = arc;\n  exports.area = area$1;\n  exports.line = line;\n  exports.pie = pie;\n  exports.radialArea = radialArea;\n  exports.radialLine = radialLine$1;\n  exports.symbol = symbol;\n  exports.symbols = symbols;\n  exports.symbolCircle = circle;\n  exports.symbolCross = cross$1;\n  exports.symbolDiamond = diamond;\n  exports.symbolSquare = square;\n  exports.symbolStar = star;\n  exports.symbolTriangle = triangle;\n  exports.symbolWye = wye;\n  exports.curveBasisClosed = basisClosed;\n  exports.curveBasisOpen = basisOpen;\n  exports.curveBasis = basis;\n  exports.curveBundle = bundle;\n  exports.curveCardinalClosed = cardinalClosed;\n  exports.curveCardinalOpen = cardinalOpen;\n  exports.curveCardinal = cardinal;\n  exports.curveCatmullRomClosed = catmullRomClosed;\n  exports.curveCatmullRomOpen = catmullRomOpen;\n  exports.curveCatmullRom = catmullRom;\n  exports.curveLinearClosed = linearClosed;\n  exports.curveLinear = curveLinear;\n  exports.curveMonotoneX = monotoneX;\n  exports.curveMonotoneY = monotoneY;\n  exports.curveNatural = natural;\n  exports.curveStep = step;\n  exports.curveStepAfter = stepAfter;\n  exports.curveStepBefore = stepBefore;\n  exports.stack = stack;\n  exports.stackOffsetExpand = expand;\n  exports.stackOffsetNone = none;\n  exports.stackOffsetSilhouette = silhouette;\n  exports.stackOffsetWiggle = wiggle;\n  exports.stackOrderAscending = ascending$1;\n  exports.stackOrderDescending = descending$2;\n  exports.stackOrderInsideOut = insideOut;\n  exports.stackOrderNone = none$1;\n  exports.stackOrderReverse = reverse;\n  exports.color = color;\n  exports.rgb = colorRgb;\n  exports.hsl = colorHsl;\n  exports.lab = lab;\n  exports.hcl = colorHcl;\n  exports.cubehelix = cubehelix;\n  exports.interpolate = interpolate;\n  exports.interpolateArray = array$1;\n  exports.interpolateDate = date;\n  exports.interpolateNumber = interpolateNumber;\n  exports.interpolateObject = object;\n  exports.interpolateRound = interpolateRound;\n  exports.interpolateString = interpolateString;\n  exports.interpolateTransformCss = interpolateTransform$1;\n  exports.interpolateTransformSvg = interpolateTransform$2;\n  exports.interpolateZoom = interpolateZoom;\n  exports.interpolateRgb = interpolateRgb;\n  exports.interpolateRgbBasis = rgbBasis;\n  exports.interpolateRgbBasisClosed = rgbBasisClosed;\n  exports.interpolateHsl = hsl$1;\n  exports.interpolateHslLong = hslLong;\n  exports.interpolateLab = lab$1;\n  exports.interpolateHcl = hcl$1;\n  exports.interpolateHclLong = hclLong;\n  exports.interpolateCubehelix = cubehelix$2;\n  exports.interpolateCubehelixLong = interpolateCubehelixLong;\n  exports.interpolateBasis = basis$2;\n  exports.interpolateBasisClosed = basisClosed$1;\n  exports.quantize = quantize;\n  exports.dispatch = dispatch;\n  exports.dsvFormat = dsv;\n  exports.csvParse = csvParse;\n  exports.csvParseRows = csvParseRows;\n  exports.csvFormat = csvFormat;\n  exports.csvFormatRows = csvFormatRows;\n  exports.tsvParse = tsvParse;\n  exports.tsvParseRows = tsvParseRows;\n  exports.tsvFormat = tsvFormat;\n  exports.tsvFormatRows = tsvFormatRows;\n  exports.request = request;\n  exports.html = html;\n  exports.json = json;\n  exports.text = text;\n  exports.xml = xml;\n  exports.csv = csv$1;\n  exports.tsv = tsv$1;\n  exports.now = now;\n  exports.timer = timer;\n  exports.timerFlush = timerFlush;\n  exports.timeout = timeout$1;\n  exports.interval = interval$1;\n  exports.timeInterval = newInterval;\n  exports.timeMillisecond = millisecond;\n  exports.timeMilliseconds = milliseconds;\n  exports.timeSecond = second;\n  exports.timeSeconds = seconds;\n  exports.timeMinute = minute;\n  exports.timeMinutes = minutes;\n  exports.timeHour = hour;\n  exports.timeHours = hours;\n  exports.timeDay = day;\n  exports.timeDays = days;\n  exports.timeWeek = timeWeek;\n  exports.timeWeeks = sundays;\n  exports.timeSunday = timeWeek;\n  exports.timeSundays = sundays;\n  exports.timeMonday = timeMonday;\n  exports.timeMondays = mondays;\n  exports.timeTuesday = tuesday;\n  exports.timeTuesdays = tuesdays;\n  exports.timeWednesday = wednesday;\n  exports.timeWednesdays = wednesdays;\n  exports.timeThursday = thursday;\n  exports.timeThursdays = thursdays;\n  exports.timeFriday = friday;\n  exports.timeFridays = fridays;\n  exports.timeSaturday = saturday;\n  exports.timeSaturdays = saturdays;\n  exports.timeMonth = month;\n  exports.timeMonths = months;\n  exports.timeYear = year;\n  exports.timeYears = years;\n  exports.utcMillisecond = millisecond;\n  exports.utcMilliseconds = milliseconds;\n  exports.utcSecond = second;\n  exports.utcSeconds = seconds;\n  exports.utcMinute = utcMinute;\n  exports.utcMinutes = utcMinutes;\n  exports.utcHour = utcHour;\n  exports.utcHours = utcHours;\n  exports.utcDay = utcDay;\n  exports.utcDays = utcDays;\n  exports.utcWeek = utcWeek;\n  exports.utcWeeks = utcSundays;\n  exports.utcSunday = utcWeek;\n  exports.utcSundays = utcSundays;\n  exports.utcMonday = utcMonday;\n  exports.utcMondays = utcMondays;\n  exports.utcTuesday = utcTuesday;\n  exports.utcTuesdays = utcTuesdays;\n  exports.utcWednesday = utcWednesday;\n  exports.utcWednesdays = utcWednesdays;\n  exports.utcThursday = utcThursday;\n  exports.utcThursdays = utcThursdays;\n  exports.utcFriday = utcFriday;\n  exports.utcFridays = utcFridays;\n  exports.utcSaturday = utcSaturday;\n  exports.utcSaturdays = utcSaturdays;\n  exports.utcMonth = utcMonth;\n  exports.utcMonths = utcMonths;\n  exports.utcYear = utcYear;\n  exports.utcYears = utcYears;\n  exports.formatLocale = formatLocale;\n  exports.formatDefaultLocale = defaultLocale;\n  exports.formatSpecifier = formatSpecifier;\n  exports.precisionFixed = precisionFixed;\n  exports.precisionPrefix = precisionPrefix;\n  exports.precisionRound = precisionRound;\n  exports.isoFormat = formatIso;\n  exports.isoParse = parseIso;\n  exports.timeFormatLocale = formatLocale$1;\n  exports.timeFormatDefaultLocale = defaultLocale$1;\n  exports.scaleBand = band;\n  exports.scalePoint = point$4;\n  exports.scaleIdentity = identity$4;\n  exports.scaleLinear = linear$2;\n  exports.scaleLog = log;\n  exports.scaleOrdinal = ordinal;\n  exports.scaleImplicit = implicit;\n  exports.scalePow = pow;\n  exports.scaleSqrt = sqrt;\n  exports.scaleQuantile = quantile;\n  exports.scaleQuantize = quantize$1;\n  exports.scaleThreshold = threshold$1;\n  exports.scaleTime = time;\n  exports.scaleUtc = utcTime;\n  exports.schemeCategory10 = category10;\n  exports.schemeCategory20b = category20b;\n  exports.schemeCategory20c = category20c;\n  exports.schemeCategory20 = category20;\n  exports.scaleSequential = sequential;\n  exports.interpolateCubehelixDefault = cubehelix$3;\n  exports.interpolateRainbow = rainbow$1;\n  exports.interpolateWarm = warm;\n  exports.interpolateCool = cool;\n  exports.interpolateViridis = viridis;\n  exports.interpolateMagma = magma;\n  exports.interpolateInferno = inferno;\n  exports.interpolatePlasma = plasma;\n  exports.creator = creator;\n  exports.customEvent = customEvent;\n  exports.local = local;\n  exports.matcher = matcher$1;\n  exports.mouse = mouse;\n  exports.namespace = namespace;\n  exports.namespaces = namespaces;\n  exports.select = select;\n  exports.selectAll = selectAll;\n  exports.selection = selection;\n  exports.selector = selector;\n  exports.selectorAll = selectorAll;\n  exports.touch = touch;\n  exports.touches = touches;\n  exports.window = window;\n  exports.active = active;\n  exports.interrupt = interrupt;\n  exports.transition = transition;\n  exports.axisTop = axisTop;\n  exports.axisRight = axisRight;\n  exports.axisBottom = axisBottom;\n  exports.axisLeft = axisLeft;\n  exports.cluster = cluster;\n  exports.hierarchy = hierarchy;\n  exports.pack = index;\n  exports.packSiblings = siblings;\n  exports.packEnclose = enclose;\n  exports.partition = partition;\n  exports.stratify = stratify;\n  exports.tree = tree;\n  exports.treemap = index$1;\n  exports.treemapBinary = binary;\n  exports.treemapDice = treemapDice;\n  exports.treemapSlice = treemapSlice;\n  exports.treemapSliceDice = sliceDice;\n  exports.treemapSquarify = squarify;\n  exports.treemapResquarify = resquarify;\n  exports.forceCenter = center$1;\n  exports.forceCollide = collide;\n  exports.forceLink = link;\n  exports.forceManyBody = manyBody;\n  exports.forceSimulation = simulation;\n  exports.forceX = x$3;\n  exports.forceY = y$3;\n  exports.drag = drag;\n  exports.dragDisable = dragDisable;\n  exports.dragEnable = dragEnable;\n  exports.voronoi = voronoi;\n  exports.zoom = zoom;\n  exports.zoomIdentity = identity$6;\n  exports.zoomTransform = transform;\n  exports.brush = brush;\n  exports.brushX = brushX;\n  exports.brushY = brushY;\n  exports.brushSelection = brushSelection;\n  exports.chord = chord;\n  exports.ribbon = ribbon;\n  exports.geoAlbers = albers;\n  exports.geoAlbersUsa = albersUsa;\n  exports.geoArea = area$2;\n  exports.geoAzimuthalEqualArea = azimuthalEqualArea;\n  exports.geoAzimuthalEqualAreaRaw = azimuthalEqualAreaRaw;\n  exports.geoAzimuthalEquidistant = azimuthalEquidistant;\n  exports.geoAzimuthalEquidistantRaw = azimuthalEquidistantRaw;\n  exports.geoBounds = bounds;\n  exports.geoCentroid = centroid$1;\n  exports.geoCircle = circle$1;\n  exports.geoClipExtent = extent$1;\n  exports.geoConicConformal = conicConformal;\n  exports.geoConicConformalRaw = conicConformalRaw;\n  exports.geoConicEqualArea = conicEqualArea;\n  exports.geoConicEqualAreaRaw = conicEqualAreaRaw;\n  exports.geoConicEquidistant = conicEquidistant;\n  exports.geoConicEquidistantRaw = conicEquidistantRaw;\n  exports.geoDistance = distance;\n  exports.geoEquirectangular = equirectangular;\n  exports.geoEquirectangularRaw = equirectangularRaw;\n  exports.geoGnomonic = gnomonic;\n  exports.geoGnomonicRaw = gnomonicRaw;\n  exports.geoGraticule = graticule;\n  exports.geoInterpolate = interpolate$2;\n  exports.geoLength = length$2;\n  exports.geoMercator = mercator;\n  exports.geoMercatorRaw = mercatorRaw;\n  exports.geoOrthographic = orthographic;\n  exports.geoOrthographicRaw = orthographicRaw;\n  exports.geoPath = index$3;\n  exports.geoProjection = projection;\n  exports.geoProjectionMutator = projectionMutator;\n  exports.geoRotation = rotation;\n  exports.geoStereographic = stereographic;\n  exports.geoStereographicRaw = stereographicRaw;\n  exports.geoStream = stream;\n  exports.geoTransform = transform$1;\n  exports.geoTransverseMercator = transverseMercator;\n  exports.geoTransverseMercatorRaw = transverseMercatorRaw;\n\n  Object.defineProperty(exports, '__esModule', { value: true });\n\n}));"
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactDom = __webpack_require__(44);
+	var _reactDom = __webpack_require__(46);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _reactRedux = __webpack_require__(174);
+	var _reactRedux = __webpack_require__(176);
 
-	var _reactRouter = __webpack_require__(200);
+	var _reactRouter = __webpack_require__(202);
 
-	var _reactTapEventPlugin = __webpack_require__(262);
+	var _reactTapEventPlugin = __webpack_require__(264);
 
 	var _reactTapEventPlugin2 = _interopRequireDefault(_reactTapEventPlugin);
 
-	var _app = __webpack_require__(268);
+	var _app = __webpack_require__(270);
 
 	var _app2 = _interopRequireDefault(_app);
 
-	var _stores = __webpack_require__(285);
+	var _stores = __webpack_require__(288);
 
 	var _stores2 = _interopRequireDefault(_stores);
 
-	var _styles = __webpack_require__(338);
+	var _styles = __webpack_require__(341);
 
 	var _styles2 = _interopRequireDefault(_styles);
 
@@ -174,16 +187,16 @@
 	};
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(8);
+	module.exports = __webpack_require__(10);
 
 
 /***/ },
-/* 8 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -199,19 +212,19 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var ReactChildren = __webpack_require__(11);
-	var ReactComponent = __webpack_require__(22);
-	var ReactClass = __webpack_require__(33);
-	var ReactDOMFactories = __webpack_require__(38);
-	var ReactElement = __webpack_require__(14);
-	var ReactElementValidator = __webpack_require__(39);
-	var ReactPropTypes = __webpack_require__(41);
-	var ReactVersion = __webpack_require__(42);
+	var ReactChildren = __webpack_require__(13);
+	var ReactComponent = __webpack_require__(24);
+	var ReactClass = __webpack_require__(35);
+	var ReactDOMFactories = __webpack_require__(40);
+	var ReactElement = __webpack_require__(16);
+	var ReactElementValidator = __webpack_require__(41);
+	var ReactPropTypes = __webpack_require__(43);
+	var ReactVersion = __webpack_require__(44);
 
-	var onlyChild = __webpack_require__(43);
-	var warning = __webpack_require__(16);
+	var onlyChild = __webpack_require__(45);
+	var warning = __webpack_require__(18);
 
 	var createElement = ReactElement.createElement;
 	var createFactory = ReactElement.createFactory;
@@ -273,10 +286,10 @@
 	};
 
 	module.exports = React;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 9 */
+/* 11 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
@@ -401,7 +414,7 @@
 
 
 /***/ },
-/* 10 */
+/* 12 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -490,7 +503,7 @@
 
 
 /***/ },
-/* 11 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -506,11 +519,11 @@
 
 	'use strict';
 
-	var PooledClass = __webpack_require__(12);
-	var ReactElement = __webpack_require__(14);
+	var PooledClass = __webpack_require__(14);
+	var ReactElement = __webpack_require__(16);
 
-	var emptyFunction = __webpack_require__(17);
-	var traverseAllChildren = __webpack_require__(19);
+	var emptyFunction = __webpack_require__(19);
+	var traverseAllChildren = __webpack_require__(21);
 
 	var twoArgumentPooler = PooledClass.twoArgumentPooler;
 	var fourArgumentPooler = PooledClass.fourArgumentPooler;
@@ -686,7 +699,7 @@
 	module.exports = ReactChildren;
 
 /***/ },
-/* 12 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -702,7 +715,7 @@
 
 	'use strict';
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * Static poolers. Several custom versions for each potential number of
@@ -808,10 +821,10 @@
 	};
 
 	module.exports = PooledClass;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 13 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -863,10 +876,10 @@
 	}
 
 	module.exports = invariant;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -882,12 +895,12 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var ReactCurrentOwner = __webpack_require__(15);
+	var ReactCurrentOwner = __webpack_require__(17);
 
-	var warning = __webpack_require__(16);
-	var canDefineProperty = __webpack_require__(18);
+	var warning = __webpack_require__(18);
+	var canDefineProperty = __webpack_require__(20);
 
 	// The Symbol used to tag the ReactElement type. If there is no native Symbol
 	// nor polyfill, then a plain number is used for performance.
@@ -1182,10 +1195,10 @@
 	};
 
 	module.exports = ReactElement;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports) {
 
 	/**
@@ -1221,7 +1234,7 @@
 	module.exports = ReactCurrentOwner;
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -1236,7 +1249,7 @@
 
 	'use strict';
 
-	var emptyFunction = __webpack_require__(17);
+	var emptyFunction = __webpack_require__(19);
 
 	/**
 	 * Similar to invariant but only logs a warning if the condition is not met.
@@ -1280,10 +1293,10 @@
 	}
 
 	module.exports = warning;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1326,7 +1339,7 @@
 	module.exports = emptyFunction;
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -1353,10 +1366,10 @@
 	}
 
 	module.exports = canDefineProperty;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -1372,13 +1385,13 @@
 
 	'use strict';
 
-	var ReactCurrentOwner = __webpack_require__(15);
-	var ReactElement = __webpack_require__(14);
+	var ReactCurrentOwner = __webpack_require__(17);
+	var ReactElement = __webpack_require__(16);
 
-	var getIteratorFn = __webpack_require__(20);
-	var invariant = __webpack_require__(13);
-	var KeyEscapeUtils = __webpack_require__(21);
-	var warning = __webpack_require__(16);
+	var getIteratorFn = __webpack_require__(22);
+	var invariant = __webpack_require__(15);
+	var KeyEscapeUtils = __webpack_require__(23);
+	var warning = __webpack_require__(18);
 
 	var SEPARATOR = '.';
 	var SUBSEPARATOR = ':';
@@ -1517,10 +1530,10 @@
 	}
 
 	module.exports = traverseAllChildren;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports) {
 
 	/**
@@ -1565,7 +1578,7 @@
 	module.exports = getIteratorFn;
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports) {
 
 	/**
@@ -1628,7 +1641,7 @@
 	module.exports = KeyEscapeUtils;
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -1644,13 +1657,13 @@
 
 	'use strict';
 
-	var ReactNoopUpdateQueue = __webpack_require__(23);
-	var ReactInstrumentation = __webpack_require__(24);
+	var ReactNoopUpdateQueue = __webpack_require__(25);
+	var ReactInstrumentation = __webpack_require__(26);
 
-	var canDefineProperty = __webpack_require__(18);
-	var emptyObject = __webpack_require__(32);
-	var invariant = __webpack_require__(13);
-	var warning = __webpack_require__(16);
+	var canDefineProperty = __webpack_require__(20);
+	var emptyObject = __webpack_require__(34);
+	var invariant = __webpack_require__(15);
+	var warning = __webpack_require__(18);
 
 	/**
 	 * Base class helpers for the updating state of a component.
@@ -1752,10 +1765,10 @@
 	}
 
 	module.exports = ReactComponent;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -1771,7 +1784,7 @@
 
 	'use strict';
 
-	var warning = __webpack_require__(16);
+	var warning = __webpack_require__(18);
 
 	function warnTDZ(publicInstance, callerName) {
 	  if (process.env.NODE_ENV !== 'production') {
@@ -1853,10 +1866,10 @@
 	};
 
 	module.exports = ReactNoopUpdateQueue;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1872,12 +1885,12 @@
 
 	'use strict';
 
-	var ReactDebugTool = __webpack_require__(25);
+	var ReactDebugTool = __webpack_require__(27);
 
 	module.exports = { debugTool: ReactDebugTool };
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -1893,10 +1906,10 @@
 
 	'use strict';
 
-	var ExecutionEnvironment = __webpack_require__(26);
+	var ExecutionEnvironment = __webpack_require__(28);
 
-	var performanceNow = __webpack_require__(27);
-	var warning = __webpack_require__(16);
+	var performanceNow = __webpack_require__(29);
+	var warning = __webpack_require__(18);
 
 	var eventHandlers = [];
 	var handlerDoesThrowForEvent = {};
@@ -2117,9 +2130,9 @@
 	};
 
 	if (process.env.NODE_ENV !== 'production') {
-	  var ReactInvalidSetStateWarningDevTool = __webpack_require__(29);
-	  var ReactNativeOperationHistoryDevtool = __webpack_require__(30);
-	  var ReactComponentTreeDevtool = __webpack_require__(31);
+	  var ReactInvalidSetStateWarningDevTool = __webpack_require__(31);
+	  var ReactNativeOperationHistoryDevtool = __webpack_require__(32);
+	  var ReactComponentTreeDevtool = __webpack_require__(33);
 	  ReactDebugTool.addDevtool(ReactInvalidSetStateWarningDevTool);
 	  ReactDebugTool.addDevtool(ReactComponentTreeDevtool);
 	  ReactDebugTool.addDevtool(ReactNativeOperationHistoryDevtool);
@@ -2130,10 +2143,10 @@
 	}
 
 	module.exports = ReactDebugTool;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports) {
 
 	/**
@@ -2173,7 +2186,7 @@
 	module.exports = ExecutionEnvironment;
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2189,7 +2202,7 @@
 	 * @typechecks
 	 */
 
-	var performance = __webpack_require__(28);
+	var performance = __webpack_require__(30);
 
 	var performanceNow;
 
@@ -2211,7 +2224,7 @@
 	module.exports = performanceNow;
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2227,7 +2240,7 @@
 
 	'use strict';
 
-	var ExecutionEnvironment = __webpack_require__(26);
+	var ExecutionEnvironment = __webpack_require__(28);
 
 	var performance;
 
@@ -2238,7 +2251,7 @@
 	module.exports = performance || {};
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -2254,7 +2267,7 @@
 
 	'use strict';
 
-	var warning = __webpack_require__(16);
+	var warning = __webpack_require__(18);
 
 	if (process.env.NODE_ENV !== 'production') {
 	  var processingChildContext = false;
@@ -2277,10 +2290,10 @@
 	};
 
 	module.exports = ReactInvalidSetStateWarningDevTool;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports) {
 
 	/**
@@ -2322,7 +2335,7 @@
 	module.exports = ReactNativeOperationHistoryDevtool;
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -2338,7 +2351,7 @@
 
 	'use strict';
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	var tree = {};
 	var rootIDs = [];
@@ -2470,10 +2483,10 @@
 	};
 
 	module.exports = ReactComponentTreeDevtool;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -2495,10 +2508,10 @@
 	}
 
 	module.exports = emptyObject;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -2514,19 +2527,19 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var ReactComponent = __webpack_require__(22);
-	var ReactElement = __webpack_require__(14);
-	var ReactPropTypeLocations = __webpack_require__(34);
-	var ReactPropTypeLocationNames = __webpack_require__(36);
-	var ReactNoopUpdateQueue = __webpack_require__(23);
+	var ReactComponent = __webpack_require__(24);
+	var ReactElement = __webpack_require__(16);
+	var ReactPropTypeLocations = __webpack_require__(36);
+	var ReactPropTypeLocationNames = __webpack_require__(38);
+	var ReactNoopUpdateQueue = __webpack_require__(25);
 
-	var emptyObject = __webpack_require__(32);
-	var invariant = __webpack_require__(13);
-	var keyMirror = __webpack_require__(35);
-	var keyOf = __webpack_require__(37);
-	var warning = __webpack_require__(16);
+	var emptyObject = __webpack_require__(34);
+	var invariant = __webpack_require__(15);
+	var keyMirror = __webpack_require__(37);
+	var keyOf = __webpack_require__(39);
+	var warning = __webpack_require__(18);
 
 	var MIXINS_KEY = keyOf({ mixins: null });
 
@@ -3225,10 +3238,10 @@
 	};
 
 	module.exports = ReactClass;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3244,7 +3257,7 @@
 
 	'use strict';
 
-	var keyMirror = __webpack_require__(35);
+	var keyMirror = __webpack_require__(37);
 
 	var ReactPropTypeLocations = keyMirror({
 	  prop: null,
@@ -3255,7 +3268,7 @@
 	module.exports = ReactPropTypeLocations;
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -3271,7 +3284,7 @@
 
 	'use strict';
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * Constructs an enumeration with keys equal to their value.
@@ -3305,10 +3318,10 @@
 	};
 
 	module.exports = keyMirror;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -3335,10 +3348,10 @@
 	}
 
 	module.exports = ReactPropTypeLocationNames;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3377,7 +3390,7 @@
 	module.exports = keyOf;
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -3393,10 +3406,10 @@
 
 	'use strict';
 
-	var ReactElement = __webpack_require__(14);
-	var ReactElementValidator = __webpack_require__(39);
+	var ReactElement = __webpack_require__(16);
+	var ReactElementValidator = __webpack_require__(41);
 
-	var mapObject = __webpack_require__(40);
+	var mapObject = __webpack_require__(42);
 
 	/**
 	 * Create a factory that creates HTML tag elements.
@@ -3556,10 +3569,10 @@
 	}, createDOMFactory);
 
 	module.exports = ReactDOMFactories;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -3582,15 +3595,15 @@
 
 	'use strict';
 
-	var ReactElement = __webpack_require__(14);
-	var ReactPropTypeLocations = __webpack_require__(34);
-	var ReactPropTypeLocationNames = __webpack_require__(36);
-	var ReactCurrentOwner = __webpack_require__(15);
+	var ReactElement = __webpack_require__(16);
+	var ReactPropTypeLocations = __webpack_require__(36);
+	var ReactPropTypeLocationNames = __webpack_require__(38);
+	var ReactCurrentOwner = __webpack_require__(17);
 
-	var canDefineProperty = __webpack_require__(18);
-	var getIteratorFn = __webpack_require__(20);
-	var invariant = __webpack_require__(13);
-	var warning = __webpack_require__(16);
+	var canDefineProperty = __webpack_require__(20);
+	var getIteratorFn = __webpack_require__(22);
+	var invariant = __webpack_require__(15);
+	var warning = __webpack_require__(18);
 
 	function getDeclarationErrorAddendum() {
 	  if (ReactCurrentOwner.current) {
@@ -3843,10 +3856,10 @@
 	};
 
 	module.exports = ReactElementValidator;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports) {
 
 	/**
@@ -3901,7 +3914,7 @@
 	module.exports = mapObject;
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3917,11 +3930,11 @@
 
 	'use strict';
 
-	var ReactElement = __webpack_require__(14);
-	var ReactPropTypeLocationNames = __webpack_require__(36);
+	var ReactElement = __webpack_require__(16);
+	var ReactPropTypeLocationNames = __webpack_require__(38);
 
-	var emptyFunction = __webpack_require__(17);
-	var getIteratorFn = __webpack_require__(20);
+	var emptyFunction = __webpack_require__(19);
+	var getIteratorFn = __webpack_require__(22);
 
 	/**
 	 * Collection of methods that allow declaration and validation of props that are
@@ -4286,7 +4299,7 @@
 	module.exports = ReactPropTypes;
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports) {
 
 	/**
@@ -4305,7 +4318,7 @@
 	module.exports = '15.1.0';
 
 /***/ },
-/* 43 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -4320,9 +4333,9 @@
 	 */
 	'use strict';
 
-	var ReactElement = __webpack_require__(14);
+	var ReactElement = __webpack_require__(16);
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * Returns the first child in a collection of children and verifies that there
@@ -4344,19 +4357,19 @@
 	}
 
 	module.exports = onlyChild;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(45);
+	module.exports = __webpack_require__(47);
 
 
 /***/ },
-/* 45 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -4374,17 +4387,17 @@
 
 	'use strict';
 
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactDefaultInjection = __webpack_require__(49);
-	var ReactMount = __webpack_require__(166);
-	var ReactReconciler = __webpack_require__(68);
-	var ReactUpdates = __webpack_require__(65);
-	var ReactVersion = __webpack_require__(42);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactDefaultInjection = __webpack_require__(51);
+	var ReactMount = __webpack_require__(168);
+	var ReactReconciler = __webpack_require__(70);
+	var ReactUpdates = __webpack_require__(67);
+	var ReactVersion = __webpack_require__(44);
 
-	var findDOMNode = __webpack_require__(171);
-	var getNativeComponentFromComposite = __webpack_require__(172);
-	var renderSubtreeIntoContainer = __webpack_require__(173);
-	var warning = __webpack_require__(16);
+	var findDOMNode = __webpack_require__(173);
+	var getNativeComponentFromComposite = __webpack_require__(174);
+	var renderSubtreeIntoContainer = __webpack_require__(175);
+	var warning = __webpack_require__(18);
 
 	ReactDefaultInjection.inject();
 
@@ -4424,7 +4437,7 @@
 	}
 
 	if (process.env.NODE_ENV !== 'production') {
-	  var ExecutionEnvironment = __webpack_require__(26);
+	  var ExecutionEnvironment = __webpack_require__(28);
 	  if (ExecutionEnvironment.canUseDOM && window.top === window.self) {
 
 	    // First check if devtools is not installed
@@ -4460,10 +4473,10 @@
 	}
 
 	module.exports = React;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 46 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -4479,10 +4492,10 @@
 
 	'use strict';
 
-	var DOMProperty = __webpack_require__(47);
-	var ReactDOMComponentFlags = __webpack_require__(48);
+	var DOMProperty = __webpack_require__(49);
+	var ReactDOMComponentFlags = __webpack_require__(50);
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	var ATTR_NAME = DOMProperty.ID_ATTRIBUTE_NAME;
 	var Flags = ReactDOMComponentFlags;
@@ -4652,10 +4665,10 @@
 	};
 
 	module.exports = ReactDOMComponentTree;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 47 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -4671,7 +4684,7 @@
 
 	'use strict';
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	function checkMask(value, bitmask) {
 	  return (value & bitmask) === bitmask;
@@ -4871,10 +4884,10 @@
 	};
 
 	module.exports = DOMProperty;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 48 */
+/* 50 */
 /***/ function(module, exports) {
 
 	/**
@@ -4897,7 +4910,7 @@
 	module.exports = ReactDOMComponentFlags;
 
 /***/ },
-/* 49 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4913,24 +4926,24 @@
 
 	'use strict';
 
-	var BeforeInputEventPlugin = __webpack_require__(50);
-	var ChangeEventPlugin = __webpack_require__(64);
-	var DefaultEventPluginOrder = __webpack_require__(75);
-	var EnterLeaveEventPlugin = __webpack_require__(76);
-	var HTMLDOMPropertyConfig = __webpack_require__(81);
-	var ReactComponentBrowserEnvironment = __webpack_require__(82);
-	var ReactDOMComponent = __webpack_require__(96);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactDOMEmptyComponent = __webpack_require__(137);
-	var ReactDOMTreeTraversal = __webpack_require__(138);
-	var ReactDOMTextComponent = __webpack_require__(139);
-	var ReactDefaultBatchingStrategy = __webpack_require__(140);
-	var ReactEventListener = __webpack_require__(141);
-	var ReactInjection = __webpack_require__(144);
-	var ReactReconcileTransaction = __webpack_require__(145);
-	var SVGDOMPropertyConfig = __webpack_require__(153);
-	var SelectEventPlugin = __webpack_require__(154);
-	var SimpleEventPlugin = __webpack_require__(155);
+	var BeforeInputEventPlugin = __webpack_require__(52);
+	var ChangeEventPlugin = __webpack_require__(66);
+	var DefaultEventPluginOrder = __webpack_require__(77);
+	var EnterLeaveEventPlugin = __webpack_require__(78);
+	var HTMLDOMPropertyConfig = __webpack_require__(83);
+	var ReactComponentBrowserEnvironment = __webpack_require__(84);
+	var ReactDOMComponent = __webpack_require__(98);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactDOMEmptyComponent = __webpack_require__(139);
+	var ReactDOMTreeTraversal = __webpack_require__(140);
+	var ReactDOMTextComponent = __webpack_require__(141);
+	var ReactDefaultBatchingStrategy = __webpack_require__(142);
+	var ReactEventListener = __webpack_require__(143);
+	var ReactInjection = __webpack_require__(146);
+	var ReactReconcileTransaction = __webpack_require__(147);
+	var SVGDOMPropertyConfig = __webpack_require__(155);
+	var SelectEventPlugin = __webpack_require__(156);
+	var SimpleEventPlugin = __webpack_require__(157);
 
 	var alreadyInjected = false;
 
@@ -4986,7 +4999,7 @@
 	};
 
 /***/ },
-/* 50 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -5002,14 +5015,14 @@
 
 	'use strict';
 
-	var EventConstants = __webpack_require__(51);
-	var EventPropagators = __webpack_require__(52);
-	var ExecutionEnvironment = __webpack_require__(26);
-	var FallbackCompositionState = __webpack_require__(59);
-	var SyntheticCompositionEvent = __webpack_require__(61);
-	var SyntheticInputEvent = __webpack_require__(63);
+	var EventConstants = __webpack_require__(53);
+	var EventPropagators = __webpack_require__(54);
+	var ExecutionEnvironment = __webpack_require__(28);
+	var FallbackCompositionState = __webpack_require__(61);
+	var SyntheticCompositionEvent = __webpack_require__(63);
+	var SyntheticInputEvent = __webpack_require__(65);
 
-	var keyOf = __webpack_require__(37);
+	var keyOf = __webpack_require__(39);
 
 	var END_KEYCODES = [9, 13, 27, 32]; // Tab, Return, Esc, Space
 	var START_KEYCODE = 229;
@@ -5379,7 +5392,7 @@
 	module.exports = BeforeInputEventPlugin;
 
 /***/ },
-/* 51 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -5395,7 +5408,7 @@
 
 	'use strict';
 
-	var keyMirror = __webpack_require__(35);
+	var keyMirror = __webpack_require__(37);
 
 	var PropagationPhases = keyMirror({ bubbled: null, captured: null });
 
@@ -5481,7 +5494,7 @@
 	module.exports = EventConstants;
 
 /***/ },
-/* 52 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -5497,13 +5510,13 @@
 
 	'use strict';
 
-	var EventConstants = __webpack_require__(51);
-	var EventPluginHub = __webpack_require__(53);
-	var EventPluginUtils = __webpack_require__(55);
+	var EventConstants = __webpack_require__(53);
+	var EventPluginHub = __webpack_require__(55);
+	var EventPluginUtils = __webpack_require__(57);
 
-	var accumulateInto = __webpack_require__(57);
-	var forEachAccumulated = __webpack_require__(58);
-	var warning = __webpack_require__(16);
+	var accumulateInto = __webpack_require__(59);
+	var forEachAccumulated = __webpack_require__(60);
+	var warning = __webpack_require__(18);
 
 	var PropagationPhases = EventConstants.PropagationPhases;
 	var getListener = EventPluginHub.getListener;
@@ -5621,10 +5634,10 @@
 	};
 
 	module.exports = EventPropagators;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 53 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -5640,13 +5653,13 @@
 
 	'use strict';
 
-	var EventPluginRegistry = __webpack_require__(54);
-	var EventPluginUtils = __webpack_require__(55);
-	var ReactErrorUtils = __webpack_require__(56);
+	var EventPluginRegistry = __webpack_require__(56);
+	var EventPluginUtils = __webpack_require__(57);
+	var ReactErrorUtils = __webpack_require__(58);
 
-	var accumulateInto = __webpack_require__(57);
-	var forEachAccumulated = __webpack_require__(58);
-	var invariant = __webpack_require__(13);
+	var accumulateInto = __webpack_require__(59);
+	var forEachAccumulated = __webpack_require__(60);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * Internal store for event listeners
@@ -5862,10 +5875,10 @@
 	};
 
 	module.exports = EventPluginHub;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 54 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -5881,7 +5894,7 @@
 
 	'use strict';
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * Injectable ordering of event plugins.
@@ -6109,10 +6122,10 @@
 	};
 
 	module.exports = EventPluginRegistry;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 55 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -6128,11 +6141,11 @@
 
 	'use strict';
 
-	var EventConstants = __webpack_require__(51);
-	var ReactErrorUtils = __webpack_require__(56);
+	var EventConstants = __webpack_require__(53);
+	var ReactErrorUtils = __webpack_require__(58);
 
-	var invariant = __webpack_require__(13);
-	var warning = __webpack_require__(16);
+	var invariant = __webpack_require__(15);
+	var warning = __webpack_require__(18);
 
 	/**
 	 * Injected dependencies:
@@ -6342,10 +6355,10 @@
 	};
 
 	module.exports = EventPluginUtils;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 56 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -6424,10 +6437,10 @@
 	}
 
 	module.exports = ReactErrorUtils;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 57 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -6443,7 +6456,7 @@
 
 	'use strict';
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 *
@@ -6489,10 +6502,10 @@
 	}
 
 	module.exports = accumulateInto;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 58 */
+/* 60 */
 /***/ function(module, exports) {
 
 	/**
@@ -6527,7 +6540,7 @@
 	module.exports = forEachAccumulated;
 
 /***/ },
-/* 59 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -6543,11 +6556,11 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var PooledClass = __webpack_require__(12);
+	var PooledClass = __webpack_require__(14);
 
-	var getTextContentAccessor = __webpack_require__(60);
+	var getTextContentAccessor = __webpack_require__(62);
 
 	/**
 	 * This helper class stores information about text content of a target node,
@@ -6627,7 +6640,7 @@
 	module.exports = FallbackCompositionState;
 
 /***/ },
-/* 60 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -6643,7 +6656,7 @@
 
 	'use strict';
 
-	var ExecutionEnvironment = __webpack_require__(26);
+	var ExecutionEnvironment = __webpack_require__(28);
 
 	var contentKey = null;
 
@@ -6665,7 +6678,7 @@
 	module.exports = getTextContentAccessor;
 
 /***/ },
-/* 61 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -6681,7 +6694,7 @@
 
 	'use strict';
 
-	var SyntheticEvent = __webpack_require__(62);
+	var SyntheticEvent = __webpack_require__(64);
 
 	/**
 	 * @interface Event
@@ -6706,7 +6719,7 @@
 	module.exports = SyntheticCompositionEvent;
 
 /***/ },
-/* 62 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -6722,12 +6735,12 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var PooledClass = __webpack_require__(12);
+	var PooledClass = __webpack_require__(14);
 
-	var emptyFunction = __webpack_require__(17);
-	var warning = __webpack_require__(16);
+	var emptyFunction = __webpack_require__(19);
+	var warning = __webpack_require__(18);
 
 	var didWarnForAddedNewProperty = false;
 	var isProxySupported = typeof Proxy === 'function';
@@ -6876,7 +6889,7 @@
 	      this[shouldBeReleasedProperties[i]] = null;
 	    }
 	    if (process.env.NODE_ENV !== 'production') {
-	      var noop = __webpack_require__(17);
+	      var noop = __webpack_require__(19);
 	      Object.defineProperty(this, 'nativeEvent', getPooledWarningPropertyDefinition('nativeEvent', null));
 	      Object.defineProperty(this, 'preventDefault', getPooledWarningPropertyDefinition('preventDefault', noop));
 	      Object.defineProperty(this, 'stopPropagation', getPooledWarningPropertyDefinition('stopPropagation', noop));
@@ -6970,10 +6983,10 @@
 	    process.env.NODE_ENV !== 'production' ? warning(warningCondition, 'This synthetic event is reused for performance reasons. If you\'re seeing this, ' + 'you\'re %s `%s` on a released/nullified synthetic event. %s. ' + 'If you must keep the original synthetic event around, use event.persist(). ' + 'See https://fb.me/react-event-pooling for more information.', action, propName, result) : void 0;
 	  }
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 63 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -6989,7 +7002,7 @@
 
 	'use strict';
 
-	var SyntheticEvent = __webpack_require__(62);
+	var SyntheticEvent = __webpack_require__(64);
 
 	/**
 	 * @interface Event
@@ -7015,7 +7028,7 @@
 	module.exports = SyntheticInputEvent;
 
 /***/ },
-/* 64 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7031,18 +7044,18 @@
 
 	'use strict';
 
-	var EventConstants = __webpack_require__(51);
-	var EventPluginHub = __webpack_require__(53);
-	var EventPropagators = __webpack_require__(52);
-	var ExecutionEnvironment = __webpack_require__(26);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactUpdates = __webpack_require__(65);
-	var SyntheticEvent = __webpack_require__(62);
+	var EventConstants = __webpack_require__(53);
+	var EventPluginHub = __webpack_require__(55);
+	var EventPropagators = __webpack_require__(54);
+	var ExecutionEnvironment = __webpack_require__(28);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactUpdates = __webpack_require__(67);
+	var SyntheticEvent = __webpack_require__(64);
 
-	var getEventTarget = __webpack_require__(72);
-	var isEventSupported = __webpack_require__(73);
-	var isTextInputElement = __webpack_require__(74);
-	var keyOf = __webpack_require__(37);
+	var getEventTarget = __webpack_require__(74);
+	var isEventSupported = __webpack_require__(75);
+	var isTextInputElement = __webpack_require__(76);
+	var keyOf = __webpack_require__(39);
 
 	var topLevelTypes = EventConstants.topLevelTypes;
 
@@ -7345,7 +7358,7 @@
 	module.exports = ChangeEventPlugin;
 
 /***/ },
-/* 65 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -7361,16 +7374,16 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var CallbackQueue = __webpack_require__(66);
-	var PooledClass = __webpack_require__(12);
-	var ReactFeatureFlags = __webpack_require__(67);
-	var ReactInstrumentation = __webpack_require__(24);
-	var ReactReconciler = __webpack_require__(68);
-	var Transaction = __webpack_require__(71);
+	var CallbackQueue = __webpack_require__(68);
+	var PooledClass = __webpack_require__(14);
+	var ReactFeatureFlags = __webpack_require__(69);
+	var ReactInstrumentation = __webpack_require__(26);
+	var ReactReconciler = __webpack_require__(70);
+	var Transaction = __webpack_require__(73);
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	var dirtyComponents = [];
 	var updateBatchNumber = 0;
@@ -7607,10 +7620,10 @@
 	};
 
 	module.exports = ReactUpdates;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 66 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -7626,11 +7639,11 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var PooledClass = __webpack_require__(12);
+	var PooledClass = __webpack_require__(14);
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * A specialized pseudo-event module to help keep track of components waiting to
@@ -7718,10 +7731,10 @@
 	PooledClass.addPoolingTo(CallbackQueue);
 
 	module.exports = CallbackQueue;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 67 */
+/* 69 */
 /***/ function(module, exports) {
 
 	/**
@@ -7747,7 +7760,7 @@
 	module.exports = ReactFeatureFlags;
 
 /***/ },
-/* 68 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -7763,10 +7776,10 @@
 
 	'use strict';
 
-	var ReactRef = __webpack_require__(69);
-	var ReactInstrumentation = __webpack_require__(24);
+	var ReactRef = __webpack_require__(71);
+	var ReactInstrumentation = __webpack_require__(26);
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * Helper to call ReactRef.attachRefs with this composite component, split out
@@ -7921,10 +7934,10 @@
 	};
 
 	module.exports = ReactReconciler;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 69 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7940,7 +7953,7 @@
 
 	'use strict';
 
-	var ReactOwner = __webpack_require__(70);
+	var ReactOwner = __webpack_require__(72);
 
 	var ReactRef = {};
 
@@ -8007,7 +8020,7 @@
 	module.exports = ReactRef;
 
 /***/ },
-/* 70 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -8023,7 +8036,7 @@
 
 	'use strict';
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * ReactOwners are capable of storing references to owned components.
@@ -8102,10 +8115,10 @@
 	};
 
 	module.exports = ReactOwner;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 71 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -8121,7 +8134,7 @@
 
 	'use strict';
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * `Transaction` creates a black box that is able to wrap any method such that
@@ -8339,10 +8352,10 @@
 	};
 
 	module.exports = Transaction;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 72 */
+/* 74 */
 /***/ function(module, exports) {
 
 	/**
@@ -8382,7 +8395,7 @@
 	module.exports = getEventTarget;
 
 /***/ },
-/* 73 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -8398,7 +8411,7 @@
 
 	'use strict';
 
-	var ExecutionEnvironment = __webpack_require__(26);
+	var ExecutionEnvironment = __webpack_require__(28);
 
 	var useHasFeature;
 	if (ExecutionEnvironment.canUseDOM) {
@@ -8447,7 +8460,7 @@
 	module.exports = isEventSupported;
 
 /***/ },
-/* 74 */
+/* 76 */
 /***/ function(module, exports) {
 
 	/**
@@ -8493,7 +8506,7 @@
 	module.exports = isTextInputElement;
 
 /***/ },
-/* 75 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -8509,7 +8522,7 @@
 
 	'use strict';
 
-	var keyOf = __webpack_require__(37);
+	var keyOf = __webpack_require__(39);
 
 	/**
 	 * Module that is injectable into `EventPluginHub`, that specifies a
@@ -8525,7 +8538,7 @@
 	module.exports = DefaultEventPluginOrder;
 
 /***/ },
-/* 76 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -8541,12 +8554,12 @@
 
 	'use strict';
 
-	var EventConstants = __webpack_require__(51);
-	var EventPropagators = __webpack_require__(52);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var SyntheticMouseEvent = __webpack_require__(77);
+	var EventConstants = __webpack_require__(53);
+	var EventPropagators = __webpack_require__(54);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var SyntheticMouseEvent = __webpack_require__(79);
 
-	var keyOf = __webpack_require__(37);
+	var keyOf = __webpack_require__(39);
 
 	var topLevelTypes = EventConstants.topLevelTypes;
 
@@ -8635,7 +8648,7 @@
 	module.exports = EnterLeaveEventPlugin;
 
 /***/ },
-/* 77 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -8651,10 +8664,10 @@
 
 	'use strict';
 
-	var SyntheticUIEvent = __webpack_require__(78);
-	var ViewportMetrics = __webpack_require__(79);
+	var SyntheticUIEvent = __webpack_require__(80);
+	var ViewportMetrics = __webpack_require__(81);
 
-	var getEventModifierState = __webpack_require__(80);
+	var getEventModifierState = __webpack_require__(82);
 
 	/**
 	 * @interface MouseEvent
@@ -8712,7 +8725,7 @@
 	module.exports = SyntheticMouseEvent;
 
 /***/ },
-/* 78 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -8728,9 +8741,9 @@
 
 	'use strict';
 
-	var SyntheticEvent = __webpack_require__(62);
+	var SyntheticEvent = __webpack_require__(64);
 
-	var getEventTarget = __webpack_require__(72);
+	var getEventTarget = __webpack_require__(74);
 
 	/**
 	 * @interface UIEvent
@@ -8776,7 +8789,7 @@
 	module.exports = SyntheticUIEvent;
 
 /***/ },
-/* 79 */
+/* 81 */
 /***/ function(module, exports) {
 
 	/**
@@ -8808,7 +8821,7 @@
 	module.exports = ViewportMetrics;
 
 /***/ },
-/* 80 */
+/* 82 */
 /***/ function(module, exports) {
 
 	/**
@@ -8856,7 +8869,7 @@
 	module.exports = getEventModifierState;
 
 /***/ },
-/* 81 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -8872,7 +8885,7 @@
 
 	'use strict';
 
-	var DOMProperty = __webpack_require__(47);
+	var DOMProperty = __webpack_require__(49);
 
 	var MUST_USE_PROPERTY = DOMProperty.injection.MUST_USE_PROPERTY;
 	var HAS_BOOLEAN_VALUE = DOMProperty.injection.HAS_BOOLEAN_VALUE;
@@ -9070,7 +9083,7 @@
 	module.exports = HTMLDOMPropertyConfig;
 
 /***/ },
-/* 82 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -9086,8 +9099,8 @@
 
 	'use strict';
 
-	var DOMChildrenOperations = __webpack_require__(83);
-	var ReactDOMIDOperations = __webpack_require__(95);
+	var DOMChildrenOperations = __webpack_require__(85);
+	var ReactDOMIDOperations = __webpack_require__(97);
 
 	/**
 	 * Abstracts away all functionality of the reconciler that requires knowledge of
@@ -9114,7 +9127,7 @@
 	module.exports = ReactComponentBrowserEnvironment;
 
 /***/ },
-/* 83 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -9130,15 +9143,15 @@
 
 	'use strict';
 
-	var DOMLazyTree = __webpack_require__(84);
-	var Danger = __webpack_require__(90);
-	var ReactMultiChildUpdateTypes = __webpack_require__(94);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactInstrumentation = __webpack_require__(24);
+	var DOMLazyTree = __webpack_require__(86);
+	var Danger = __webpack_require__(92);
+	var ReactMultiChildUpdateTypes = __webpack_require__(96);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactInstrumentation = __webpack_require__(26);
 
-	var createMicrosoftUnsafeLocalFunction = __webpack_require__(86);
-	var setInnerHTML = __webpack_require__(89);
-	var setTextContent = __webpack_require__(87);
+	var createMicrosoftUnsafeLocalFunction = __webpack_require__(88);
+	var setInnerHTML = __webpack_require__(91);
+	var setTextContent = __webpack_require__(89);
 
 	function getNodeAfter(parentNode, node) {
 	  // Special case for text components, which return [open, close] comments
@@ -9311,10 +9324,10 @@
 	};
 
 	module.exports = DOMChildrenOperations;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 84 */
+/* 86 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -9330,10 +9343,10 @@
 
 	'use strict';
 
-	var DOMNamespaces = __webpack_require__(85);
+	var DOMNamespaces = __webpack_require__(87);
 
-	var createMicrosoftUnsafeLocalFunction = __webpack_require__(86);
-	var setTextContent = __webpack_require__(87);
+	var createMicrosoftUnsafeLocalFunction = __webpack_require__(88);
+	var setTextContent = __webpack_require__(89);
 
 	var ELEMENT_NODE_TYPE = 1;
 	var DOCUMENT_FRAGMENT_NODE_TYPE = 11;
@@ -9436,7 +9449,7 @@
 	module.exports = DOMLazyTree;
 
 /***/ },
-/* 85 */
+/* 87 */
 /***/ function(module, exports) {
 
 	/**
@@ -9461,7 +9474,7 @@
 	module.exports = DOMNamespaces;
 
 /***/ },
-/* 86 */
+/* 88 */
 /***/ function(module, exports) {
 
 	/**
@@ -9498,7 +9511,7 @@
 	module.exports = createMicrosoftUnsafeLocalFunction;
 
 /***/ },
-/* 87 */
+/* 89 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -9514,9 +9527,9 @@
 
 	'use strict';
 
-	var ExecutionEnvironment = __webpack_require__(26);
-	var escapeTextContentForBrowser = __webpack_require__(88);
-	var setInnerHTML = __webpack_require__(89);
+	var ExecutionEnvironment = __webpack_require__(28);
+	var escapeTextContentForBrowser = __webpack_require__(90);
+	var setInnerHTML = __webpack_require__(91);
 
 	/**
 	 * Set the textContent property of a node, ensuring that whitespace is preserved
@@ -9543,7 +9556,7 @@
 	module.exports = setTextContent;
 
 /***/ },
-/* 88 */
+/* 90 */
 /***/ function(module, exports) {
 
 	/**
@@ -9586,7 +9599,7 @@
 	module.exports = escapeTextContentForBrowser;
 
 /***/ },
-/* 89 */
+/* 91 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -9602,12 +9615,12 @@
 
 	'use strict';
 
-	var ExecutionEnvironment = __webpack_require__(26);
+	var ExecutionEnvironment = __webpack_require__(28);
 
 	var WHITESPACE_TEST = /^[ \r\n\t\f]/;
 	var NONVISIBLE_TEST = /<(!--|link|noscript|meta|script|style)[ \r\n\t\f\/>]/;
 
-	var createMicrosoftUnsafeLocalFunction = __webpack_require__(86);
+	var createMicrosoftUnsafeLocalFunction = __webpack_require__(88);
 
 	/**
 	 * Set the innerHTML property of a node, ensuring that whitespace is preserved
@@ -9673,7 +9686,7 @@
 	module.exports = setInnerHTML;
 
 /***/ },
-/* 90 */
+/* 92 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -9689,13 +9702,13 @@
 
 	'use strict';
 
-	var DOMLazyTree = __webpack_require__(84);
-	var ExecutionEnvironment = __webpack_require__(26);
+	var DOMLazyTree = __webpack_require__(86);
+	var ExecutionEnvironment = __webpack_require__(28);
 
-	var createNodesFromMarkup = __webpack_require__(91);
-	var emptyFunction = __webpack_require__(17);
-	var getMarkupWrap = __webpack_require__(93);
-	var invariant = __webpack_require__(13);
+	var createNodesFromMarkup = __webpack_require__(93);
+	var emptyFunction = __webpack_require__(19);
+	var getMarkupWrap = __webpack_require__(95);
+	var invariant = __webpack_require__(15);
 
 	var OPEN_TAG_NAME_EXP = /^(<[^ \/>]+)/;
 	var RESULT_INDEX_ATTR = 'data-danger-index';
@@ -9820,10 +9833,10 @@
 	};
 
 	module.exports = Danger;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 91 */
+/* 93 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -9841,11 +9854,11 @@
 
 	/*eslint-disable fb-www/unsafe-html*/
 
-	var ExecutionEnvironment = __webpack_require__(26);
+	var ExecutionEnvironment = __webpack_require__(28);
 
-	var createArrayFromMixed = __webpack_require__(92);
-	var getMarkupWrap = __webpack_require__(93);
-	var invariant = __webpack_require__(13);
+	var createArrayFromMixed = __webpack_require__(94);
+	var getMarkupWrap = __webpack_require__(95);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * Dummy container used to render all markup.
@@ -9909,10 +9922,10 @@
 	}
 
 	module.exports = createNodesFromMarkup;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 92 */
+/* 94 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -9928,7 +9941,7 @@
 	 * @typechecks
 	 */
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * Convert array-like objects to arrays.
@@ -10041,10 +10054,10 @@
 	}
 
 	module.exports = createArrayFromMixed;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 93 */
+/* 95 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -10061,9 +10074,9 @@
 
 	/*eslint-disable fb-www/unsafe-html */
 
-	var ExecutionEnvironment = __webpack_require__(26);
+	var ExecutionEnvironment = __webpack_require__(28);
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * Dummy container used to detect which wraps are necessary.
@@ -10141,10 +10154,10 @@
 	}
 
 	module.exports = getMarkupWrap;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 94 */
+/* 96 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -10160,7 +10173,7 @@
 
 	'use strict';
 
-	var keyMirror = __webpack_require__(35);
+	var keyMirror = __webpack_require__(37);
 
 	/**
 	 * When a component's children are updated, a series of update configuration
@@ -10181,7 +10194,7 @@
 	module.exports = ReactMultiChildUpdateTypes;
 
 /***/ },
-/* 95 */
+/* 97 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -10197,8 +10210,8 @@
 
 	'use strict';
 
-	var DOMChildrenOperations = __webpack_require__(83);
-	var ReactDOMComponentTree = __webpack_require__(46);
+	var DOMChildrenOperations = __webpack_require__(85);
+	var ReactDOMComponentTree = __webpack_require__(48);
 
 	/**
 	 * Operations used to process updates to DOM nodes.
@@ -10220,7 +10233,7 @@
 	module.exports = ReactDOMIDOperations;
 
 /***/ },
-/* 96 */
+/* 98 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -10238,38 +10251,38 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var AutoFocusUtils = __webpack_require__(97);
-	var CSSPropertyOperations = __webpack_require__(99);
-	var DOMLazyTree = __webpack_require__(84);
-	var DOMNamespaces = __webpack_require__(85);
-	var DOMProperty = __webpack_require__(47);
-	var DOMPropertyOperations = __webpack_require__(107);
-	var EventConstants = __webpack_require__(51);
-	var EventPluginHub = __webpack_require__(53);
-	var EventPluginRegistry = __webpack_require__(54);
-	var ReactBrowserEventEmitter = __webpack_require__(112);
-	var ReactComponentBrowserEnvironment = __webpack_require__(82);
-	var ReactDOMButton = __webpack_require__(115);
-	var ReactDOMComponentFlags = __webpack_require__(48);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactDOMInput = __webpack_require__(117);
-	var ReactDOMOption = __webpack_require__(119);
-	var ReactDOMSelect = __webpack_require__(120);
-	var ReactDOMTextarea = __webpack_require__(121);
-	var ReactInstrumentation = __webpack_require__(24);
-	var ReactMultiChild = __webpack_require__(122);
-	var ReactServerRenderingTransaction = __webpack_require__(134);
+	var AutoFocusUtils = __webpack_require__(99);
+	var CSSPropertyOperations = __webpack_require__(101);
+	var DOMLazyTree = __webpack_require__(86);
+	var DOMNamespaces = __webpack_require__(87);
+	var DOMProperty = __webpack_require__(49);
+	var DOMPropertyOperations = __webpack_require__(109);
+	var EventConstants = __webpack_require__(53);
+	var EventPluginHub = __webpack_require__(55);
+	var EventPluginRegistry = __webpack_require__(56);
+	var ReactBrowserEventEmitter = __webpack_require__(114);
+	var ReactComponentBrowserEnvironment = __webpack_require__(84);
+	var ReactDOMButton = __webpack_require__(117);
+	var ReactDOMComponentFlags = __webpack_require__(50);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactDOMInput = __webpack_require__(119);
+	var ReactDOMOption = __webpack_require__(121);
+	var ReactDOMSelect = __webpack_require__(122);
+	var ReactDOMTextarea = __webpack_require__(123);
+	var ReactInstrumentation = __webpack_require__(26);
+	var ReactMultiChild = __webpack_require__(124);
+	var ReactServerRenderingTransaction = __webpack_require__(136);
 
-	var emptyFunction = __webpack_require__(17);
-	var escapeTextContentForBrowser = __webpack_require__(88);
-	var invariant = __webpack_require__(13);
-	var isEventSupported = __webpack_require__(73);
-	var keyOf = __webpack_require__(37);
-	var shallowEqual = __webpack_require__(135);
-	var validateDOMNesting = __webpack_require__(136);
-	var warning = __webpack_require__(16);
+	var emptyFunction = __webpack_require__(19);
+	var escapeTextContentForBrowser = __webpack_require__(90);
+	var invariant = __webpack_require__(15);
+	var isEventSupported = __webpack_require__(75);
+	var keyOf = __webpack_require__(39);
+	var shallowEqual = __webpack_require__(137);
+	var validateDOMNesting = __webpack_require__(138);
+	var warning = __webpack_require__(18);
 
 	var Flags = ReactDOMComponentFlags;
 	var deleteListener = EventPluginHub.deleteListener;
@@ -11172,10 +11185,10 @@
 	_assign(ReactDOMComponent.prototype, ReactDOMComponent.Mixin, ReactMultiChild.Mixin);
 
 	module.exports = ReactDOMComponent;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 97 */
+/* 99 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11191,9 +11204,9 @@
 
 	'use strict';
 
-	var ReactDOMComponentTree = __webpack_require__(46);
+	var ReactDOMComponentTree = __webpack_require__(48);
 
-	var focusNode = __webpack_require__(98);
+	var focusNode = __webpack_require__(100);
 
 	var AutoFocusUtils = {
 	  focusDOMComponent: function () {
@@ -11204,7 +11217,7 @@
 	module.exports = AutoFocusUtils;
 
 /***/ },
-/* 98 */
+/* 100 */
 /***/ function(module, exports) {
 
 	/**
@@ -11235,7 +11248,7 @@
 	module.exports = focusNode;
 
 /***/ },
-/* 99 */
+/* 101 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -11251,15 +11264,15 @@
 
 	'use strict';
 
-	var CSSProperty = __webpack_require__(100);
-	var ExecutionEnvironment = __webpack_require__(26);
-	var ReactInstrumentation = __webpack_require__(24);
+	var CSSProperty = __webpack_require__(102);
+	var ExecutionEnvironment = __webpack_require__(28);
+	var ReactInstrumentation = __webpack_require__(26);
 
-	var camelizeStyleName = __webpack_require__(101);
-	var dangerousStyleValue = __webpack_require__(103);
-	var hyphenateStyleName = __webpack_require__(104);
-	var memoizeStringOnly = __webpack_require__(106);
-	var warning = __webpack_require__(16);
+	var camelizeStyleName = __webpack_require__(103);
+	var dangerousStyleValue = __webpack_require__(105);
+	var hyphenateStyleName = __webpack_require__(106);
+	var memoizeStringOnly = __webpack_require__(108);
+	var warning = __webpack_require__(18);
 
 	var processStyleName = memoizeStringOnly(function (styleName) {
 	  return hyphenateStyleName(styleName);
@@ -11443,10 +11456,10 @@
 	};
 
 	module.exports = CSSPropertyOperations;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 100 */
+/* 102 */
 /***/ function(module, exports) {
 
 	/**
@@ -11599,7 +11612,7 @@
 	module.exports = CSSProperty;
 
 /***/ },
-/* 101 */
+/* 103 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11615,7 +11628,7 @@
 
 	'use strict';
 
-	var camelize = __webpack_require__(102);
+	var camelize = __webpack_require__(104);
 
 	var msPattern = /^-ms-/;
 
@@ -11643,7 +11656,7 @@
 	module.exports = camelizeStyleName;
 
 /***/ },
-/* 102 */
+/* 104 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -11679,7 +11692,7 @@
 	module.exports = camelize;
 
 /***/ },
-/* 103 */
+/* 105 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -11695,8 +11708,8 @@
 
 	'use strict';
 
-	var CSSProperty = __webpack_require__(100);
-	var warning = __webpack_require__(16);
+	var CSSProperty = __webpack_require__(102);
+	var warning = __webpack_require__(18);
 
 	var isUnitlessNumber = CSSProperty.isUnitlessNumber;
 	var styleWarnings = {};
@@ -11759,10 +11772,10 @@
 	}
 
 	module.exports = dangerousStyleValue;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 104 */
+/* 106 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11778,7 +11791,7 @@
 
 	'use strict';
 
-	var hyphenate = __webpack_require__(105);
+	var hyphenate = __webpack_require__(107);
 
 	var msPattern = /^ms-/;
 
@@ -11805,7 +11818,7 @@
 	module.exports = hyphenateStyleName;
 
 /***/ },
-/* 105 */
+/* 107 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11842,7 +11855,7 @@
 	module.exports = hyphenate;
 
 /***/ },
-/* 106 */
+/* 108 */
 /***/ function(module, exports) {
 
 	/**
@@ -11876,7 +11889,7 @@
 	module.exports = memoizeStringOnly;
 
 /***/ },
-/* 107 */
+/* 109 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -11892,13 +11905,13 @@
 
 	'use strict';
 
-	var DOMProperty = __webpack_require__(47);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactDOMInstrumentation = __webpack_require__(108);
-	var ReactInstrumentation = __webpack_require__(24);
+	var DOMProperty = __webpack_require__(49);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactDOMInstrumentation = __webpack_require__(110);
+	var ReactInstrumentation = __webpack_require__(26);
 
-	var quoteAttributeValueForBrowser = __webpack_require__(111);
-	var warning = __webpack_require__(16);
+	var quoteAttributeValueForBrowser = __webpack_require__(113);
+	var warning = __webpack_require__(18);
 
 	var VALID_ATTRIBUTE_NAME_REGEX = new RegExp('^[' + DOMProperty.ATTRIBUTE_NAME_START_CHAR + '][' + DOMProperty.ATTRIBUTE_NAME_CHAR + ']*$');
 	var illegalAttributeNameCache = {};
@@ -12101,10 +12114,10 @@
 	};
 
 	module.exports = DOMPropertyOperations;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 108 */
+/* 110 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -12120,12 +12133,12 @@
 
 	'use strict';
 
-	var ReactDOMDebugTool = __webpack_require__(109);
+	var ReactDOMDebugTool = __webpack_require__(111);
 
 	module.exports = { debugTool: ReactDOMDebugTool };
 
 /***/ },
-/* 109 */
+/* 111 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -12141,9 +12154,9 @@
 
 	'use strict';
 
-	var ReactDOMUnknownPropertyDevtool = __webpack_require__(110);
+	var ReactDOMUnknownPropertyDevtool = __webpack_require__(112);
 
-	var warning = __webpack_require__(16);
+	var warning = __webpack_require__(18);
 
 	var eventHandlers = [];
 	var handlerDoesThrowForEvent = {};
@@ -12189,10 +12202,10 @@
 	ReactDOMDebugTool.addDevtool(ReactDOMUnknownPropertyDevtool);
 
 	module.exports = ReactDOMDebugTool;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 110 */
+/* 112 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -12208,10 +12221,10 @@
 
 	'use strict';
 
-	var DOMProperty = __webpack_require__(47);
-	var EventPluginRegistry = __webpack_require__(54);
+	var DOMProperty = __webpack_require__(49);
+	var EventPluginRegistry = __webpack_require__(56);
 
-	var warning = __webpack_require__(16);
+	var warning = __webpack_require__(18);
 
 	if (process.env.NODE_ENV !== 'production') {
 	  var reactProps = {
@@ -12259,10 +12272,10 @@
 	};
 
 	module.exports = ReactDOMUnknownPropertyDevtool;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 111 */
+/* 113 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -12278,7 +12291,7 @@
 
 	'use strict';
 
-	var escapeTextContentForBrowser = __webpack_require__(88);
+	var escapeTextContentForBrowser = __webpack_require__(90);
 
 	/**
 	 * Escapes attribute value to prevent scripting attacks.
@@ -12293,7 +12306,7 @@
 	module.exports = quoteAttributeValueForBrowser;
 
 /***/ },
-/* 112 */
+/* 114 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -12309,15 +12322,15 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var EventConstants = __webpack_require__(51);
-	var EventPluginRegistry = __webpack_require__(54);
-	var ReactEventEmitterMixin = __webpack_require__(113);
-	var ViewportMetrics = __webpack_require__(79);
+	var EventConstants = __webpack_require__(53);
+	var EventPluginRegistry = __webpack_require__(56);
+	var ReactEventEmitterMixin = __webpack_require__(115);
+	var ViewportMetrics = __webpack_require__(81);
 
-	var getVendorPrefixedEventName = __webpack_require__(114);
-	var isEventSupported = __webpack_require__(73);
+	var getVendorPrefixedEventName = __webpack_require__(116);
+	var isEventSupported = __webpack_require__(75);
 
 	/**
 	 * Summary of `ReactBrowserEventEmitter` event handling:
@@ -12615,7 +12628,7 @@
 	module.exports = ReactBrowserEventEmitter;
 
 /***/ },
-/* 113 */
+/* 115 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -12631,7 +12644,7 @@
 
 	'use strict';
 
-	var EventPluginHub = __webpack_require__(53);
+	var EventPluginHub = __webpack_require__(55);
 
 	function runEventQueueInBatch(events) {
 	  EventPluginHub.enqueueEvents(events);
@@ -12653,7 +12666,7 @@
 	module.exports = ReactEventEmitterMixin;
 
 /***/ },
-/* 114 */
+/* 116 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -12669,7 +12682,7 @@
 
 	'use strict';
 
-	var ExecutionEnvironment = __webpack_require__(26);
+	var ExecutionEnvironment = __webpack_require__(28);
 
 	/**
 	 * Generate a mapping of standard vendor prefixes using the defined style property and event name.
@@ -12759,7 +12772,7 @@
 	module.exports = getVendorPrefixedEventName;
 
 /***/ },
-/* 115 */
+/* 117 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -12775,7 +12788,7 @@
 
 	'use strict';
 
-	var DisabledInputUtils = __webpack_require__(116);
+	var DisabledInputUtils = __webpack_require__(118);
 
 	/**
 	 * Implements a <button> native component that does not receive mouse events
@@ -12788,7 +12801,7 @@
 	module.exports = ReactDOMButton;
 
 /***/ },
-/* 116 */
+/* 118 */
 /***/ function(module, exports) {
 
 	/**
@@ -12843,7 +12856,7 @@
 	module.exports = DisabledInputUtils;
 
 /***/ },
-/* 117 */
+/* 119 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -12859,16 +12872,16 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var DisabledInputUtils = __webpack_require__(116);
-	var DOMPropertyOperations = __webpack_require__(107);
-	var LinkedValueUtils = __webpack_require__(118);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactUpdates = __webpack_require__(65);
+	var DisabledInputUtils = __webpack_require__(118);
+	var DOMPropertyOperations = __webpack_require__(109);
+	var LinkedValueUtils = __webpack_require__(120);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactUpdates = __webpack_require__(67);
 
-	var invariant = __webpack_require__(13);
-	var warning = __webpack_require__(16);
+	var invariant = __webpack_require__(15);
+	var warning = __webpack_require__(18);
 
 	var didWarnValueLink = false;
 	var didWarnCheckedLink = false;
@@ -13052,10 +13065,10 @@
 	}
 
 	module.exports = ReactDOMInput;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 118 */
+/* 120 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -13071,11 +13084,11 @@
 
 	'use strict';
 
-	var ReactPropTypes = __webpack_require__(41);
-	var ReactPropTypeLocations = __webpack_require__(34);
+	var ReactPropTypes = __webpack_require__(43);
+	var ReactPropTypeLocations = __webpack_require__(36);
 
-	var invariant = __webpack_require__(13);
-	var warning = __webpack_require__(16);
+	var invariant = __webpack_require__(15);
+	var warning = __webpack_require__(18);
 
 	var hasReadOnlyValue = {
 	  'button': true,
@@ -13191,10 +13204,10 @@
 	};
 
 	module.exports = LinkedValueUtils;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 119 */
+/* 121 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -13210,13 +13223,13 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var ReactChildren = __webpack_require__(11);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactDOMSelect = __webpack_require__(120);
+	var ReactChildren = __webpack_require__(13);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactDOMSelect = __webpack_require__(122);
 
-	var warning = __webpack_require__(16);
+	var warning = __webpack_require__(18);
 
 	/**
 	 * Implements an <option> native component that warns when `selected` is set.
@@ -13306,10 +13319,10 @@
 	};
 
 	module.exports = ReactDOMOption;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 120 */
+/* 122 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -13325,14 +13338,14 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var DisabledInputUtils = __webpack_require__(116);
-	var LinkedValueUtils = __webpack_require__(118);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactUpdates = __webpack_require__(65);
+	var DisabledInputUtils = __webpack_require__(118);
+	var LinkedValueUtils = __webpack_require__(120);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactUpdates = __webpack_require__(67);
 
-	var warning = __webpack_require__(16);
+	var warning = __webpack_require__(18);
 
 	var didWarnValueLink = false;
 	var didWarnValueNull = false;
@@ -13525,10 +13538,10 @@
 	}
 
 	module.exports = ReactDOMSelect;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 121 */
+/* 123 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -13544,16 +13557,16 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var DisabledInputUtils = __webpack_require__(116);
-	var DOMPropertyOperations = __webpack_require__(107);
-	var LinkedValueUtils = __webpack_require__(118);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactUpdates = __webpack_require__(65);
+	var DisabledInputUtils = __webpack_require__(118);
+	var DOMPropertyOperations = __webpack_require__(109);
+	var LinkedValueUtils = __webpack_require__(120);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactUpdates = __webpack_require__(67);
 
-	var invariant = __webpack_require__(13);
-	var warning = __webpack_require__(16);
+	var invariant = __webpack_require__(15);
+	var warning = __webpack_require__(18);
 
 	var didWarnValueLink = false;
 	var didWarnValueNull = false;
@@ -13673,10 +13686,10 @@
 	}
 
 	module.exports = ReactDOMTextarea;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 122 */
+/* 124 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -13692,17 +13705,17 @@
 
 	'use strict';
 
-	var ReactComponentEnvironment = __webpack_require__(123);
-	var ReactInstrumentation = __webpack_require__(24);
-	var ReactMultiChildUpdateTypes = __webpack_require__(94);
+	var ReactComponentEnvironment = __webpack_require__(125);
+	var ReactInstrumentation = __webpack_require__(26);
+	var ReactMultiChildUpdateTypes = __webpack_require__(96);
 
-	var ReactCurrentOwner = __webpack_require__(15);
-	var ReactReconciler = __webpack_require__(68);
-	var ReactChildReconciler = __webpack_require__(124);
+	var ReactCurrentOwner = __webpack_require__(17);
+	var ReactReconciler = __webpack_require__(70);
+	var ReactChildReconciler = __webpack_require__(126);
 
-	var emptyFunction = __webpack_require__(17);
-	var flattenChildren = __webpack_require__(133);
-	var invariant = __webpack_require__(13);
+	var emptyFunction = __webpack_require__(19);
+	var flattenChildren = __webpack_require__(135);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * Make an update for markup to be rendered and inserted at a supplied index.
@@ -14102,10 +14115,10 @@
 	};
 
 	module.exports = ReactMultiChild;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 123 */
+/* 125 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -14121,7 +14134,7 @@
 
 	'use strict';
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	var injected = false;
 
@@ -14159,10 +14172,10 @@
 	};
 
 	module.exports = ReactComponentEnvironment;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 124 */
+/* 126 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -14178,13 +14191,13 @@
 
 	'use strict';
 
-	var ReactReconciler = __webpack_require__(68);
+	var ReactReconciler = __webpack_require__(70);
 
-	var instantiateReactComponent = __webpack_require__(125);
-	var KeyEscapeUtils = __webpack_require__(21);
-	var shouldUpdateReactComponent = __webpack_require__(130);
-	var traverseAllChildren = __webpack_require__(19);
-	var warning = __webpack_require__(16);
+	var instantiateReactComponent = __webpack_require__(127);
+	var KeyEscapeUtils = __webpack_require__(23);
+	var shouldUpdateReactComponent = __webpack_require__(132);
+	var traverseAllChildren = __webpack_require__(21);
+	var warning = __webpack_require__(18);
 
 	function instantiateChild(childInstances, child, name) {
 	  // We found a component instance.
@@ -14290,10 +14303,10 @@
 	};
 
 	module.exports = ReactChildReconciler;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 125 */
+/* 127 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -14309,15 +14322,15 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var ReactCompositeComponent = __webpack_require__(126);
-	var ReactEmptyComponent = __webpack_require__(131);
-	var ReactNativeComponent = __webpack_require__(132);
-	var ReactInstrumentation = __webpack_require__(24);
+	var ReactCompositeComponent = __webpack_require__(128);
+	var ReactEmptyComponent = __webpack_require__(133);
+	var ReactNativeComponent = __webpack_require__(134);
+	var ReactInstrumentation = __webpack_require__(26);
 
-	var invariant = __webpack_require__(13);
-	var warning = __webpack_require__(16);
+	var invariant = __webpack_require__(15);
+	var warning = __webpack_require__(18);
 
 	// To avoid a cyclic dependency, we create the final class in this module
 	var ReactCompositeComponentWrapper = function (element) {
@@ -14440,10 +14453,10 @@
 	}
 
 	module.exports = instantiateReactComponent;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 126 */
+/* 128 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -14459,24 +14472,24 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var ReactComponentEnvironment = __webpack_require__(123);
-	var ReactCurrentOwner = __webpack_require__(15);
-	var ReactElement = __webpack_require__(14);
-	var ReactErrorUtils = __webpack_require__(56);
-	var ReactInstanceMap = __webpack_require__(127);
-	var ReactInstrumentation = __webpack_require__(24);
-	var ReactNodeTypes = __webpack_require__(128);
-	var ReactPropTypeLocations = __webpack_require__(34);
-	var ReactPropTypeLocationNames = __webpack_require__(36);
-	var ReactReconciler = __webpack_require__(68);
-	var ReactUpdateQueue = __webpack_require__(129);
+	var ReactComponentEnvironment = __webpack_require__(125);
+	var ReactCurrentOwner = __webpack_require__(17);
+	var ReactElement = __webpack_require__(16);
+	var ReactErrorUtils = __webpack_require__(58);
+	var ReactInstanceMap = __webpack_require__(129);
+	var ReactInstrumentation = __webpack_require__(26);
+	var ReactNodeTypes = __webpack_require__(130);
+	var ReactPropTypeLocations = __webpack_require__(36);
+	var ReactPropTypeLocationNames = __webpack_require__(38);
+	var ReactReconciler = __webpack_require__(70);
+	var ReactUpdateQueue = __webpack_require__(131);
 
-	var emptyObject = __webpack_require__(32);
-	var invariant = __webpack_require__(13);
-	var shouldUpdateReactComponent = __webpack_require__(130);
-	var warning = __webpack_require__(16);
+	var emptyObject = __webpack_require__(34);
+	var invariant = __webpack_require__(15);
+	var shouldUpdateReactComponent = __webpack_require__(132);
+	var warning = __webpack_require__(18);
 
 	function getDeclarationErrorAddendum(component) {
 	  var owner = component._currentElement._owner || null;
@@ -15369,10 +15382,10 @@
 	};
 
 	module.exports = ReactCompositeComponent;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 127 */
+/* 129 */
 /***/ function(module, exports) {
 
 	/**
@@ -15425,7 +15438,7 @@
 	module.exports = ReactInstanceMap;
 
 /***/ },
-/* 128 */
+/* 130 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -15441,9 +15454,9 @@
 
 	'use strict';
 
-	var ReactElement = __webpack_require__(14);
+	var ReactElement = __webpack_require__(16);
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	var ReactNodeTypes = {
 	  NATIVE: 0,
@@ -15465,10 +15478,10 @@
 	};
 
 	module.exports = ReactNodeTypes;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 129 */
+/* 131 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -15484,12 +15497,12 @@
 
 	'use strict';
 
-	var ReactCurrentOwner = __webpack_require__(15);
-	var ReactInstanceMap = __webpack_require__(127);
-	var ReactUpdates = __webpack_require__(65);
+	var ReactCurrentOwner = __webpack_require__(17);
+	var ReactInstanceMap = __webpack_require__(129);
+	var ReactUpdates = __webpack_require__(67);
 
-	var invariant = __webpack_require__(13);
-	var warning = __webpack_require__(16);
+	var invariant = __webpack_require__(15);
+	var warning = __webpack_require__(18);
 
 	function enqueueUpdate(internalInstance) {
 	  ReactUpdates.enqueueUpdate(internalInstance);
@@ -15686,10 +15699,10 @@
 	};
 
 	module.exports = ReactUpdateQueue;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 130 */
+/* 132 */
 /***/ function(module, exports) {
 
 	/**
@@ -15736,7 +15749,7 @@
 	module.exports = shouldUpdateReactComponent;
 
 /***/ },
-/* 131 */
+/* 133 */
 /***/ function(module, exports) {
 
 	/**
@@ -15771,7 +15784,7 @@
 	module.exports = ReactEmptyComponent;
 
 /***/ },
-/* 132 */
+/* 134 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -15787,9 +15800,9 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	var autoGenerateWrapperClass = null;
 	var genericComponentClass = null;
@@ -15869,10 +15882,10 @@
 	};
 
 	module.exports = ReactNativeComponent;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 133 */
+/* 135 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -15888,9 +15901,9 @@
 
 	'use strict';
 
-	var KeyEscapeUtils = __webpack_require__(21);
-	var traverseAllChildren = __webpack_require__(19);
-	var warning = __webpack_require__(16);
+	var KeyEscapeUtils = __webpack_require__(23);
+	var traverseAllChildren = __webpack_require__(21);
+	var warning = __webpack_require__(18);
 
 	/**
 	 * @param {function} traverseContext Context passed through traversal.
@@ -15924,10 +15937,10 @@
 	}
 
 	module.exports = flattenChildren;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 134 */
+/* 136 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -15943,10 +15956,10 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var PooledClass = __webpack_require__(12);
-	var Transaction = __webpack_require__(71);
+	var PooledClass = __webpack_require__(14);
+	var Transaction = __webpack_require__(73);
 
 	/**
 	 * Executed within the scope of the `Transaction` instance. Consider these as
@@ -16005,7 +16018,7 @@
 	module.exports = ReactServerRenderingTransaction;
 
 /***/ },
-/* 135 */
+/* 137 */
 /***/ function(module, exports) {
 
 	/**
@@ -16076,7 +16089,7 @@
 	module.exports = shallowEqual;
 
 /***/ },
-/* 136 */
+/* 138 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -16092,10 +16105,10 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var emptyFunction = __webpack_require__(17);
-	var warning = __webpack_require__(16);
+	var emptyFunction = __webpack_require__(19);
+	var warning = __webpack_require__(18);
 
 	var validateDOMNesting = emptyFunction;
 
@@ -16448,10 +16461,10 @@
 	}
 
 	module.exports = validateDOMNesting;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 137 */
+/* 139 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -16467,10 +16480,10 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var DOMLazyTree = __webpack_require__(84);
-	var ReactDOMComponentTree = __webpack_require__(46);
+	var DOMLazyTree = __webpack_require__(86);
+	var ReactDOMComponentTree = __webpack_require__(48);
 
 	var ReactDOMEmptyComponent = function (instantiate) {
 	  // ReactCompositeComponent uses this:
@@ -16516,7 +16529,7 @@
 	module.exports = ReactDOMEmptyComponent;
 
 /***/ },
-/* 138 */
+/* 140 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -16532,7 +16545,7 @@
 
 	'use strict';
 
-	var invariant = __webpack_require__(13);
+	var invariant = __webpack_require__(15);
 
 	/**
 	 * Return the lowest common ancestor of A and B, or null if they are in
@@ -16653,10 +16666,10 @@
 	  traverseTwoPhase: traverseTwoPhase,
 	  traverseEnterLeave: traverseEnterLeave
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 139 */
+/* 141 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -16672,16 +16685,16 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var DOMChildrenOperations = __webpack_require__(83);
-	var DOMLazyTree = __webpack_require__(84);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactInstrumentation = __webpack_require__(24);
+	var DOMChildrenOperations = __webpack_require__(85);
+	var DOMLazyTree = __webpack_require__(86);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactInstrumentation = __webpack_require__(26);
 
-	var escapeTextContentForBrowser = __webpack_require__(88);
-	var invariant = __webpack_require__(13);
-	var validateDOMNesting = __webpack_require__(136);
+	var escapeTextContentForBrowser = __webpack_require__(90);
+	var invariant = __webpack_require__(15);
+	var validateDOMNesting = __webpack_require__(138);
 
 	/**
 	 * Text nodes violate a couple assumptions that React makes about components:
@@ -16829,10 +16842,10 @@
 	});
 
 	module.exports = ReactDOMTextComponent;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 140 */
+/* 142 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -16848,12 +16861,12 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var ReactUpdates = __webpack_require__(65);
-	var Transaction = __webpack_require__(71);
+	var ReactUpdates = __webpack_require__(67);
+	var Transaction = __webpack_require__(73);
 
-	var emptyFunction = __webpack_require__(17);
+	var emptyFunction = __webpack_require__(19);
 
 	var RESET_BATCHED_UPDATES = {
 	  initialize: emptyFunction,
@@ -16905,7 +16918,7 @@
 	module.exports = ReactDefaultBatchingStrategy;
 
 /***/ },
-/* 141 */
+/* 143 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -16921,16 +16934,16 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var EventListener = __webpack_require__(142);
-	var ExecutionEnvironment = __webpack_require__(26);
-	var PooledClass = __webpack_require__(12);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactUpdates = __webpack_require__(65);
+	var EventListener = __webpack_require__(144);
+	var ExecutionEnvironment = __webpack_require__(28);
+	var PooledClass = __webpack_require__(14);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactUpdates = __webpack_require__(67);
 
-	var getEventTarget = __webpack_require__(72);
-	var getUnboundedScrollPosition = __webpack_require__(143);
+	var getEventTarget = __webpack_require__(74);
+	var getUnboundedScrollPosition = __webpack_require__(145);
 
 	/**
 	 * Find the deepest React component completely containing the root of the
@@ -17067,7 +17080,7 @@
 	module.exports = ReactEventListener;
 
 /***/ },
-/* 142 */
+/* 144 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -17090,7 +17103,7 @@
 	 * @typechecks
 	 */
 
-	var emptyFunction = __webpack_require__(17);
+	var emptyFunction = __webpack_require__(19);
 
 	/**
 	 * Upstream version of event listener. Does not take into account specific
@@ -17153,10 +17166,10 @@
 	};
 
 	module.exports = EventListener;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 143 */
+/* 145 */
 /***/ function(module, exports) {
 
 	/**
@@ -17199,7 +17212,7 @@
 	module.exports = getUnboundedScrollPosition;
 
 /***/ },
-/* 144 */
+/* 146 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -17215,15 +17228,15 @@
 
 	'use strict';
 
-	var DOMProperty = __webpack_require__(47);
-	var EventPluginHub = __webpack_require__(53);
-	var EventPluginUtils = __webpack_require__(55);
-	var ReactComponentEnvironment = __webpack_require__(123);
-	var ReactClass = __webpack_require__(33);
-	var ReactEmptyComponent = __webpack_require__(131);
-	var ReactBrowserEventEmitter = __webpack_require__(112);
-	var ReactNativeComponent = __webpack_require__(132);
-	var ReactUpdates = __webpack_require__(65);
+	var DOMProperty = __webpack_require__(49);
+	var EventPluginHub = __webpack_require__(55);
+	var EventPluginUtils = __webpack_require__(57);
+	var ReactComponentEnvironment = __webpack_require__(125);
+	var ReactClass = __webpack_require__(35);
+	var ReactEmptyComponent = __webpack_require__(133);
+	var ReactBrowserEventEmitter = __webpack_require__(114);
+	var ReactNativeComponent = __webpack_require__(134);
+	var ReactUpdates = __webpack_require__(67);
 
 	var ReactInjection = {
 	  Component: ReactComponentEnvironment.injection,
@@ -17240,7 +17253,7 @@
 	module.exports = ReactInjection;
 
 /***/ },
-/* 145 */
+/* 147 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -17256,13 +17269,13 @@
 
 	'use strict';
 
-	var _assign = __webpack_require__(10);
+	var _assign = __webpack_require__(12);
 
-	var CallbackQueue = __webpack_require__(66);
-	var PooledClass = __webpack_require__(12);
-	var ReactBrowserEventEmitter = __webpack_require__(112);
-	var ReactInputSelection = __webpack_require__(146);
-	var Transaction = __webpack_require__(71);
+	var CallbackQueue = __webpack_require__(68);
+	var PooledClass = __webpack_require__(14);
+	var ReactBrowserEventEmitter = __webpack_require__(114);
+	var ReactInputSelection = __webpack_require__(148);
+	var Transaction = __webpack_require__(73);
 
 	/**
 	 * Ensures that, when possible, the selection range (currently selected text
@@ -17407,7 +17420,7 @@
 	module.exports = ReactReconcileTransaction;
 
 /***/ },
-/* 146 */
+/* 148 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -17423,11 +17436,11 @@
 
 	'use strict';
 
-	var ReactDOMSelection = __webpack_require__(147);
+	var ReactDOMSelection = __webpack_require__(149);
 
-	var containsNode = __webpack_require__(149);
-	var focusNode = __webpack_require__(98);
-	var getActiveElement = __webpack_require__(152);
+	var containsNode = __webpack_require__(151);
+	var focusNode = __webpack_require__(100);
+	var getActiveElement = __webpack_require__(154);
 
 	function isInDocument(node) {
 	  return containsNode(document.documentElement, node);
@@ -17536,7 +17549,7 @@
 	module.exports = ReactInputSelection;
 
 /***/ },
-/* 147 */
+/* 149 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -17552,10 +17565,10 @@
 
 	'use strict';
 
-	var ExecutionEnvironment = __webpack_require__(26);
+	var ExecutionEnvironment = __webpack_require__(28);
 
-	var getNodeForCharacterOffset = __webpack_require__(148);
-	var getTextContentAccessor = __webpack_require__(60);
+	var getNodeForCharacterOffset = __webpack_require__(150);
+	var getTextContentAccessor = __webpack_require__(62);
 
 	/**
 	 * While `isCollapsed` is available on the Selection object and `collapsed`
@@ -17753,7 +17766,7 @@
 	module.exports = ReactDOMSelection;
 
 /***/ },
-/* 148 */
+/* 150 */
 /***/ function(module, exports) {
 
 	/**
@@ -17832,7 +17845,7 @@
 	module.exports = getNodeForCharacterOffset;
 
 /***/ },
-/* 149 */
+/* 151 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -17848,7 +17861,7 @@
 	 * 
 	 */
 
-	var isTextNode = __webpack_require__(150);
+	var isTextNode = __webpack_require__(152);
 
 	/*eslint-disable no-bitwise */
 
@@ -17876,7 +17889,7 @@
 	module.exports = containsNode;
 
 /***/ },
-/* 150 */
+/* 152 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -17892,7 +17905,7 @@
 	 * @typechecks
 	 */
 
-	var isNode = __webpack_require__(151);
+	var isNode = __webpack_require__(153);
 
 	/**
 	 * @param {*} object The object to check.
@@ -17905,7 +17918,7 @@
 	module.exports = isTextNode;
 
 /***/ },
-/* 151 */
+/* 153 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -17932,7 +17945,7 @@
 	module.exports = isNode;
 
 /***/ },
-/* 152 */
+/* 154 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -17971,7 +17984,7 @@
 	module.exports = getActiveElement;
 
 /***/ },
-/* 153 */
+/* 155 */
 /***/ function(module, exports) {
 
 	/**
@@ -18276,7 +18289,7 @@
 	module.exports = SVGDOMPropertyConfig;
 
 /***/ },
-/* 154 */
+/* 156 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -18292,17 +18305,17 @@
 
 	'use strict';
 
-	var EventConstants = __webpack_require__(51);
-	var EventPropagators = __webpack_require__(52);
-	var ExecutionEnvironment = __webpack_require__(26);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactInputSelection = __webpack_require__(146);
-	var SyntheticEvent = __webpack_require__(62);
+	var EventConstants = __webpack_require__(53);
+	var EventPropagators = __webpack_require__(54);
+	var ExecutionEnvironment = __webpack_require__(28);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactInputSelection = __webpack_require__(148);
+	var SyntheticEvent = __webpack_require__(64);
 
-	var getActiveElement = __webpack_require__(152);
-	var isTextInputElement = __webpack_require__(74);
-	var keyOf = __webpack_require__(37);
-	var shallowEqual = __webpack_require__(135);
+	var getActiveElement = __webpack_require__(154);
+	var isTextInputElement = __webpack_require__(76);
+	var keyOf = __webpack_require__(39);
+	var shallowEqual = __webpack_require__(137);
 
 	var topLevelTypes = EventConstants.topLevelTypes;
 
@@ -18477,7 +18490,7 @@
 	module.exports = SelectEventPlugin;
 
 /***/ },
-/* 155 */
+/* 157 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -18493,26 +18506,26 @@
 
 	'use strict';
 
-	var EventConstants = __webpack_require__(51);
-	var EventListener = __webpack_require__(142);
-	var EventPropagators = __webpack_require__(52);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var SyntheticAnimationEvent = __webpack_require__(156);
-	var SyntheticClipboardEvent = __webpack_require__(157);
-	var SyntheticEvent = __webpack_require__(62);
-	var SyntheticFocusEvent = __webpack_require__(158);
-	var SyntheticKeyboardEvent = __webpack_require__(159);
-	var SyntheticMouseEvent = __webpack_require__(77);
-	var SyntheticDragEvent = __webpack_require__(162);
-	var SyntheticTouchEvent = __webpack_require__(163);
-	var SyntheticTransitionEvent = __webpack_require__(164);
-	var SyntheticUIEvent = __webpack_require__(78);
-	var SyntheticWheelEvent = __webpack_require__(165);
+	var EventConstants = __webpack_require__(53);
+	var EventListener = __webpack_require__(144);
+	var EventPropagators = __webpack_require__(54);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var SyntheticAnimationEvent = __webpack_require__(158);
+	var SyntheticClipboardEvent = __webpack_require__(159);
+	var SyntheticEvent = __webpack_require__(64);
+	var SyntheticFocusEvent = __webpack_require__(160);
+	var SyntheticKeyboardEvent = __webpack_require__(161);
+	var SyntheticMouseEvent = __webpack_require__(79);
+	var SyntheticDragEvent = __webpack_require__(164);
+	var SyntheticTouchEvent = __webpack_require__(165);
+	var SyntheticTransitionEvent = __webpack_require__(166);
+	var SyntheticUIEvent = __webpack_require__(80);
+	var SyntheticWheelEvent = __webpack_require__(167);
 
-	var emptyFunction = __webpack_require__(17);
-	var getEventCharCode = __webpack_require__(160);
-	var invariant = __webpack_require__(13);
-	var keyOf = __webpack_require__(37);
+	var emptyFunction = __webpack_require__(19);
+	var getEventCharCode = __webpack_require__(162);
+	var invariant = __webpack_require__(15);
+	var keyOf = __webpack_require__(39);
 
 	var topLevelTypes = EventConstants.topLevelTypes;
 
@@ -19107,10 +19120,10 @@
 	};
 
 	module.exports = SimpleEventPlugin;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 156 */
+/* 158 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19126,7 +19139,7 @@
 
 	'use strict';
 
-	var SyntheticEvent = __webpack_require__(62);
+	var SyntheticEvent = __webpack_require__(64);
 
 	/**
 	 * @interface Event
@@ -19154,7 +19167,7 @@
 	module.exports = SyntheticAnimationEvent;
 
 /***/ },
-/* 157 */
+/* 159 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19170,7 +19183,7 @@
 
 	'use strict';
 
-	var SyntheticEvent = __webpack_require__(62);
+	var SyntheticEvent = __webpack_require__(64);
 
 	/**
 	 * @interface Event
@@ -19197,7 +19210,7 @@
 	module.exports = SyntheticClipboardEvent;
 
 /***/ },
-/* 158 */
+/* 160 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19213,7 +19226,7 @@
 
 	'use strict';
 
-	var SyntheticUIEvent = __webpack_require__(78);
+	var SyntheticUIEvent = __webpack_require__(80);
 
 	/**
 	 * @interface FocusEvent
@@ -19238,7 +19251,7 @@
 	module.exports = SyntheticFocusEvent;
 
 /***/ },
-/* 159 */
+/* 161 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19254,11 +19267,11 @@
 
 	'use strict';
 
-	var SyntheticUIEvent = __webpack_require__(78);
+	var SyntheticUIEvent = __webpack_require__(80);
 
-	var getEventCharCode = __webpack_require__(160);
-	var getEventKey = __webpack_require__(161);
-	var getEventModifierState = __webpack_require__(80);
+	var getEventCharCode = __webpack_require__(162);
+	var getEventKey = __webpack_require__(163);
+	var getEventModifierState = __webpack_require__(82);
 
 	/**
 	 * @interface KeyboardEvent
@@ -19327,7 +19340,7 @@
 	module.exports = SyntheticKeyboardEvent;
 
 /***/ },
-/* 160 */
+/* 162 */
 /***/ function(module, exports) {
 
 	/**
@@ -19382,7 +19395,7 @@
 	module.exports = getEventCharCode;
 
 /***/ },
-/* 161 */
+/* 163 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19398,7 +19411,7 @@
 
 	'use strict';
 
-	var getEventCharCode = __webpack_require__(160);
+	var getEventCharCode = __webpack_require__(162);
 
 	/**
 	 * Normalization of deprecated HTML5 `key` values
@@ -19489,7 +19502,7 @@
 	module.exports = getEventKey;
 
 /***/ },
-/* 162 */
+/* 164 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19505,7 +19518,7 @@
 
 	'use strict';
 
-	var SyntheticMouseEvent = __webpack_require__(77);
+	var SyntheticMouseEvent = __webpack_require__(79);
 
 	/**
 	 * @interface DragEvent
@@ -19530,7 +19543,7 @@
 	module.exports = SyntheticDragEvent;
 
 /***/ },
-/* 163 */
+/* 165 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19546,9 +19559,9 @@
 
 	'use strict';
 
-	var SyntheticUIEvent = __webpack_require__(78);
+	var SyntheticUIEvent = __webpack_require__(80);
 
-	var getEventModifierState = __webpack_require__(80);
+	var getEventModifierState = __webpack_require__(82);
 
 	/**
 	 * @interface TouchEvent
@@ -19580,7 +19593,7 @@
 	module.exports = SyntheticTouchEvent;
 
 /***/ },
-/* 164 */
+/* 166 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19596,7 +19609,7 @@
 
 	'use strict';
 
-	var SyntheticEvent = __webpack_require__(62);
+	var SyntheticEvent = __webpack_require__(64);
 
 	/**
 	 * @interface Event
@@ -19624,7 +19637,7 @@
 	module.exports = SyntheticTransitionEvent;
 
 /***/ },
-/* 165 */
+/* 167 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19640,7 +19653,7 @@
 
 	'use strict';
 
-	var SyntheticMouseEvent = __webpack_require__(77);
+	var SyntheticMouseEvent = __webpack_require__(79);
 
 	/**
 	 * @interface WheelEvent
@@ -19683,7 +19696,7 @@
 	module.exports = SyntheticWheelEvent;
 
 /***/ },
-/* 166 */
+/* 168 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -19699,27 +19712,27 @@
 
 	'use strict';
 
-	var DOMLazyTree = __webpack_require__(84);
-	var DOMProperty = __webpack_require__(47);
-	var ReactBrowserEventEmitter = __webpack_require__(112);
-	var ReactCurrentOwner = __webpack_require__(15);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactDOMContainerInfo = __webpack_require__(167);
-	var ReactDOMFeatureFlags = __webpack_require__(168);
-	var ReactElement = __webpack_require__(14);
-	var ReactFeatureFlags = __webpack_require__(67);
-	var ReactInstrumentation = __webpack_require__(24);
-	var ReactMarkupChecksum = __webpack_require__(169);
-	var ReactReconciler = __webpack_require__(68);
-	var ReactUpdateQueue = __webpack_require__(129);
-	var ReactUpdates = __webpack_require__(65);
+	var DOMLazyTree = __webpack_require__(86);
+	var DOMProperty = __webpack_require__(49);
+	var ReactBrowserEventEmitter = __webpack_require__(114);
+	var ReactCurrentOwner = __webpack_require__(17);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactDOMContainerInfo = __webpack_require__(169);
+	var ReactDOMFeatureFlags = __webpack_require__(170);
+	var ReactElement = __webpack_require__(16);
+	var ReactFeatureFlags = __webpack_require__(69);
+	var ReactInstrumentation = __webpack_require__(26);
+	var ReactMarkupChecksum = __webpack_require__(171);
+	var ReactReconciler = __webpack_require__(70);
+	var ReactUpdateQueue = __webpack_require__(131);
+	var ReactUpdates = __webpack_require__(67);
 
-	var emptyObject = __webpack_require__(32);
-	var instantiateReactComponent = __webpack_require__(125);
-	var invariant = __webpack_require__(13);
-	var setInnerHTML = __webpack_require__(89);
-	var shouldUpdateReactComponent = __webpack_require__(130);
-	var warning = __webpack_require__(16);
+	var emptyObject = __webpack_require__(34);
+	var instantiateReactComponent = __webpack_require__(127);
+	var invariant = __webpack_require__(15);
+	var setInnerHTML = __webpack_require__(91);
+	var shouldUpdateReactComponent = __webpack_require__(132);
+	var warning = __webpack_require__(18);
 
 	var ATTR_NAME = DOMProperty.ID_ATTRIBUTE_NAME;
 	var ROOT_ATTR_NAME = DOMProperty.ROOT_ATTRIBUTE_NAME;
@@ -20179,10 +20192,10 @@
 	};
 
 	module.exports = ReactMount;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 167 */
+/* 169 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -20198,7 +20211,7 @@
 
 	'use strict';
 
-	var validateDOMNesting = __webpack_require__(136);
+	var validateDOMNesting = __webpack_require__(138);
 
 	var DOC_NODE_TYPE = 9;
 
@@ -20218,10 +20231,10 @@
 	}
 
 	module.exports = ReactDOMContainerInfo;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 168 */
+/* 170 */
 /***/ function(module, exports) {
 
 	/**
@@ -20244,7 +20257,7 @@
 	module.exports = ReactDOMFeatureFlags;
 
 /***/ },
-/* 169 */
+/* 171 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -20260,7 +20273,7 @@
 
 	'use strict';
 
-	var adler32 = __webpack_require__(170);
+	var adler32 = __webpack_require__(172);
 
 	var TAG_END = /\/?>/;
 	var COMMENT_START = /^<\!\-\-/;
@@ -20299,7 +20312,7 @@
 	module.exports = ReactMarkupChecksum;
 
 /***/ },
-/* 170 */
+/* 172 */
 /***/ function(module, exports) {
 
 	/**
@@ -20347,7 +20360,7 @@
 	module.exports = adler32;
 
 /***/ },
-/* 171 */
+/* 173 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -20363,13 +20376,13 @@
 
 	'use strict';
 
-	var ReactCurrentOwner = __webpack_require__(15);
-	var ReactDOMComponentTree = __webpack_require__(46);
-	var ReactInstanceMap = __webpack_require__(127);
+	var ReactCurrentOwner = __webpack_require__(17);
+	var ReactDOMComponentTree = __webpack_require__(48);
+	var ReactInstanceMap = __webpack_require__(129);
 
-	var getNativeComponentFromComposite = __webpack_require__(172);
-	var invariant = __webpack_require__(13);
-	var warning = __webpack_require__(16);
+	var getNativeComponentFromComposite = __webpack_require__(174);
+	var invariant = __webpack_require__(15);
+	var warning = __webpack_require__(18);
 
 	/**
 	 * Returns the DOM node rendered by this element.
@@ -20408,10 +20421,10 @@
 	}
 
 	module.exports = findDOMNode;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 172 */
+/* 174 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -20427,7 +20440,7 @@
 
 	'use strict';
 
-	var ReactNodeTypes = __webpack_require__(128);
+	var ReactNodeTypes = __webpack_require__(130);
 
 	function getNativeComponentFromComposite(inst) {
 	  var type;
@@ -20446,7 +20459,7 @@
 	module.exports = getNativeComponentFromComposite;
 
 /***/ },
-/* 173 */
+/* 175 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -20462,12 +20475,12 @@
 
 	'use strict';
 
-	var ReactMount = __webpack_require__(166);
+	var ReactMount = __webpack_require__(168);
 
 	module.exports = ReactMount.renderSubtreeIntoContainer;
 
 /***/ },
-/* 174 */
+/* 176 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20475,11 +20488,11 @@
 	exports.__esModule = true;
 	exports.connect = exports.Provider = undefined;
 
-	var _Provider = __webpack_require__(175);
+	var _Provider = __webpack_require__(177);
 
 	var _Provider2 = _interopRequireDefault(_Provider);
 
-	var _connect = __webpack_require__(178);
+	var _connect = __webpack_require__(180);
 
 	var _connect2 = _interopRequireDefault(_connect);
 
@@ -20489,7 +20502,7 @@
 	exports.connect = _connect2["default"];
 
 /***/ },
-/* 175 */
+/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -20497,13 +20510,13 @@
 	exports.__esModule = true;
 	exports["default"] = undefined;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
-	var _storeShape = __webpack_require__(176);
+	var _storeShape = __webpack_require__(178);
 
 	var _storeShape2 = _interopRequireDefault(_storeShape);
 
-	var _warning = __webpack_require__(177);
+	var _warning = __webpack_require__(179);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
@@ -20570,17 +20583,17 @@
 	Provider.childContextTypes = {
 	  store: _storeShape2["default"].isRequired
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 176 */
+/* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	exports["default"] = _react.PropTypes.shape({
 	  subscribe: _react.PropTypes.func.isRequired,
@@ -20589,7 +20602,7 @@
 	});
 
 /***/ },
-/* 177 */
+/* 179 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -20618,7 +20631,7 @@
 	}
 
 /***/ },
-/* 178 */
+/* 180 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -20628,33 +20641,33 @@
 	exports.__esModule = true;
 	exports["default"] = connect;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
-	var _storeShape = __webpack_require__(176);
+	var _storeShape = __webpack_require__(178);
 
 	var _storeShape2 = _interopRequireDefault(_storeShape);
 
-	var _shallowEqual = __webpack_require__(179);
+	var _shallowEqual = __webpack_require__(181);
 
 	var _shallowEqual2 = _interopRequireDefault(_shallowEqual);
 
-	var _wrapActionCreators = __webpack_require__(180);
+	var _wrapActionCreators = __webpack_require__(182);
 
 	var _wrapActionCreators2 = _interopRequireDefault(_wrapActionCreators);
 
-	var _warning = __webpack_require__(177);
+	var _warning = __webpack_require__(179);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
-	var _isPlainObject = __webpack_require__(194);
+	var _isPlainObject = __webpack_require__(196);
 
 	var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 
-	var _hoistNonReactStatics = __webpack_require__(198);
+	var _hoistNonReactStatics = __webpack_require__(200);
 
 	var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 
-	var _invariant = __webpack_require__(199);
+	var _invariant = __webpack_require__(201);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
@@ -21014,10 +21027,10 @@
 	    return (0, _hoistNonReactStatics2["default"])(Connect, WrappedComponent);
 	  };
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 179 */
+/* 181 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -21048,7 +21061,7 @@
 	}
 
 /***/ },
-/* 180 */
+/* 182 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21056,7 +21069,7 @@
 	exports.__esModule = true;
 	exports["default"] = wrapActionCreators;
 
-	var _redux = __webpack_require__(181);
+	var _redux = __webpack_require__(183);
 
 	function wrapActionCreators(actionCreators) {
 	  return function (dispatch) {
@@ -21065,7 +21078,7 @@
 	}
 
 /***/ },
-/* 181 */
+/* 183 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -21073,27 +21086,27 @@
 	exports.__esModule = true;
 	exports.compose = exports.applyMiddleware = exports.bindActionCreators = exports.combineReducers = exports.createStore = undefined;
 
-	var _createStore = __webpack_require__(182);
+	var _createStore = __webpack_require__(184);
 
 	var _createStore2 = _interopRequireDefault(_createStore);
 
-	var _combineReducers = __webpack_require__(189);
+	var _combineReducers = __webpack_require__(191);
 
 	var _combineReducers2 = _interopRequireDefault(_combineReducers);
 
-	var _bindActionCreators = __webpack_require__(191);
+	var _bindActionCreators = __webpack_require__(193);
 
 	var _bindActionCreators2 = _interopRequireDefault(_bindActionCreators);
 
-	var _applyMiddleware = __webpack_require__(192);
+	var _applyMiddleware = __webpack_require__(194);
 
 	var _applyMiddleware2 = _interopRequireDefault(_applyMiddleware);
 
-	var _compose = __webpack_require__(193);
+	var _compose = __webpack_require__(195);
 
 	var _compose2 = _interopRequireDefault(_compose);
 
-	var _warning = __webpack_require__(190);
+	var _warning = __webpack_require__(192);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
@@ -21114,10 +21127,10 @@
 	exports.bindActionCreators = _bindActionCreators2["default"];
 	exports.applyMiddleware = _applyMiddleware2["default"];
 	exports.compose = _compose2["default"];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 182 */
+/* 184 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21126,11 +21139,11 @@
 	exports.ActionTypes = undefined;
 	exports["default"] = createStore;
 
-	var _isPlainObject = __webpack_require__(183);
+	var _isPlainObject = __webpack_require__(185);
 
 	var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 
-	var _symbolObservable = __webpack_require__(187);
+	var _symbolObservable = __webpack_require__(189);
 
 	var _symbolObservable2 = _interopRequireDefault(_symbolObservable);
 
@@ -21384,12 +21397,12 @@
 	}
 
 /***/ },
-/* 183 */
+/* 185 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getPrototype = __webpack_require__(184),
-	    isHostObject = __webpack_require__(185),
-	    isObjectLike = __webpack_require__(186);
+	var getPrototype = __webpack_require__(186),
+	    isHostObject = __webpack_require__(187),
+	    isObjectLike = __webpack_require__(188);
 
 	/** `Object#toString` result references. */
 	var objectTag = '[object Object]';
@@ -21460,7 +21473,7 @@
 
 
 /***/ },
-/* 184 */
+/* 186 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -21481,7 +21494,7 @@
 
 
 /***/ },
-/* 185 */
+/* 187 */
 /***/ function(module, exports) {
 
 	/**
@@ -21507,7 +21520,7 @@
 
 
 /***/ },
-/* 186 */
+/* 188 */
 /***/ function(module, exports) {
 
 	/**
@@ -21542,18 +21555,18 @@
 
 
 /***/ },
-/* 187 */
+/* 189 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/* global window */
 	'use strict';
 
-	module.exports = __webpack_require__(188)(global || window || this);
+	module.exports = __webpack_require__(190)(global || window || this);
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 188 */
+/* 190 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21578,7 +21591,7 @@
 
 
 /***/ },
-/* 189 */
+/* 191 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -21586,13 +21599,13 @@
 	exports.__esModule = true;
 	exports["default"] = combineReducers;
 
-	var _createStore = __webpack_require__(182);
+	var _createStore = __webpack_require__(184);
 
-	var _isPlainObject = __webpack_require__(183);
+	var _isPlainObject = __webpack_require__(185);
 
 	var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 
-	var _warning = __webpack_require__(190);
+	var _warning = __webpack_require__(192);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
@@ -21708,10 +21721,10 @@
 	    return hasChanged ? nextState : state;
 	  };
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 190 */
+/* 192 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21741,7 +21754,7 @@
 	}
 
 /***/ },
-/* 191 */
+/* 193 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21797,7 +21810,7 @@
 	}
 
 /***/ },
-/* 192 */
+/* 194 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21808,7 +21821,7 @@
 
 	exports["default"] = applyMiddleware;
 
-	var _compose = __webpack_require__(193);
+	var _compose = __webpack_require__(195);
 
 	var _compose2 = _interopRequireDefault(_compose);
 
@@ -21860,7 +21873,7 @@
 	}
 
 /***/ },
-/* 193 */
+/* 195 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -21905,12 +21918,12 @@
 	}
 
 /***/ },
-/* 194 */
+/* 196 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getPrototype = __webpack_require__(195),
-	    isHostObject = __webpack_require__(196),
-	    isObjectLike = __webpack_require__(197);
+	var getPrototype = __webpack_require__(197),
+	    isHostObject = __webpack_require__(198),
+	    isObjectLike = __webpack_require__(199);
 
 	/** `Object#toString` result references. */
 	var objectTag = '[object Object]';
@@ -21981,7 +21994,7 @@
 
 
 /***/ },
-/* 195 */
+/* 197 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -22002,7 +22015,7 @@
 
 
 /***/ },
-/* 196 */
+/* 198 */
 /***/ function(module, exports) {
 
 	/**
@@ -22028,7 +22041,7 @@
 
 
 /***/ },
-/* 197 */
+/* 199 */
 /***/ function(module, exports) {
 
 	/**
@@ -22063,7 +22076,7 @@
 
 
 /***/ },
-/* 198 */
+/* 200 */
 /***/ function(module, exports) {
 
 	/**
@@ -22119,7 +22132,7 @@
 
 
 /***/ },
-/* 199 */
+/* 201 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -22174,10 +22187,10 @@
 
 	module.exports = invariant;
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 200 */
+/* 202 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22185,7 +22198,7 @@
 	exports.__esModule = true;
 	exports.createMemoryHistory = exports.hashHistory = exports.browserHistory = exports.applyRouterMiddleware = exports.formatPattern = exports.useRouterHistory = exports.match = exports.routerShape = exports.locationShape = exports.PropTypes = exports.RoutingContext = exports.RouterContext = exports.createRoutes = exports.useRoutes = exports.RouteContext = exports.Lifecycle = exports.History = exports.Route = exports.Redirect = exports.IndexRoute = exports.IndexRedirect = exports.withRouter = exports.IndexLink = exports.Link = exports.Router = undefined;
 
-	var _RouteUtils = __webpack_require__(201);
+	var _RouteUtils = __webpack_require__(203);
 
 	Object.defineProperty(exports, 'createRoutes', {
 	  enumerable: true,
@@ -22194,7 +22207,7 @@
 	  }
 	});
 
-	var _PropTypes2 = __webpack_require__(204);
+	var _PropTypes2 = __webpack_require__(206);
 
 	Object.defineProperty(exports, 'locationShape', {
 	  enumerable: true,
@@ -22209,7 +22222,7 @@
 	  }
 	});
 
-	var _PatternUtils = __webpack_require__(207);
+	var _PatternUtils = __webpack_require__(209);
 
 	Object.defineProperty(exports, 'formatPattern', {
 	  enumerable: true,
@@ -22218,85 +22231,85 @@
 	  }
 	});
 
-	var _Router2 = __webpack_require__(209);
+	var _Router2 = __webpack_require__(211);
 
 	var _Router3 = _interopRequireDefault(_Router2);
 
-	var _Link2 = __webpack_require__(239);
+	var _Link2 = __webpack_require__(241);
 
 	var _Link3 = _interopRequireDefault(_Link2);
 
-	var _IndexLink2 = __webpack_require__(240);
+	var _IndexLink2 = __webpack_require__(242);
 
 	var _IndexLink3 = _interopRequireDefault(_IndexLink2);
 
-	var _withRouter2 = __webpack_require__(241);
+	var _withRouter2 = __webpack_require__(243);
 
 	var _withRouter3 = _interopRequireDefault(_withRouter2);
 
-	var _IndexRedirect2 = __webpack_require__(243);
+	var _IndexRedirect2 = __webpack_require__(245);
 
 	var _IndexRedirect3 = _interopRequireDefault(_IndexRedirect2);
 
-	var _IndexRoute2 = __webpack_require__(245);
+	var _IndexRoute2 = __webpack_require__(247);
 
 	var _IndexRoute3 = _interopRequireDefault(_IndexRoute2);
 
-	var _Redirect2 = __webpack_require__(244);
+	var _Redirect2 = __webpack_require__(246);
 
 	var _Redirect3 = _interopRequireDefault(_Redirect2);
 
-	var _Route2 = __webpack_require__(246);
+	var _Route2 = __webpack_require__(248);
 
 	var _Route3 = _interopRequireDefault(_Route2);
 
-	var _History2 = __webpack_require__(247);
+	var _History2 = __webpack_require__(249);
 
 	var _History3 = _interopRequireDefault(_History2);
 
-	var _Lifecycle2 = __webpack_require__(248);
+	var _Lifecycle2 = __webpack_require__(250);
 
 	var _Lifecycle3 = _interopRequireDefault(_Lifecycle2);
 
-	var _RouteContext2 = __webpack_require__(249);
+	var _RouteContext2 = __webpack_require__(251);
 
 	var _RouteContext3 = _interopRequireDefault(_RouteContext2);
 
-	var _useRoutes2 = __webpack_require__(250);
+	var _useRoutes2 = __webpack_require__(252);
 
 	var _useRoutes3 = _interopRequireDefault(_useRoutes2);
 
-	var _RouterContext2 = __webpack_require__(236);
+	var _RouterContext2 = __webpack_require__(238);
 
 	var _RouterContext3 = _interopRequireDefault(_RouterContext2);
 
-	var _RoutingContext2 = __webpack_require__(251);
+	var _RoutingContext2 = __webpack_require__(253);
 
 	var _RoutingContext3 = _interopRequireDefault(_RoutingContext2);
 
 	var _PropTypes3 = _interopRequireDefault(_PropTypes2);
 
-	var _match2 = __webpack_require__(252);
+	var _match2 = __webpack_require__(254);
 
 	var _match3 = _interopRequireDefault(_match2);
 
-	var _useRouterHistory2 = __webpack_require__(256);
+	var _useRouterHistory2 = __webpack_require__(258);
 
 	var _useRouterHistory3 = _interopRequireDefault(_useRouterHistory2);
 
-	var _applyRouterMiddleware2 = __webpack_require__(257);
+	var _applyRouterMiddleware2 = __webpack_require__(259);
 
 	var _applyRouterMiddleware3 = _interopRequireDefault(_applyRouterMiddleware2);
 
-	var _browserHistory2 = __webpack_require__(258);
+	var _browserHistory2 = __webpack_require__(260);
 
 	var _browserHistory3 = _interopRequireDefault(_browserHistory2);
 
-	var _hashHistory2 = __webpack_require__(261);
+	var _hashHistory2 = __webpack_require__(263);
 
 	var _hashHistory3 = _interopRequireDefault(_hashHistory2);
 
-	var _createMemoryHistory2 = __webpack_require__(253);
+	var _createMemoryHistory2 = __webpack_require__(255);
 
 	var _createMemoryHistory3 = _interopRequireDefault(_createMemoryHistory2);
 
@@ -22338,7 +22351,7 @@
 	exports.createMemoryHistory = _createMemoryHistory3.default;
 
 /***/ },
-/* 201 */
+/* 203 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -22352,11 +22365,11 @@
 	exports.createRoutesFromReactChildren = createRoutesFromReactChildren;
 	exports.createRoutes = createRoutes;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
@@ -22453,10 +22466,10 @@
 
 	  return routes;
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 202 */
+/* 204 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22465,7 +22478,7 @@
 	exports.default = routerWarning;
 	exports._resetWarned = _resetWarned;
 
-	var _warning = __webpack_require__(203);
+	var _warning = __webpack_require__(205);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
@@ -22497,7 +22510,7 @@
 	}
 
 /***/ },
-/* 203 */
+/* 205 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -22561,10 +22574,10 @@
 
 	module.exports = warning;
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 204 */
+/* 206 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -22572,17 +22585,17 @@
 	exports.__esModule = true;
 	exports.router = exports.routes = exports.route = exports.components = exports.component = exports.location = exports.history = exports.falsy = exports.locationShape = exports.routerShape = undefined;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
-	var _deprecateObjectProperties = __webpack_require__(205);
+	var _deprecateObjectProperties = __webpack_require__(207);
 
 	var _deprecateObjectProperties2 = _interopRequireDefault(_deprecateObjectProperties);
 
-	var _InternalPropTypes = __webpack_require__(206);
+	var _InternalPropTypes = __webpack_require__(208);
 
 	var InternalPropTypes = _interopRequireWildcard(_InternalPropTypes);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
@@ -22668,10 +22681,10 @@
 	}
 
 	exports.default = defaultExport;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 205 */
+/* 207 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -22679,7 +22692,7 @@
 	exports.__esModule = true;
 	exports.canUseMembrane = undefined;
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
@@ -22749,10 +22762,10 @@
 	}
 
 	exports.default = deprecateObjectProperties;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 206 */
+/* 208 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22761,7 +22774,7 @@
 	exports.routes = exports.route = exports.components = exports.component = exports.history = undefined;
 	exports.falsy = falsy;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var func = _react.PropTypes.func;
 	var object = _react.PropTypes.object;
@@ -22789,7 +22802,7 @@
 	var routes = exports.routes = oneOfType([route, arrayOf(route)]);
 
 /***/ },
-/* 207 */
+/* 209 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -22801,7 +22814,7 @@
 	exports.getParams = getParams;
 	exports.formatPattern = formatPattern;
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
@@ -23004,10 +23017,10 @@
 
 	  return pathname.replace(/\/+/g, '/');
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 208 */
+/* 210 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -23062,10 +23075,10 @@
 
 	module.exports = invariant;
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 209 */
+/* 211 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -23074,33 +23087,33 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _createHashHistory = __webpack_require__(210);
+	var _createHashHistory = __webpack_require__(212);
 
 	var _createHashHistory2 = _interopRequireDefault(_createHashHistory);
 
-	var _useQueries = __webpack_require__(225);
+	var _useQueries = __webpack_require__(227);
 
 	var _useQueries2 = _interopRequireDefault(_useQueries);
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _createTransitionManager = __webpack_require__(228);
+	var _createTransitionManager = __webpack_require__(230);
 
 	var _createTransitionManager2 = _interopRequireDefault(_createTransitionManager);
 
-	var _InternalPropTypes = __webpack_require__(206);
+	var _InternalPropTypes = __webpack_require__(208);
 
-	var _RouterContext = __webpack_require__(236);
+	var _RouterContext = __webpack_require__(238);
 
 	var _RouterContext2 = _interopRequireDefault(_RouterContext);
 
-	var _RouteUtils = __webpack_require__(201);
+	var _RouteUtils = __webpack_require__(203);
 
-	var _RouterUtils = __webpack_require__(238);
+	var _RouterUtils = __webpack_require__(240);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
@@ -23276,10 +23289,10 @@
 
 	exports.default = Router;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 210 */
+/* 212 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -23290,25 +23303,25 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _warning = __webpack_require__(203);
+	var _warning = __webpack_require__(205);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
-	var _Actions = __webpack_require__(211);
+	var _Actions = __webpack_require__(213);
 
-	var _PathUtils = __webpack_require__(212);
+	var _PathUtils = __webpack_require__(214);
 
-	var _ExecutionEnvironment = __webpack_require__(213);
+	var _ExecutionEnvironment = __webpack_require__(215);
 
-	var _DOMUtils = __webpack_require__(214);
+	var _DOMUtils = __webpack_require__(216);
 
-	var _DOMStateStorage = __webpack_require__(215);
+	var _DOMStateStorage = __webpack_require__(217);
 
-	var _createDOMHistory = __webpack_require__(216);
+	var _createDOMHistory = __webpack_require__(218);
 
 	var _createDOMHistory2 = _interopRequireDefault(_createDOMHistory);
 
@@ -23528,10 +23541,10 @@
 
 	exports['default'] = createHashHistory;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 211 */
+/* 213 */
 /***/ function(module, exports) {
 
 	/**
@@ -23567,7 +23580,7 @@
 	};
 
 /***/ },
-/* 212 */
+/* 214 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -23578,7 +23591,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _warning = __webpack_require__(203);
+	var _warning = __webpack_require__(205);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
@@ -23617,10 +23630,10 @@
 	    hash: hash
 	  };
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 213 */
+/* 215 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -23630,7 +23643,7 @@
 	exports.canUseDOM = canUseDOM;
 
 /***/ },
-/* 214 */
+/* 216 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -23710,7 +23723,7 @@
 	}
 
 /***/ },
-/* 215 */
+/* 217 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/*eslint-disable no-empty */
@@ -23722,7 +23735,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _warning = __webpack_require__(203);
+	var _warning = __webpack_require__(205);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
@@ -23786,10 +23799,10 @@
 
 	  return null;
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 216 */
+/* 218 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -23800,15 +23813,15 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
-	var _ExecutionEnvironment = __webpack_require__(213);
+	var _ExecutionEnvironment = __webpack_require__(215);
 
-	var _DOMUtils = __webpack_require__(214);
+	var _DOMUtils = __webpack_require__(216);
 
-	var _createHistory = __webpack_require__(217);
+	var _createHistory = __webpack_require__(219);
 
 	var _createHistory2 = _interopRequireDefault(_createHistory);
 
@@ -23832,10 +23845,10 @@
 
 	exports['default'] = createDOMHistory;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 217 */
+/* 219 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -23846,29 +23859,29 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _warning = __webpack_require__(203);
+	var _warning = __webpack_require__(205);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
-	var _deepEqual = __webpack_require__(218);
+	var _deepEqual = __webpack_require__(220);
 
 	var _deepEqual2 = _interopRequireDefault(_deepEqual);
 
-	var _PathUtils = __webpack_require__(212);
+	var _PathUtils = __webpack_require__(214);
 
-	var _AsyncUtils = __webpack_require__(221);
+	var _AsyncUtils = __webpack_require__(223);
 
-	var _Actions = __webpack_require__(211);
+	var _Actions = __webpack_require__(213);
 
-	var _createLocation2 = __webpack_require__(222);
+	var _createLocation2 = __webpack_require__(224);
 
 	var _createLocation3 = _interopRequireDefault(_createLocation2);
 
-	var _runTransitionHook = __webpack_require__(223);
+	var _runTransitionHook = __webpack_require__(225);
 
 	var _runTransitionHook2 = _interopRequireDefault(_runTransitionHook);
 
-	var _deprecate = __webpack_require__(224);
+	var _deprecate = __webpack_require__(226);
 
 	var _deprecate2 = _interopRequireDefault(_deprecate);
 
@@ -24126,15 +24139,15 @@
 
 	exports['default'] = createHistory;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 218 */
+/* 220 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var pSlice = Array.prototype.slice;
-	var objectKeys = __webpack_require__(219);
-	var isArguments = __webpack_require__(220);
+	var objectKeys = __webpack_require__(221);
+	var isArguments = __webpack_require__(222);
 
 	var deepEqual = module.exports = function (actual, expected, opts) {
 	  if (!opts) opts = {};
@@ -24229,7 +24242,7 @@
 
 
 /***/ },
-/* 219 */
+/* 221 */
 /***/ function(module, exports) {
 
 	exports = module.exports = typeof Object.keys === 'function'
@@ -24244,7 +24257,7 @@
 
 
 /***/ },
-/* 220 */
+/* 222 */
 /***/ function(module, exports) {
 
 	var supportsArgumentsClass = (function(){
@@ -24270,7 +24283,7 @@
 
 
 /***/ },
-/* 221 */
+/* 223 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -24333,7 +24346,7 @@
 	}
 
 /***/ },
-/* 222 */
+/* 224 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -24344,13 +24357,13 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _warning = __webpack_require__(203);
+	var _warning = __webpack_require__(205);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
-	var _Actions = __webpack_require__(211);
+	var _Actions = __webpack_require__(213);
 
-	var _PathUtils = __webpack_require__(212);
+	var _PathUtils = __webpack_require__(214);
 
 	function createLocation() {
 	  var location = arguments.length <= 0 || arguments[0] === undefined ? '/' : arguments[0];
@@ -24387,10 +24400,10 @@
 
 	exports['default'] = createLocation;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 223 */
+/* 225 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -24399,7 +24412,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _warning = __webpack_require__(203);
+	var _warning = __webpack_require__(205);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
@@ -24417,10 +24430,10 @@
 
 	exports['default'] = runTransitionHook;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 224 */
+/* 226 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -24429,7 +24442,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _warning = __webpack_require__(203);
+	var _warning = __webpack_require__(205);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
@@ -24442,10 +24455,10 @@
 
 	exports['default'] = deprecate;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 225 */
+/* 227 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -24456,19 +24469,19 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _warning = __webpack_require__(203);
+	var _warning = __webpack_require__(205);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
-	var _queryString = __webpack_require__(226);
+	var _queryString = __webpack_require__(228);
 
-	var _runTransitionHook = __webpack_require__(223);
+	var _runTransitionHook = __webpack_require__(225);
 
 	var _runTransitionHook2 = _interopRequireDefault(_runTransitionHook);
 
-	var _PathUtils = __webpack_require__(212);
+	var _PathUtils = __webpack_require__(214);
 
-	var _deprecate = __webpack_require__(224);
+	var _deprecate = __webpack_require__(226);
 
 	var _deprecate2 = _interopRequireDefault(_deprecate);
 
@@ -24624,14 +24637,14 @@
 
 	exports['default'] = useQueries;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 226 */
+/* 228 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var strictUriEncode = __webpack_require__(227);
+	var strictUriEncode = __webpack_require__(229);
 
 	exports.extract = function (str) {
 		return str.split('?')[1] || '';
@@ -24699,7 +24712,7 @@
 
 
 /***/ },
-/* 227 */
+/* 229 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -24711,7 +24724,7 @@
 
 
 /***/ },
-/* 228 */
+/* 230 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -24722,27 +24735,27 @@
 
 	exports.default = createTransitionManager;
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
-	var _Actions = __webpack_require__(211);
+	var _Actions = __webpack_require__(213);
 
-	var _computeChangedRoutes2 = __webpack_require__(229);
+	var _computeChangedRoutes2 = __webpack_require__(231);
 
 	var _computeChangedRoutes3 = _interopRequireDefault(_computeChangedRoutes2);
 
-	var _TransitionUtils = __webpack_require__(230);
+	var _TransitionUtils = __webpack_require__(232);
 
-	var _isActive2 = __webpack_require__(232);
+	var _isActive2 = __webpack_require__(234);
 
 	var _isActive3 = _interopRequireDefault(_isActive2);
 
-	var _getComponents = __webpack_require__(233);
+	var _getComponents = __webpack_require__(235);
 
 	var _getComponents2 = _interopRequireDefault(_getComponents);
 
-	var _matchRoutes = __webpack_require__(235);
+	var _matchRoutes = __webpack_require__(237);
 
 	var _matchRoutes2 = _interopRequireDefault(_matchRoutes);
 
@@ -25021,17 +25034,17 @@
 
 	//export default useRoutes
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 229 */
+/* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _PatternUtils = __webpack_require__(207);
+	var _PatternUtils = __webpack_require__(209);
 
 	function routeParamsChanged(route, prevState, nextState) {
 	  if (!route.path) return false;
@@ -25106,7 +25119,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 230 */
+/* 232 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -25116,9 +25129,9 @@
 	exports.runChangeHooks = runChangeHooks;
 	exports.runLeaveHooks = runLeaveHooks;
 
-	var _AsyncUtils = __webpack_require__(231);
+	var _AsyncUtils = __webpack_require__(233);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
@@ -25231,10 +25244,10 @@
 	    if (routes[i].onLeave) routes[i].onLeave.call(routes[i]);
 	  }
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 231 */
+/* 233 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -25327,7 +25340,7 @@
 	}
 
 /***/ },
-/* 232 */
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -25338,7 +25351,7 @@
 
 	exports.default = isActive;
 
-	var _PatternUtils = __webpack_require__(207);
+	var _PatternUtils = __webpack_require__(209);
 
 	function deepEqual(a, b) {
 	  if (a == b) return true;
@@ -25484,16 +25497,16 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 233 */
+/* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _AsyncUtils = __webpack_require__(231);
+	var _AsyncUtils = __webpack_require__(233);
 
-	var _makeStateWithLocation = __webpack_require__(234);
+	var _makeStateWithLocation = __webpack_require__(236);
 
 	var _makeStateWithLocation2 = _interopRequireDefault(_makeStateWithLocation);
 
@@ -25535,7 +25548,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 234 */
+/* 236 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -25546,9 +25559,9 @@
 
 	exports.default = makeStateWithLocation;
 
-	var _deprecateObjectProperties = __webpack_require__(205);
+	var _deprecateObjectProperties = __webpack_require__(207);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
@@ -25587,10 +25600,10 @@
 	  return _extends({}, state, location);
 	}
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 235 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -25603,19 +25616,19 @@
 
 	exports.default = matchRoutes;
 
-	var _AsyncUtils = __webpack_require__(231);
+	var _AsyncUtils = __webpack_require__(233);
 
-	var _makeStateWithLocation = __webpack_require__(234);
+	var _makeStateWithLocation = __webpack_require__(236);
 
 	var _makeStateWithLocation2 = _interopRequireDefault(_makeStateWithLocation);
 
-	var _PatternUtils = __webpack_require__(207);
+	var _PatternUtils = __webpack_require__(209);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
-	var _RouteUtils = __webpack_require__(201);
+	var _RouteUtils = __webpack_require__(203);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -25844,10 +25857,10 @@
 	  }, callback);
 	}
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 236 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -25858,25 +25871,25 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _deprecateObjectProperties = __webpack_require__(205);
+	var _deprecateObjectProperties = __webpack_require__(207);
 
 	var _deprecateObjectProperties2 = _interopRequireDefault(_deprecateObjectProperties);
 
-	var _getRouteParams = __webpack_require__(237);
+	var _getRouteParams = __webpack_require__(239);
 
 	var _getRouteParams2 = _interopRequireDefault(_getRouteParams);
 
-	var _RouteUtils = __webpack_require__(201);
+	var _RouteUtils = __webpack_require__(203);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
@@ -26006,17 +26019,17 @@
 
 	exports.default = RouterContext;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 237 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _PatternUtils = __webpack_require__(207);
+	var _PatternUtils = __webpack_require__(209);
 
 	/**
 	 * Extracts an object of params the given route cares about from
@@ -26040,7 +26053,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 238 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -26052,7 +26065,7 @@
 	exports.createRouterObject = createRouterObject;
 	exports.createRoutingHistory = createRoutingHistory;
 
-	var _deprecateObjectProperties = __webpack_require__(205);
+	var _deprecateObjectProperties = __webpack_require__(207);
 
 	var _deprecateObjectProperties2 = _interopRequireDefault(_deprecateObjectProperties);
 
@@ -26075,10 +26088,10 @@
 
 	  return history;
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 239 */
+/* 241 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -26087,15 +26100,15 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
-	var _PropTypes = __webpack_require__(204);
+	var _PropTypes = __webpack_require__(206);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26254,10 +26267,10 @@
 
 	exports.default = Link;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 240 */
+/* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -26266,11 +26279,11 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Link = __webpack_require__(239);
+	var _Link = __webpack_require__(241);
 
 	var _Link2 = _interopRequireDefault(_Link);
 
@@ -26290,7 +26303,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 241 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -26301,15 +26314,15 @@
 
 	exports.default = withRouter;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _hoistNonReactStatics = __webpack_require__(242);
+	var _hoistNonReactStatics = __webpack_require__(244);
 
 	var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 
-	var _PropTypes = __webpack_require__(204);
+	var _PropTypes = __webpack_require__(206);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26335,7 +26348,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 242 */
+/* 244 */
 /***/ function(module, exports) {
 
 	/**
@@ -26391,30 +26404,30 @@
 
 
 /***/ },
-/* 243 */
+/* 245 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
 	exports.__esModule = true;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
-	var _Redirect = __webpack_require__(244);
+	var _Redirect = __webpack_require__(246);
 
 	var _Redirect2 = _interopRequireDefault(_Redirect);
 
-	var _InternalPropTypes = __webpack_require__(206);
+	var _InternalPropTypes = __webpack_require__(208);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26457,29 +26470,29 @@
 
 	exports.default = IndexRedirect;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 244 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
 	exports.__esModule = true;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
-	var _RouteUtils = __webpack_require__(201);
+	var _RouteUtils = __webpack_require__(203);
 
-	var _PatternUtils = __webpack_require__(207);
+	var _PatternUtils = __webpack_require__(209);
 
-	var _InternalPropTypes = __webpack_require__(206);
+	var _InternalPropTypes = __webpack_require__(208);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26565,31 +26578,31 @@
 
 	exports.default = Redirect;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 245 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
 	exports.__esModule = true;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
-	var _RouteUtils = __webpack_require__(201);
+	var _RouteUtils = __webpack_require__(203);
 
-	var _InternalPropTypes = __webpack_require__(206);
+	var _InternalPropTypes = __webpack_require__(208);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26631,27 +26644,27 @@
 
 	exports.default = IndexRoute;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 246 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
 	exports.__esModule = true;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
-	var _RouteUtils = __webpack_require__(201);
+	var _RouteUtils = __webpack_require__(203);
 
-	var _InternalPropTypes = __webpack_require__(206);
+	var _InternalPropTypes = __webpack_require__(208);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26694,21 +26707,21 @@
 
 	exports.default = Route;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 247 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
 	exports.__esModule = true;
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
-	var _InternalPropTypes = __webpack_require__(206);
+	var _InternalPropTypes = __webpack_require__(208);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26729,25 +26742,25 @@
 
 	exports.default = History;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 248 */
+/* 250 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
 	exports.__esModule = true;
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
@@ -26803,21 +26816,21 @@
 
 	exports.default = Lifecycle;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 249 */
+/* 251 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
 	exports.__esModule = true;
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
@@ -26854,10 +26867,10 @@
 
 	exports.default = RouteContext;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 250 */
+/* 252 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -26866,15 +26879,15 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _useQueries = __webpack_require__(225);
+	var _useQueries = __webpack_require__(227);
 
 	var _useQueries2 = _interopRequireDefault(_useQueries);
 
-	var _createTransitionManager = __webpack_require__(228);
+	var _createTransitionManager = __webpack_require__(230);
 
 	var _createTransitionManager2 = _interopRequireDefault(_createTransitionManager);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
@@ -26911,25 +26924,25 @@
 
 	exports.default = useRoutes;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 251 */
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
 	exports.__esModule = true;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _RouterContext = __webpack_require__(236);
+	var _RouterContext = __webpack_require__(238);
 
 	var _RouterContext2 = _interopRequireDefault(_RouterContext);
 
-	var _routerWarning = __webpack_require__(202);
+	var _routerWarning = __webpack_require__(204);
 
 	var _routerWarning2 = _interopRequireDefault(_routerWarning);
 
@@ -26947,10 +26960,10 @@
 
 	exports.default = RoutingContext;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 252 */
+/* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -26959,21 +26972,21 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
-	var _createMemoryHistory = __webpack_require__(253);
+	var _createMemoryHistory = __webpack_require__(255);
 
 	var _createMemoryHistory2 = _interopRequireDefault(_createMemoryHistory);
 
-	var _createTransitionManager = __webpack_require__(228);
+	var _createTransitionManager = __webpack_require__(230);
 
 	var _createTransitionManager2 = _interopRequireDefault(_createTransitionManager);
 
-	var _RouteUtils = __webpack_require__(201);
+	var _RouteUtils = __webpack_require__(203);
 
-	var _RouterUtils = __webpack_require__(238);
+	var _RouterUtils = __webpack_require__(240);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -27034,10 +27047,10 @@
 
 	exports.default = match;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 253 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -27045,15 +27058,15 @@
 	exports.__esModule = true;
 	exports.default = createMemoryHistory;
 
-	var _useQueries = __webpack_require__(225);
+	var _useQueries = __webpack_require__(227);
 
 	var _useQueries2 = _interopRequireDefault(_useQueries);
 
-	var _useBasename = __webpack_require__(254);
+	var _useBasename = __webpack_require__(256);
 
 	var _useBasename2 = _interopRequireDefault(_useBasename);
 
-	var _createMemoryHistory = __webpack_require__(255);
+	var _createMemoryHistory = __webpack_require__(257);
 
 	var _createMemoryHistory2 = _interopRequireDefault(_createMemoryHistory);
 
@@ -27074,7 +27087,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 254 */
+/* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -27085,19 +27098,19 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _warning = __webpack_require__(203);
+	var _warning = __webpack_require__(205);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
-	var _ExecutionEnvironment = __webpack_require__(213);
+	var _ExecutionEnvironment = __webpack_require__(215);
 
-	var _PathUtils = __webpack_require__(212);
+	var _PathUtils = __webpack_require__(214);
 
-	var _runTransitionHook = __webpack_require__(223);
+	var _runTransitionHook = __webpack_require__(225);
 
 	var _runTransitionHook2 = _interopRequireDefault(_runTransitionHook);
 
-	var _deprecate = __webpack_require__(224);
+	var _deprecate = __webpack_require__(226);
 
 	var _deprecate2 = _interopRequireDefault(_deprecate);
 
@@ -27235,10 +27248,10 @@
 
 	exports['default'] = useBasename;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 255 */
+/* 257 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -27249,19 +27262,19 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _warning = __webpack_require__(203);
+	var _warning = __webpack_require__(205);
 
 	var _warning2 = _interopRequireDefault(_warning);
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
-	var _PathUtils = __webpack_require__(212);
+	var _PathUtils = __webpack_require__(214);
 
-	var _Actions = __webpack_require__(211);
+	var _Actions = __webpack_require__(213);
 
-	var _createHistory = __webpack_require__(217);
+	var _createHistory = __webpack_require__(219);
 
 	var _createHistory2 = _interopRequireDefault(_createHistory);
 
@@ -27395,10 +27408,10 @@
 
 	exports['default'] = createMemoryHistory;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 256 */
+/* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -27406,11 +27419,11 @@
 	exports.__esModule = true;
 	exports.default = useRouterHistory;
 
-	var _useQueries = __webpack_require__(225);
+	var _useQueries = __webpack_require__(227);
 
 	var _useQueries2 = _interopRequireDefault(_useQueries);
 
-	var _useBasename = __webpack_require__(254);
+	var _useBasename = __webpack_require__(256);
 
 	var _useBasename2 = _interopRequireDefault(_useBasename);
 
@@ -27426,7 +27439,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 257 */
+/* 259 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -27435,11 +27448,11 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _RouterContext = __webpack_require__(236);
+	var _RouterContext = __webpack_require__(238);
 
 	var _RouterContext2 = _interopRequireDefault(_RouterContext);
 
@@ -27481,18 +27494,18 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 258 */
+/* 260 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _createBrowserHistory = __webpack_require__(259);
+	var _createBrowserHistory = __webpack_require__(261);
 
 	var _createBrowserHistory2 = _interopRequireDefault(_createBrowserHistory);
 
-	var _createRouterHistory = __webpack_require__(260);
+	var _createRouterHistory = __webpack_require__(262);
 
 	var _createRouterHistory2 = _interopRequireDefault(_createRouterHistory);
 
@@ -27502,7 +27515,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 259 */
+/* 261 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -27513,21 +27526,21 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _invariant = __webpack_require__(208);
+	var _invariant = __webpack_require__(210);
 
 	var _invariant2 = _interopRequireDefault(_invariant);
 
-	var _Actions = __webpack_require__(211);
+	var _Actions = __webpack_require__(213);
 
-	var _PathUtils = __webpack_require__(212);
+	var _PathUtils = __webpack_require__(214);
 
-	var _ExecutionEnvironment = __webpack_require__(213);
+	var _ExecutionEnvironment = __webpack_require__(215);
 
-	var _DOMUtils = __webpack_require__(214);
+	var _DOMUtils = __webpack_require__(216);
 
-	var _DOMStateStorage = __webpack_require__(215);
+	var _DOMStateStorage = __webpack_require__(217);
 
-	var _createDOMHistory = __webpack_require__(216);
+	var _createDOMHistory = __webpack_require__(218);
 
 	var _createDOMHistory2 = _interopRequireDefault(_createDOMHistory);
 
@@ -27685,10 +27698,10 @@
 
 	exports['default'] = createBrowserHistory;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 260 */
+/* 262 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -27701,7 +27714,7 @@
 	  return history;
 	};
 
-	var _useRouterHistory = __webpack_require__(256);
+	var _useRouterHistory = __webpack_require__(258);
 
 	var _useRouterHistory2 = _interopRequireDefault(_useRouterHistory);
 
@@ -27712,18 +27725,18 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 261 */
+/* 263 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _createHashHistory = __webpack_require__(210);
+	var _createHashHistory = __webpack_require__(212);
 
 	var _createHashHistory2 = _interopRequireDefault(_createHashHistory);
 
-	var _createRouterHistory = __webpack_require__(260);
+	var _createRouterHistory = __webpack_require__(262);
 
 	var _createRouterHistory2 = _interopRequireDefault(_createRouterHistory);
 
@@ -27733,11 +27746,11 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 262 */
+/* 264 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(process) {var invariant = __webpack_require__(263);
-	var defaultClickRejectionStrategy = __webpack_require__(264);
+	/* WEBPACK VAR INJECTION */(function(process) {var invariant = __webpack_require__(265);
+	var defaultClickRejectionStrategy = __webpack_require__(266);
 
 	var alreadyInjected = false;
 
@@ -27758,15 +27771,15 @@
 
 	  alreadyInjected = true;
 
-	  __webpack_require__(53).injection.injectEventPluginsByName({
-	    'TapEventPlugin':       __webpack_require__(265)(shouldRejectClick)
+	  __webpack_require__(55).injection.injectEventPluginsByName({
+	    'TapEventPlugin':       __webpack_require__(267)(shouldRejectClick)
 	  });
 	};
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 263 */
+/* 265 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -27818,10 +27831,10 @@
 	};
 
 	module.exports = invariant;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ },
-/* 264 */
+/* 266 */
 /***/ function(module, exports) {
 
 	module.exports = function(lastTouchEvent, clickTimestamp) {
@@ -27832,7 +27845,7 @@
 
 
 /***/ },
-/* 265 */
+/* 267 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -27856,14 +27869,14 @@
 
 	"use strict";
 
-	var EventConstants = __webpack_require__(51);
-	var EventPluginUtils = __webpack_require__(55);
-	var EventPropagators = __webpack_require__(52);
-	var SyntheticUIEvent = __webpack_require__(78);
-	var TouchEventUtils = __webpack_require__(266);
-	var ViewportMetrics = __webpack_require__(79);
+	var EventConstants = __webpack_require__(53);
+	var EventPluginUtils = __webpack_require__(57);
+	var EventPropagators = __webpack_require__(54);
+	var SyntheticUIEvent = __webpack_require__(80);
+	var TouchEventUtils = __webpack_require__(268);
+	var ViewportMetrics = __webpack_require__(81);
 
-	var keyOf = __webpack_require__(267);
+	var keyOf = __webpack_require__(269);
 	var topLevelTypes = EventConstants.topLevelTypes;
 
 	var isStartish = EventPluginUtils.isStartish;
@@ -28008,7 +28021,7 @@
 
 
 /***/ },
-/* 266 */
+/* 268 */
 /***/ function(module, exports) {
 
 	/**
@@ -28056,7 +28069,7 @@
 
 
 /***/ },
-/* 267 */
+/* 269 */
 /***/ function(module, exports) {
 
 	/**
@@ -28096,7 +28109,7 @@
 	module.exports = keyOf;
 
 /***/ },
-/* 268 */
+/* 270 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28107,11 +28120,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _catalogDialog = __webpack_require__(269);
+	var _catalogDialog = __webpack_require__(271);
 
 	var _catalogDialog2 = _interopRequireDefault(_catalogDialog);
 
@@ -28182,22 +28195,22 @@
 	exports.default = App;
 
 /***/ },
-/* 269 */
+/* 271 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function($) {'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _dialogPolyfill = __webpack_require__(271);
+	var _dialogPolyfill = __webpack_require__(273);
 
 	var _dialogPolyfill2 = _interopRequireDefault(_dialogPolyfill);
 
-	var _catalogFiltersLayout = __webpack_require__(274);
+	var _catalogFiltersLayout = __webpack_require__(276);
 
 	var _catalogFiltersLayout2 = _interopRequireDefault(_catalogFiltersLayout);
 
@@ -28324,16 +28337,16 @@
 	;
 
 	module.exports = CatalogDialog;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(270)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(272)))
 
 /***/ },
-/* 270 */
+/* 272 */
 /***/ function(module, exports) {
 
 	module.exports = jQuery;
 
 /***/ },
-/* 271 */
+/* 273 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module) {(function() {
@@ -28842,7 +28855,7 @@
 	  if (typeof module === 'object' && typeof module['exports'] === 'object') {
 	    // CommonJS support
 	    module['exports'] = dialogPolyfill;
-	  } else if ("function" === 'function' && 'amd' in __webpack_require__(273)) {
+	  } else if ("function" === 'function' && 'amd' in __webpack_require__(275)) {
 	    // AMD support
 	    !(__WEBPACK_AMD_DEFINE_RESULT__ = function() { return dialogPolyfill; }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else {
@@ -28851,10 +28864,10 @@
 	  }
 	})();
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(272)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(274)(module)))
 
 /***/ },
-/* 272 */
+/* 274 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -28870,14 +28883,14 @@
 
 
 /***/ },
-/* 273 */
+/* 275 */
 /***/ function(module, exports) {
 
 	module.exports = function() { throw new Error("define cannot be used indirect"); };
 
 
 /***/ },
-/* 274 */
+/* 276 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28888,15 +28901,15 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _locationFilter = __webpack_require__(275);
+	var _locationFilter = __webpack_require__(277);
 
 	var _locationFilter2 = _interopRequireDefault(_locationFilter);
 
-	var _productFilter = __webpack_require__(284);
+	var _productFilter = __webpack_require__(286);
 
 	var _productFilter2 = _interopRequireDefault(_productFilter);
 
@@ -28935,7 +28948,7 @@
 	exports.default = CatalogFilterLayout;
 
 /***/ },
-/* 275 */
+/* 277 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28946,11 +28959,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactAutosuggest = __webpack_require__(276);
+	var _reactAutosuggest = __webpack_require__(278);
 
 	var _reactAutosuggest2 = _interopRequireDefault(_reactAutosuggest);
 
@@ -29080,15 +29093,15 @@
 	exports.default = LocationFilter;
 
 /***/ },
-/* 276 */
+/* 278 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(277).default;
+	module.exports = __webpack_require__(279).default;
 
 /***/ },
-/* 277 */
+/* 279 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29099,17 +29112,17 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _redux = __webpack_require__(181);
+	var _redux = __webpack_require__(183);
 
-	var _reducerAndActions = __webpack_require__(278);
+	var _reducerAndActions = __webpack_require__(280);
 
 	var _reducerAndActions2 = _interopRequireDefault(_reducerAndActions);
 
-	var _Autosuggest = __webpack_require__(279);
+	var _Autosuggest = __webpack_require__(281);
 
 	var _Autosuggest2 = _interopRequireDefault(_Autosuggest);
 
@@ -29278,7 +29291,7 @@
 	exports.default = AutosuggestContainer;
 
 /***/ },
-/* 278 */
+/* 280 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -29407,7 +29420,7 @@
 	}
 
 /***/ },
-/* 279 */
+/* 281 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29420,15 +29433,15 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactRedux = __webpack_require__(174);
+	var _reactRedux = __webpack_require__(176);
 
-	var _reducerAndActions = __webpack_require__(278);
+	var _reducerAndActions = __webpack_require__(280);
 
-	var _reactAutowhatever = __webpack_require__(280);
+	var _reactAutowhatever = __webpack_require__(282);
 
 	var _reactAutowhatever2 = _interopRequireDefault(_reactAutowhatever);
 
@@ -29854,7 +29867,7 @@
 	exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(Autosuggest);
 
 /***/ },
-/* 280 */
+/* 282 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29869,15 +29882,15 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _sectionIterator = __webpack_require__(281);
+	var _sectionIterator = __webpack_require__(283);
 
 	var _sectionIterator2 = _interopRequireDefault(_sectionIterator);
 
-	var _reactThemeable = __webpack_require__(282);
+	var _reactThemeable = __webpack_require__(284);
 
 	var _reactThemeable2 = _interopRequireDefault(_reactThemeable);
 
@@ -30232,7 +30245,7 @@
 
 
 /***/ },
-/* 281 */
+/* 283 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -30348,7 +30361,7 @@
 
 
 /***/ },
-/* 282 */
+/* 284 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -30363,7 +30376,7 @@
 
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
 
-	var _objectAssign = __webpack_require__(283);
+	var _objectAssign = __webpack_require__(285);
 
 	var _objectAssign2 = _interopRequireDefault(_objectAssign);
 
@@ -30395,7 +30408,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 283 */
+/* 285 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -30440,10 +30453,10 @@
 
 
 /***/ },
-/* 284 */
+/* 286 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -30451,9 +30464,13 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
+
+	var _productItem = __webpack_require__(287);
+
+	var _productItem2 = _interopRequireDefault(_productItem);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -30469,25 +30486,39 @@
 	    function ProductFilter() {
 	        _classCallCheck(this, ProductFilter);
 
-	        return _possibleConstructorReturn(this, Object.getPrototypeOf(ProductFilter).apply(this, arguments));
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ProductFilter).call(this));
+
+	        _this.state = {
+	            active: null
+	        };
+	        _this.handleActive = _this.handleActive.bind(_this);
+	        _this.isActive = _this.isActive.bind(_this);
+	        return _this;
 	    }
 
 	    _createClass(ProductFilter, [{
-	        key: "render",
+	        key: 'handleActive',
+	        value: function handleActive(clikedItem) {
+	            this.setState({ active: clikedItem });
+	        }
+	    }, {
+	        key: 'isActive',
+	        value: function isActive(item) {
+	            return item == this.state.active;
+	        }
+	    }, {
+	        key: 'render',
 	        value: function render() {
+	            var className = this.state.active ? 'product-filter-container has-active' : 'product-filter-container';
+
 	            return _react2.default.createElement(
-	                "div",
-	                null,
-	                _react2.default.createElement(
-	                    "div",
-	                    { className: "mdl-textfield mdl-js-textfield mdl-textfield--floating-label " },
-	                    _react2.default.createElement("input", { className: "mdl-textfield__input ", type: "text", id: "sample3" }),
-	                    _react2.default.createElement(
-	                        "label",
-	                        { className: "mdl-textfield__label", "for": "sample3" },
-	                        "Urunler"
-	                    )
-	                )
+	                'div',
+	                { className: className },
+	                _react2.default.createElement(_productItem2.default, { name: 'Sebze', setActive: this.handleActive, active: this.isActive("Sebze") }),
+	                _react2.default.createElement(_productItem2.default, { name: 'Meyve', setActive: this.handleActive, active: this.isActive("Meyve") }),
+	                _react2.default.createElement(_productItem2.default, { name: 'Et', setActive: this.handleActive, active: this.isActive("Et") }),
+	                _react2.default.createElement(_productItem2.default, { name: 'Balik', setActive: this.handleActive, active: this.isActive("Balik") }),
+	                _react2.default.createElement(_productItem2.default, { name: 'Kuru Gida', setActive: this.handleActive, active: this.isActive("Kuru Gida") })
 	            );
 	        }
 	    }]);
@@ -30498,7 +30529,76 @@
 	exports.default = ProductFilter;
 
 /***/ },
-/* 285 */
+/* 287 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(9);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var ProductItem = function (_Component) {
+	    _inherits(ProductItem, _Component);
+
+	    function ProductItem(props) {
+	        _classCallCheck(this, ProductItem);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(ProductItem).call(this, props));
+	    }
+
+	    _createClass(ProductItem, [{
+	        key: 'handleReturnBack',
+	        value: function handleReturnBack(e) {
+	            e.preventDefault();
+	            e.stopPropagation();
+	            this.props.setActive(null);
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var _this2 = this;
+
+	            var className = this.props.active ? 'product-item active' : 'product-item';
+
+	            return _react2.default.createElement(
+	                'div',
+	                { className: className, onClick: function onClick() {
+	                        _this2.props.setActive(_this2.props.name);
+	                    } },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'product-content' },
+	                    _react2.default.createElement('button', { onClick: this.handleReturnBack.bind(this) }),
+	                    this.props.name
+	                )
+	            );
+	        }
+	    }]);
+
+	    return ProductItem;
+	}(_react.Component);
+
+	;
+
+	exports.default = ProductItem;
+
+/***/ },
+/* 288 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -30507,13 +30607,13 @@
 	  value: true
 	});
 
-	var _redux = __webpack_require__(181);
+	var _redux = __webpack_require__(183);
 
-	var _reduxThunk = __webpack_require__(286);
+	var _reduxThunk = __webpack_require__(289);
 
 	var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
 
-	var _reducers = __webpack_require__(287);
+	var _reducers = __webpack_require__(290);
 
 	var _reducers2 = _interopRequireDefault(_reducers);
 
@@ -30526,7 +30626,7 @@
 	exports.default = store;
 
 /***/ },
-/* 286 */
+/* 289 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -30554,7 +30654,7 @@
 	exports['default'] = thunk;
 
 /***/ },
-/* 287 */
+/* 290 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -30563,15 +30663,15 @@
 	    value: true
 	});
 
-	var _redux = __webpack_require__(181);
+	var _redux = __webpack_require__(183);
 
-	var _reduxForm = __webpack_require__(288);
+	var _reduxForm = __webpack_require__(291);
 
-	var _routesReducer = __webpack_require__(336);
+	var _routesReducer = __webpack_require__(339);
 
 	var _routesReducer2 = _interopRequireDefault(_routesReducer);
 
-	var _marketReducer = __webpack_require__(337);
+	var _marketReducer = __webpack_require__(340);
 
 	var _marketReducer2 = _interopRequireDefault(_marketReducer);
 
@@ -30585,7 +30685,7 @@
 	exports.default = rootReducer;
 
 /***/ },
-/* 288 */
+/* 291 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -30593,13 +30693,13 @@
 	exports.__esModule = true;
 	exports.untouchWithKey = exports.untouch = exports.touchWithKey = exports.touch = exports.swapArrayValues = exports.stopSubmit = exports.stopAsyncValidation = exports.startSubmit = exports.startAsyncValidation = exports.reset = exports.propTypes = exports.initializeWithKey = exports.initialize = exports.getValues = exports.removeArrayValue = exports.reduxForm = exports.reducer = exports.focus = exports.destroy = exports.changeWithKey = exports.change = exports.blur = exports.autofillWithKey = exports.autofill = exports.addArrayValue = exports.actionTypes = undefined;
 
-	var _react = __webpack_require__(7);
+	var _react = __webpack_require__(9);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactRedux = __webpack_require__(174);
+	var _reactRedux = __webpack_require__(176);
 
-	var _createAll2 = __webpack_require__(289);
+	var _createAll2 = __webpack_require__(292);
 
 	var _createAll3 = _interopRequireDefault(_createAll2);
 
@@ -30663,7 +30763,7 @@
 	exports.untouchWithKey = untouchWithKey;
 
 /***/ },
-/* 289 */
+/* 292 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -30674,35 +30774,35 @@
 
 	exports.default = createAll;
 
-	var _reducer = __webpack_require__(290);
+	var _reducer = __webpack_require__(293);
 
 	var _reducer2 = _interopRequireDefault(_reducer);
 
-	var _createReduxForm = __webpack_require__(301);
+	var _createReduxForm = __webpack_require__(304);
 
 	var _createReduxForm2 = _interopRequireDefault(_createReduxForm);
 
-	var _mapValues = __webpack_require__(292);
+	var _mapValues = __webpack_require__(295);
 
 	var _mapValues2 = _interopRequireDefault(_mapValues);
 
-	var _bindActionData = __webpack_require__(311);
+	var _bindActionData = __webpack_require__(314);
 
 	var _bindActionData2 = _interopRequireDefault(_bindActionData);
 
-	var _actions = __webpack_require__(310);
+	var _actions = __webpack_require__(313);
 
 	var actions = _interopRequireWildcard(_actions);
 
-	var _actionTypes = __webpack_require__(291);
+	var _actionTypes = __webpack_require__(294);
 
 	var actionTypes = _interopRequireWildcard(_actionTypes);
 
-	var _createPropTypes = __webpack_require__(335);
+	var _createPropTypes = __webpack_require__(338);
 
 	var _createPropTypes2 = _interopRequireDefault(_createPropTypes);
 
-	var _getValuesFromState = __webpack_require__(295);
+	var _getValuesFromState = __webpack_require__(298);
 
 	var _getValuesFromState2 = _interopRequireDefault(_getValuesFromState);
 
@@ -30819,7 +30919,7 @@
 	}
 
 /***/ },
-/* 290 */
+/* 293 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -30831,39 +30931,39 @@
 
 	var _initialState, _behaviors;
 
-	var _actionTypes = __webpack_require__(291);
+	var _actionTypes = __webpack_require__(294);
 
-	var _mapValues = __webpack_require__(292);
+	var _mapValues = __webpack_require__(295);
 
 	var _mapValues2 = _interopRequireDefault(_mapValues);
 
-	var _read = __webpack_require__(293);
+	var _read = __webpack_require__(296);
 
 	var _read2 = _interopRequireDefault(_read);
 
-	var _write = __webpack_require__(294);
+	var _write = __webpack_require__(297);
 
 	var _write2 = _interopRequireDefault(_write);
 
-	var _getValuesFromState = __webpack_require__(295);
+	var _getValuesFromState = __webpack_require__(298);
 
 	var _getValuesFromState2 = _interopRequireDefault(_getValuesFromState);
 
-	var _initializeState = __webpack_require__(297);
+	var _initializeState = __webpack_require__(300);
 
 	var _initializeState2 = _interopRequireDefault(_initializeState);
 
-	var _resetState = __webpack_require__(298);
+	var _resetState = __webpack_require__(301);
 
 	var _resetState2 = _interopRequireDefault(_resetState);
 
-	var _setErrors = __webpack_require__(299);
+	var _setErrors = __webpack_require__(302);
 
 	var _setErrors2 = _interopRequireDefault(_setErrors);
 
-	var _fieldValue = __webpack_require__(296);
+	var _fieldValue = __webpack_require__(299);
 
-	var _normalizeFields = __webpack_require__(300);
+	var _normalizeFields = __webpack_require__(303);
 
 	var _normalizeFields2 = _interopRequireDefault(_normalizeFields);
 
@@ -31157,7 +31257,7 @@
 	exports.default = decorate(formReducer);
 
 /***/ },
-/* 291 */
+/* 294 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -31182,7 +31282,7 @@
 	var UNTOUCH = exports.UNTOUCH = 'redux-form/UNTOUCH';
 
 /***/ },
-/* 292 */
+/* 295 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -31204,7 +31304,7 @@
 	}
 
 /***/ },
-/* 293 */
+/* 296 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -31250,7 +31350,7 @@
 	exports.default = read;
 
 /***/ },
-/* 294 */
+/* 297 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -31356,14 +31456,14 @@
 	exports.default = write;
 
 /***/ },
-/* 295 */
+/* 298 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _fieldValue = __webpack_require__(296);
+	var _fieldValue = __webpack_require__(299);
 
 	/**
 	 * A different version of getValues() that does not need the fields array
@@ -31402,7 +31502,7 @@
 	exports.default = getValuesFromState;
 
 /***/ },
-/* 296 */
+/* 299 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -31427,7 +31527,7 @@
 	}
 
 /***/ },
-/* 297 */
+/* 300 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31436,7 +31536,7 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _fieldValue = __webpack_require__(296);
+	var _fieldValue = __webpack_require__(299);
 
 	var makeEntry = function makeEntry(value, previousValue, overwriteValues) {
 	  return (0, _fieldValue.makeFieldValue)(value === undefined ? {} : {
@@ -31508,14 +31608,14 @@
 	exports.default = initializeState;
 
 /***/ },
-/* 298 */
+/* 301 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _fieldValue = __webpack_require__(296);
+	var _fieldValue = __webpack_require__(299);
 
 	var reset = function reset(value) {
 	  return (0, _fieldValue.makeFieldValue)(value === undefined || value && value.initial === undefined ? {} : { initial: value.initial, value: value.initial });
@@ -31547,7 +31647,7 @@
 	exports.default = resetState;
 
 /***/ },
-/* 299 */
+/* 302 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31556,7 +31656,7 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _fieldValue = __webpack_require__(296);
+	var _fieldValue = __webpack_require__(299);
 
 	var isMetaKey = function isMetaKey(key) {
 	  return key[0] === '_';
@@ -31641,7 +31741,7 @@
 	exports.default = setErrors;
 
 /***/ },
-/* 300 */
+/* 303 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31652,7 +31752,7 @@
 
 	exports.default = normalizeFields;
 
-	var _fieldValue = __webpack_require__(296);
+	var _fieldValue = __webpack_require__(299);
 
 	function extractKey(field) {
 	  var dotIndex = field.indexOf('.');
@@ -31738,7 +31838,7 @@
 	}
 
 /***/ },
-/* 301 */
+/* 304 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31747,11 +31847,11 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _createReduxFormConnector = __webpack_require__(302);
+	var _createReduxFormConnector = __webpack_require__(305);
 
 	var _createReduxFormConnector2 = _interopRequireDefault(_createReduxFormConnector);
 
-	var _hoistNonReactStatics = __webpack_require__(334);
+	var _hoistNonReactStatics = __webpack_require__(337);
 
 	var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 
@@ -31812,22 +31912,22 @@
 	exports.default = createReduxForm;
 
 /***/ },
-/* 302 */
+/* 305 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _noGetters = __webpack_require__(303);
+	var _noGetters = __webpack_require__(306);
 
 	var _noGetters2 = _interopRequireDefault(_noGetters);
 
-	var _getDisplayName = __webpack_require__(308);
+	var _getDisplayName = __webpack_require__(311);
 
 	var _getDisplayName2 = _interopRequireDefault(_getDisplayName);
 
-	var _createHigherOrderComponent = __webpack_require__(309);
+	var _createHigherOrderComponent = __webpack_require__(312);
 
 	var _createHigherOrderComponent2 = _interopRequireDefault(_createHigherOrderComponent);
 
@@ -31917,14 +32017,14 @@
 	exports.default = createReduxFormConnector;
 
 /***/ },
-/* 303 */
+/* 306 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(304);
+	module.exports = __webpack_require__(307);
 
 
 /***/ },
-/* 304 */
+/* 307 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31937,7 +32037,7 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	var _deepEqual = __webpack_require__(305);
+	var _deepEqual = __webpack_require__(308);
 
 	var _deepEqual2 = _interopRequireDefault(_deepEqual);
 
@@ -32019,12 +32119,12 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 305 */
+/* 308 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var pSlice = Array.prototype.slice;
-	var objectKeys = __webpack_require__(306);
-	var isArguments = __webpack_require__(307);
+	var objectKeys = __webpack_require__(309);
+	var isArguments = __webpack_require__(310);
 
 	var deepEqual = module.exports = function (actual, expected, opts) {
 	  if (!opts) opts = {};
@@ -32119,7 +32219,7 @@
 
 
 /***/ },
-/* 306 */
+/* 309 */
 /***/ function(module, exports) {
 
 	exports = module.exports = typeof Object.keys === 'function'
@@ -32134,7 +32234,7 @@
 
 
 /***/ },
-/* 307 */
+/* 310 */
 /***/ function(module, exports) {
 
 	var supportsArgumentsClass = (function(){
@@ -32160,7 +32260,7 @@
 
 
 /***/ },
-/* 308 */
+/* 311 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -32172,7 +32272,7 @@
 	}
 
 /***/ },
-/* 309 */
+/* 312 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -32181,57 +32281,57 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _actions = __webpack_require__(310);
+	var _actions = __webpack_require__(313);
 
 	var importedActions = _interopRequireWildcard(_actions);
 
-	var _getDisplayName = __webpack_require__(308);
+	var _getDisplayName = __webpack_require__(311);
 
 	var _getDisplayName2 = _interopRequireDefault(_getDisplayName);
 
-	var _reducer = __webpack_require__(290);
+	var _reducer = __webpack_require__(293);
 
-	var _deepEqual = __webpack_require__(305);
+	var _deepEqual = __webpack_require__(308);
 
 	var _deepEqual2 = _interopRequireDefault(_deepEqual);
 
-	var _bindActionData = __webpack_require__(311);
+	var _bindActionData = __webpack_require__(314);
 
 	var _bindActionData2 = _interopRequireDefault(_bindActionData);
 
-	var _getValues = __webpack_require__(312);
+	var _getValues = __webpack_require__(315);
 
 	var _getValues2 = _interopRequireDefault(_getValues);
 
-	var _isValid = __webpack_require__(313);
+	var _isValid = __webpack_require__(316);
 
 	var _isValid2 = _interopRequireDefault(_isValid);
 
-	var _readFields = __webpack_require__(314);
+	var _readFields = __webpack_require__(317);
 
 	var _readFields2 = _interopRequireDefault(_readFields);
 
-	var _handleSubmit2 = __webpack_require__(328);
+	var _handleSubmit2 = __webpack_require__(331);
 
 	var _handleSubmit3 = _interopRequireDefault(_handleSubmit2);
 
-	var _asyncValidation = __webpack_require__(329);
+	var _asyncValidation = __webpack_require__(332);
 
 	var _asyncValidation2 = _interopRequireDefault(_asyncValidation);
 
-	var _silenceEvents = __webpack_require__(330);
+	var _silenceEvents = __webpack_require__(333);
 
 	var _silenceEvents2 = _interopRequireDefault(_silenceEvents);
 
-	var _silenceEvent = __webpack_require__(331);
+	var _silenceEvent = __webpack_require__(334);
 
 	var _silenceEvent2 = _interopRequireDefault(_silenceEvent);
 
-	var _wrapMapDispatchToProps = __webpack_require__(332);
+	var _wrapMapDispatchToProps = __webpack_require__(335);
 
 	var _wrapMapDispatchToProps2 = _interopRequireDefault(_wrapMapDispatchToProps);
 
-	var _wrapMapStateToProps = __webpack_require__(333);
+	var _wrapMapStateToProps = __webpack_require__(336);
 
 	var _wrapMapStateToProps2 = _interopRequireDefault(_wrapMapStateToProps);
 
@@ -32543,7 +32643,7 @@
 	exports.default = createHigherOrderComponent;
 
 /***/ },
-/* 310 */
+/* 313 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -32551,7 +32651,7 @@
 	exports.__esModule = true;
 	exports.untouch = exports.touch = exports.swapArrayValues = exports.submitFailed = exports.stopSubmit = exports.stopAsyncValidation = exports.startSubmit = exports.startAsyncValidation = exports.reset = exports.removeArrayValue = exports.initialize = exports.focus = exports.destroy = exports.change = exports.blur = exports.autofill = exports.addArrayValue = undefined;
 
-	var _actionTypes = __webpack_require__(291);
+	var _actionTypes = __webpack_require__(294);
 
 	var addArrayValue = exports.addArrayValue = function addArrayValue(path, value, index, fields) {
 	  return { type: _actionTypes.ADD_ARRAY_VALUE, path: path, value: value, index: index, fields: fields };
@@ -32635,7 +32735,7 @@
 	};
 
 /***/ },
-/* 311 */
+/* 314 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -32646,7 +32746,7 @@
 
 	exports.default = bindActionData;
 
-	var _mapValues = __webpack_require__(292);
+	var _mapValues = __webpack_require__(295);
 
 	var _mapValues2 = _interopRequireDefault(_mapValues);
 
@@ -32670,7 +32770,7 @@
 	}
 
 /***/ },
-/* 312 */
+/* 315 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -32740,7 +32840,7 @@
 	exports.default = getValues;
 
 /***/ },
-/* 313 */
+/* 316 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -32762,7 +32862,7 @@
 	}
 
 /***/ },
-/* 314 */
+/* 317 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -32771,19 +32871,19 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _readField = __webpack_require__(315);
+	var _readField = __webpack_require__(318);
 
 	var _readField2 = _interopRequireDefault(_readField);
 
-	var _write = __webpack_require__(294);
+	var _write = __webpack_require__(297);
 
 	var _write2 = _interopRequireDefault(_write);
 
-	var _getValues = __webpack_require__(312);
+	var _getValues = __webpack_require__(315);
 
 	var _getValues2 = _interopRequireDefault(_getValues);
 
-	var _removeField = __webpack_require__(327);
+	var _removeField = __webpack_require__(330);
 
 	var _removeField2 = _interopRequireDefault(_removeField);
 
@@ -32833,7 +32933,7 @@
 	exports.default = readFields;
 
 /***/ },
-/* 315 */
+/* 318 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -32842,35 +32942,35 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _createOnBlur = __webpack_require__(316);
+	var _createOnBlur = __webpack_require__(319);
 
 	var _createOnBlur2 = _interopRequireDefault(_createOnBlur);
 
-	var _createOnChange = __webpack_require__(319);
+	var _createOnChange = __webpack_require__(322);
 
 	var _createOnChange2 = _interopRequireDefault(_createOnChange);
 
-	var _createOnDragStart = __webpack_require__(320);
+	var _createOnDragStart = __webpack_require__(323);
 
 	var _createOnDragStart2 = _interopRequireDefault(_createOnDragStart);
 
-	var _createOnDrop = __webpack_require__(321);
+	var _createOnDrop = __webpack_require__(324);
 
 	var _createOnDrop2 = _interopRequireDefault(_createOnDrop);
 
-	var _createOnFocus = __webpack_require__(322);
+	var _createOnFocus = __webpack_require__(325);
 
 	var _createOnFocus2 = _interopRequireDefault(_createOnFocus);
 
-	var _silencePromise = __webpack_require__(323);
+	var _silencePromise = __webpack_require__(326);
 
 	var _silencePromise2 = _interopRequireDefault(_silencePromise);
 
-	var _read = __webpack_require__(293);
+	var _read = __webpack_require__(296);
 
 	var _read2 = _interopRequireDefault(_read);
 
-	var _updateField = __webpack_require__(325);
+	var _updateField = __webpack_require__(328);
 
 	var _updateField2 = _interopRequireDefault(_updateField);
 
@@ -33062,14 +33162,14 @@
 	exports.default = readField;
 
 /***/ },
-/* 316 */
+/* 319 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _getValue = __webpack_require__(317);
+	var _getValue = __webpack_require__(320);
 
 	var _getValue2 = _interopRequireDefault(_getValue);
 
@@ -33087,14 +33187,14 @@
 	exports.default = createOnBlur;
 
 /***/ },
-/* 317 */
+/* 320 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _isEvent = __webpack_require__(318);
+	var _isEvent = __webpack_require__(321);
 
 	var _isEvent2 = _interopRequireDefault(_isEvent);
 
@@ -33147,7 +33247,7 @@
 	exports.default = getValue;
 
 /***/ },
-/* 318 */
+/* 321 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -33160,14 +33260,14 @@
 	exports.default = isEvent;
 
 /***/ },
-/* 319 */
+/* 322 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _getValue = __webpack_require__(317);
+	var _getValue = __webpack_require__(320);
 
 	var _getValue2 = _interopRequireDefault(_getValue);
 
@@ -33181,7 +33281,7 @@
 	exports.default = createOnChange;
 
 /***/ },
-/* 320 */
+/* 323 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -33197,14 +33297,14 @@
 	exports.default = createOnDragStart;
 
 /***/ },
-/* 321 */
+/* 324 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _createOnDragStart = __webpack_require__(320);
+	var _createOnDragStart = __webpack_require__(323);
 
 	var createOnDrop = function createOnDrop(name, change) {
 	  return function (event) {
@@ -33214,7 +33314,7 @@
 	exports.default = createOnDrop;
 
 /***/ },
-/* 322 */
+/* 325 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -33228,14 +33328,14 @@
 	exports.default = createOnFocus;
 
 /***/ },
-/* 323 */
+/* 326 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _isPromise = __webpack_require__(324);
+	var _isPromise = __webpack_require__(327);
 
 	var _isPromise2 = _interopRequireDefault(_isPromise);
 
@@ -33252,7 +33352,7 @@
 	exports.default = silencePromise;
 
 /***/ },
-/* 324 */
+/* 327 */
 /***/ function(module, exports) {
 
 	module.exports = isPromise;
@@ -33263,7 +33363,7 @@
 
 
 /***/ },
-/* 325 */
+/* 328 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -33272,11 +33372,11 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _isPristine = __webpack_require__(326);
+	var _isPristine = __webpack_require__(329);
 
 	var _isPristine2 = _interopRequireDefault(_isPristine);
 
-	var _isValid = __webpack_require__(313);
+	var _isValid = __webpack_require__(316);
 
 	var _isValid2 = _interopRequireDefault(_isValid);
 
@@ -33338,7 +33438,7 @@
 	exports.default = updateField;
 
 /***/ },
-/* 326 */
+/* 329 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -33376,7 +33476,7 @@
 	}
 
 /***/ },
-/* 327 */
+/* 330 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -33456,18 +33556,18 @@
 	exports.default = removeField;
 
 /***/ },
-/* 328 */
+/* 331 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _isPromise = __webpack_require__(324);
+	var _isPromise = __webpack_require__(327);
 
 	var _isPromise2 = _interopRequireDefault(_isPromise);
 
-	var _isValid = __webpack_require__(313);
+	var _isValid = __webpack_require__(316);
 
 	var _isValid2 = _interopRequireDefault(_isValid);
 
@@ -33538,18 +33638,18 @@
 	exports.default = handleSubmit;
 
 /***/ },
-/* 329 */
+/* 332 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _isPromise = __webpack_require__(324);
+	var _isPromise = __webpack_require__(327);
 
 	var _isPromise2 = _interopRequireDefault(_isPromise);
 
-	var _isValid = __webpack_require__(313);
+	var _isValid = __webpack_require__(316);
 
 	var _isValid2 = _interopRequireDefault(_isValid);
 
@@ -33580,14 +33680,14 @@
 	exports.default = asyncValidation;
 
 /***/ },
-/* 330 */
+/* 333 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _silenceEvent = __webpack_require__(331);
+	var _silenceEvent = __webpack_require__(334);
 
 	var _silenceEvent2 = _interopRequireDefault(_silenceEvent);
 
@@ -33606,14 +33706,14 @@
 	exports.default = silenceEvents;
 
 /***/ },
-/* 331 */
+/* 334 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	exports.__esModule = true;
 
-	var _isEvent = __webpack_require__(318);
+	var _isEvent = __webpack_require__(321);
 
 	var _isEvent2 = _interopRequireDefault(_isEvent);
 
@@ -33630,7 +33730,7 @@
 	exports.default = silenceEvent;
 
 /***/ },
-/* 332 */
+/* 335 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -33639,7 +33739,7 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _redux = __webpack_require__(181);
+	var _redux = __webpack_require__(183);
 
 	var wrapMapDispatchToProps = function wrapMapDispatchToProps(mapDispatchToProps, actionCreators) {
 	  if (mapDispatchToProps) {
@@ -33673,7 +33773,7 @@
 	exports.default = wrapMapDispatchToProps;
 
 /***/ },
-/* 333 */
+/* 336 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -33710,7 +33810,7 @@
 	exports.default = wrapMapStateToProps;
 
 /***/ },
-/* 334 */
+/* 337 */
 /***/ function(module, exports) {
 
 	/**
@@ -33766,7 +33866,7 @@
 
 
 /***/ },
-/* 335 */
+/* 338 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -33812,7 +33912,7 @@
 	exports.default = createPropTypes;
 
 /***/ },
-/* 336 */
+/* 339 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -33844,7 +33944,7 @@
 	};
 
 /***/ },
-/* 337 */
+/* 340 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -33877,33 +33977,34 @@
 	};
 
 /***/ },
-/* 338 */
+/* 341 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	__webpack_require__(339);
-	__webpack_require__(343);
+	__webpack_require__(342);
+	__webpack_require__(346);
 	// require('style!css!../../node_modules/foundation-sites/dist/foundation.min.css');
-	__webpack_require__(345);
-	__webpack_require__(351);
-	__webpack_require__(353);
-	__webpack_require__(355);
-	__webpack_require__(357);
+	__webpack_require__(348);
+	__webpack_require__(354);
+	__webpack_require__(356);
+	__webpack_require__(358);
 	__webpack_require__(360);
-	__webpack_require__(363);
+	__webpack_require__(362);
+	__webpack_require__(364);
+	__webpack_require__(366);
 
 /***/ },
-/* 339 */
+/* 342 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(340);
+	var content = __webpack_require__(343);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(342)(content, {});
+	var update = __webpack_require__(345)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -33920,10 +34021,10 @@
 	}
 
 /***/ },
-/* 340 */
+/* 343 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(341)();
+	exports = module.exports = __webpack_require__(344)();
 	// imports
 
 
@@ -33934,7 +34035,7 @@
 
 
 /***/ },
-/* 341 */
+/* 344 */
 /***/ function(module, exports) {
 
 	/*
@@ -33990,7 +34091,7 @@
 
 
 /***/ },
-/* 342 */
+/* 345 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -34242,16 +34343,16 @@
 
 
 /***/ },
-/* 343 */
+/* 346 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(344);
+	var content = __webpack_require__(347);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(342)(content, {});
+	var update = __webpack_require__(345)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -34268,10 +34369,10 @@
 	}
 
 /***/ },
-/* 344 */
+/* 347 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(341)();
+	exports = module.exports = __webpack_require__(344)();
 	// imports
 
 
@@ -34282,16 +34383,16 @@
 
 
 /***/ },
-/* 345 */
+/* 348 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(346);
+	var content = __webpack_require__(349);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(342)(content, {});
+	var update = __webpack_require__(345)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -34308,54 +34409,54 @@
 	}
 
 /***/ },
-/* 346 */
+/* 349 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(341)();
+	exports = module.exports = __webpack_require__(344)();
 	// imports
 
 
 	// module
-	exports.push([module.id, "@font-face {\n  font-family: 'Material Icons';\n  font-style: normal;\n  font-weight: 400;\n  src: url(" + __webpack_require__(347) + ");\n  /* For IE6-8 */\n  src: local(\"Material Icons\"), local(\"MaterialIcons-Regular\"), url(" + __webpack_require__(348) + ") format(\"woff2\"), url(" + __webpack_require__(349) + ") format(\"woff\"), url(" + __webpack_require__(350) + ") format(\"truetype\"); }\n\n.material-icons {\n  font-family: 'Material Icons';\n  font-weight: normal;\n  font-style: normal;\n  font-size: 24px;\n  /* Preferred icon size */\n  display: inline-block;\n  line-height: 1;\n  text-transform: none;\n  letter-spacing: normal;\n  word-wrap: normal;\n  white-space: nowrap;\n  direction: ltr;\n  /* Support for all WebKit browsers. */\n  -webkit-font-smoothing: antialiased;\n  /* Support for Safari and Chrome. */\n  text-rendering: optimizeLegibility;\n  /* Support for Firefox. */\n  -moz-osx-font-smoothing: grayscale;\n  /* Support for IE. */\n  font-feature-settings: 'liga'; }\n\n.material-icons.md-18 {\n  font-size: 18px; }\n\n.material-icons.md-24 {\n  font-size: 24px; }\n\n.material-icons.md-36 {\n  font-size: 36px; }\n\n.material-icons.md-48 {\n  font-size: 48px; }\n\n.material-icons.md-54 {\n  font-size: 54px; }\n", ""]);
+	exports.push([module.id, "@font-face {\n  font-family: 'Material Icons';\n  font-style: normal;\n  font-weight: 400;\n  src: url(" + __webpack_require__(350) + ");\n  /* For IE6-8 */\n  src: local(\"Material Icons\"), local(\"MaterialIcons-Regular\"), url(" + __webpack_require__(351) + ") format(\"woff2\"), url(" + __webpack_require__(352) + ") format(\"woff\"), url(" + __webpack_require__(353) + ") format(\"truetype\"); }\n\n.material-icons {\n  font-family: 'Material Icons';\n  font-weight: normal;\n  font-style: normal;\n  font-size: 24px;\n  /* Preferred icon size */\n  display: inline-block;\n  line-height: 1;\n  text-transform: none;\n  letter-spacing: normal;\n  word-wrap: normal;\n  white-space: nowrap;\n  direction: ltr;\n  /* Support for all WebKit browsers. */\n  -webkit-font-smoothing: antialiased;\n  /* Support for Safari and Chrome. */\n  text-rendering: optimizeLegibility;\n  /* Support for Firefox. */\n  -moz-osx-font-smoothing: grayscale;\n  /* Support for IE. */\n  font-feature-settings: 'liga'; }\n\n.material-icons.md-18 {\n  font-size: 18px; }\n\n.material-icons.md-24 {\n  font-size: 24px; }\n\n.material-icons.md-36 {\n  font-size: 36px; }\n\n.material-icons.md-48 {\n  font-size: 48px; }\n\n.material-icons.md-54 {\n  font-size: 54px; }\n", ""]);
 
 	// exports
 
 
 /***/ },
-/* 347 */
+/* 350 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "e79bfd88537def476913f3ed52f4f4b3.eot";
 
 /***/ },
-/* 348 */
+/* 351 */
 /***/ function(module, exports) {
 
 	module.exports = "data:application/octet-stream;base64,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"
 
 /***/ },
-/* 349 */
+/* 352 */
 /***/ function(module, exports) {
 
 	module.exports = "data:application/font-woff;base64,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"
 
 /***/ },
-/* 350 */
+/* 353 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "a37b0c01c0baf1888ca812cc0508f6e2.ttf";
 
 /***/ },
-/* 351 */
+/* 354 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(352);
+	var content = __webpack_require__(355);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(342)(content, {});
+	var update = __webpack_require__(345)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -34372,10 +34473,10 @@
 	}
 
 /***/ },
-/* 352 */
+/* 355 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(341)();
+	exports = module.exports = __webpack_require__(344)();
 	// imports
 
 
@@ -34386,16 +34487,16 @@
 
 
 /***/ },
-/* 353 */
+/* 356 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(354);
+	var content = __webpack_require__(357);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(342)(content, {});
+	var update = __webpack_require__(345)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -34412,10 +34513,10 @@
 	}
 
 /***/ },
-/* 354 */
+/* 357 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(341)();
+	exports = module.exports = __webpack_require__(344)();
 	// imports
 
 
@@ -34426,16 +34527,16 @@
 
 
 /***/ },
-/* 355 */
+/* 358 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(356);
+	var content = __webpack_require__(359);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(342)(content, {});
+	var update = __webpack_require__(345)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -34452,30 +34553,30 @@
 	}
 
 /***/ },
-/* 356 */
+/* 359 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(341)();
+	exports = module.exports = __webpack_require__(344)();
 	// imports
 
 
 	// module
-	exports.push([module.id, ".catalog-dialog dialog {\n  position: fixed;\n  -ms-transform: translate(0, 64px);\n  -webkit-transform: translate(0, 64px);\n  -moz-transform: translate(0, 64px);\n  transform: translate(0, 64px);\n  height: 50%;\n  width: auto;\n  top: 20px;\n  left: 260px;\n  right: calc(100% - 580px); }\n  .catalog-dialog dialog .search-button {\n    position: absolute;\n    top: 10%;\n    right: -28px; }\n\n.is-small-screen .catalog-dialog dialog {\n  position: fixed;\n  -ms-transform: translate(0, 56px);\n  -webkit-transform: translate(0, 56px);\n  -moz-transform: translate(0, 56px);\n  transform: translate(0, 56px); }\n  @media only screen and (min-width: 40em) {\n    .is-small-screen .catalog-dialog dialog {\n      top: 20px;\n      left: 20px;\n      right: calc(100% - 360px);\n      bottom: auto;\n      width: auto;\n      height: 50%; }\n      .is-small-screen .catalog-dialog dialog .search-button {\n        position: absolute;\n        top: 10%;\n        right: -28px; } }\n  @media only screen and (max-width: 40em) {\n    .is-small-screen .catalog-dialog dialog {\n      left: 20px;\n      right: 20px;\n      height: 75%; }\n      .is-small-screen .catalog-dialog dialog .search-button {\n        position: absolute;\n        top: auto;\n        bottom: -28px;\n        right: 28px; } }\n", ""]);
+	exports.push([module.id, ".catalog-dialog dialog {\n  position: fixed;\n  -ms-transform: translate(0, 64px);\n  -webkit-transform: translate(0, 64px);\n  -moz-transform: translate(0, 64px);\n  transform: translate(0, 64px);\n  height: 50%;\n  width: auto;\n  top: 20px;\n  left: 260px;\n  right: calc(100% - 600px); }\n  .catalog-dialog dialog .search-button {\n    position: absolute;\n    top: 10%;\n    right: -28px; }\n\n.is-small-screen .catalog-dialog dialog {\n  position: fixed;\n  -ms-transform: translate(0, 56px);\n  -webkit-transform: translate(0, 56px);\n  -moz-transform: translate(0, 56px);\n  transform: translate(0, 56px); }\n  @media only screen and (min-width: 40em) {\n    .is-small-screen .catalog-dialog dialog {\n      top: 20px;\n      left: 20px;\n      right: calc(100% - 360px);\n      bottom: auto;\n      width: auto;\n      height: 50%; }\n      .is-small-screen .catalog-dialog dialog .search-button {\n        position: absolute;\n        top: 10%;\n        right: -28px; } }\n  @media only screen and (max-width: 40em) {\n    .is-small-screen .catalog-dialog dialog {\n      left: 20px;\n      right: 20px;\n      height: 75%; }\n      .is-small-screen .catalog-dialog dialog .search-button {\n        position: absolute;\n        top: auto;\n        bottom: -28px;\n        right: 28px; } }\n", ""]);
 
 	// exports
 
 
 /***/ },
-/* 357 */
+/* 360 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(358);
+	var content = __webpack_require__(361);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(342)(content, {});
+	var update = __webpack_require__(345)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -34492,10 +34593,10 @@
 	}
 
 /***/ },
-/* 358 */
+/* 361 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(341)();
+	exports = module.exports = __webpack_require__(344)();
 	// imports
 
 
@@ -34506,17 +34607,16 @@
 
 
 /***/ },
-/* 359 */,
-/* 360 */
+/* 362 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(361);
+	var content = __webpack_require__(363);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(342)(content, {});
+	var update = __webpack_require__(345)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -34533,10 +34633,10 @@
 	}
 
 /***/ },
-/* 361 */
+/* 363 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(341)();
+	exports = module.exports = __webpack_require__(344)();
 	// imports
 
 
@@ -34547,17 +34647,16 @@
 
 
 /***/ },
-/* 362 */,
-/* 363 */
+/* 364 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(364);
+	var content = __webpack_require__(365);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(342)(content, {});
+	var update = __webpack_require__(345)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -34574,15 +34673,55 @@
 	}
 
 /***/ },
-/* 364 */
+/* 365 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(341)();
+	exports = module.exports = __webpack_require__(344)();
 	// imports
 
 
 	// module
 	exports.push([module.id, ".location-filter-container .location-filter-text {\n  font-size: 12px;\n  color: #009688; }\n\n.location-filter-container .location-filter {\n  position: relative; }\n  .location-filter-container .location-filter .location-filter-icon-container {\n    position: absolute;\n    top: 8px;\n    left: 0; }\n    .location-filter-container .location-filter .location-filter-icon-container .location-filter-icon {\n      color: #009688; }\n", ""]);
+
+	// exports
+
+
+/***/ },
+/* 366 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(367);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(345)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./product-filter.scss", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./product-filter.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 367 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(344)();
+	// imports
+
+
+	// module
+	exports.push([module.id, ".product-filter-container {\n  width: 260px;\n  height: 400px;\n  display: -webkit-box;\n  display: -moz-box;\n  display: -ms-flexbox;\n  display: -webkit-flex;\n  display: flex;\n  flex-direction: row;\n  flex-wrap: wrap;\n  justify-content: space-around;\n  align-content: space-around;\n  position: relative; }\n  .product-filter-container .product-item {\n    width: 100px;\n    height: 100px;\n    border: 1px solid black; }\n    .product-filter-container .product-item .product-content {\n      width: 100%;\n      height: 100%;\n      -webkit-transition: all 0.5s ease;\n      transition: all 0.5s ease;\n      background-color: green; }\n    .product-filter-container .product-item.active .product-content {\n      position: absolute;\n      top: 0px;\n      left: 0px;\n      right: 0px;\n      bottom: 0px;\n      background-color: red; }\n", ""]);
 
 	// exports
 
